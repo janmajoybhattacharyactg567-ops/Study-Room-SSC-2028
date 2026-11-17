@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Study Room SSC 2028</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .tab-active { border-bottom: 3px solid #2563eb; color: #1d4ed8; font-weight: 600; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+  <!-- Top Navbar -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-2">
+      <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-lg shadow-sm">
+          SR
+        </div>
+        <div>
+          <h1 class="font-bold text-slate-900 text-base sm:text-lg leading-tight">Study Room SSC 2028</h1>
+          <p class="text-xs text-slate-500">Shared Notes, PDFs, Videos & Links</p>
+        </div>
+      </div>
+      <button onclick="openModal()" class="bg-blue-600 hover:bg-blue-700 active:scale-95 transition text-white text-sm font-medium px-3.5 py-2 rounded-lg shadow-sm flex items-center gap-1.5">
+        <span class="text-lg leading-none">+</span> Add Resource
+      </button>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <nav class="max-w-5xl mx-auto px-4 flex overflow-x-auto no-scrollbar gap-6 text-sm text-slate-600">
+      <button onclick="switchTab('home')" id="tab-home" class="py-3 whitespace-nowrap tab-active">Home</button>
+      <button onclick="switchTab('images')" id="tab-images" class="py-3 whitespace-nowrap hover:text-blue-600">Images</button>
+      <button onclick="switchTab('documents')" id="tab-documents" class="py-3 whitespace-nowrap hover:text-blue-600">Documents</button>
+      <button onclick="switchTab('videos')" id="tab-videos" class="py-3 whitespace-nowrap hover:text-blue-600">Videos</button>
+      <button onclick="switchTab('links')" id="tab-links" class="py-3 whitespace-nowrap hover:text-blue-600">Links</button>
+    </nav>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-5xl w-full mx-auto px-4 py-6 flex-1">
+
+    <!-- Home Banner (Visible on Home tab) -->
+    <section id="home-banner" class="mb-6 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-5 sm:p-6 text-white shadow-md">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <span class="inline-block bg-white/20 text-xs font-semibold px-2.5 py-1 rounded-full mb-2">Batch SSC 2028</span>
+          <h2 class="text-xl sm:text-2xl font-bold mb-1">Welcome to Study Room SSC 2028</h2>
+          <p class="text-blue-100 text-sm max-w-xl">
+            Browse all shared class notes, guide PDFs, lecture videos, and study links in one place—or tap <strong>+ Add Resource</strong> to share yours with classmates.
+          </p>
+        </div>
+        <div class="flex flex-col gap-2 shrink-0">
+          <a id="whatsapp-btn" href="https://chat.whatsapp.com/" target="_blank" rel="noopener noreferrer"
+             class="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold text-sm px-4 py-2.5 rounded-xl text-center shadow transition">
+            Join WhatsApp Group
+          </a>
+          <span class="text-[11px] text-blue-100 text-center">15–20+ GB Cloud Drive Ready</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Search & Subject Filter -->
+    <div class="flex flex-col sm:flex-row gap-3 mb-6">
+      <input type="text" id="searchInput" oninput="renderResources()" placeholder="Search by title, topic, or contributor..."
+             class="flex-1 bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      <select id="subjectFilter" onchange="renderResources()"
+              class="bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <option value="All">All Subjects</option>
+        <option value="Physics">Physics</option>
+        <option value="Chemistry">Chemistry</option>
+        <option value="Biology">Biology</option>
+        <option value="Higher Math">Higher Math</option>
+        <option value="General Math">General Math</option>
+        <option value="English">English</option>
+        <option value="Bangla">Bangla</option>
+        <option value="ICT">ICT</option>
+        <option value="BGS">BGS / Other</option>
+      </select>
+    </div>
+
+    <!-- Status / Loading Indicator -->
+    <div id="statusMessage" class="text-center py-12 text-slate-500 text-sm">
+      Loading shared study resources...
+    </div>
+
+    <!-- Resource Cards Grid -->
+    <div id="resourceGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 hidden"></div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500">
+    Study Room SSC 2028 • Free Student Resource Hub
+  </footer>
+
+  <!-- Add Resource Modal -->
+  <div id="resourceModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs hidden items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-xl">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-bold text-slate-900">Share a Study Resource</h3>
+        <button onclick="closeModal()" class="text-slate-400 hover:text-slate-700 text-2xl leading-none">&times;</button>
+      </div>
+
+      <form id="resourceForm" onsubmit="handleAddResource(event)" class="space-y-3.5">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Category Tab *</label>
+          <select id="resTab" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+            <option value="documents">Documents (PDFs, Notes, Drive/MEGA)</option>
+            <option value="images">Images (Board Photos, Diagrams)</option>
+            <option value="videos">Videos (YouTube / Recorded Classes)</option>
+            <option value="links">Links (Websites, Quizzes, Tools)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Title *</label>
+          <input type="text" id="resTitle" required placeholder="e.g., Physics Chapter 4 Hand Notes"
+                 class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Subject</label>
+            <select id="resSubject" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+              <option value="Physics">Physics</option>
+              <option value="Chemistry">Chemistry</option>
+              <option value="Biology">Biology</option>
+              <option value="Higher Math">Higher Math</option>
+              <option value="General Math">General Math</option>
+              <option value="English">English</option>
+              <option value="Bangla">Bangla</option>
+              <option value="ICT">ICT</option>
+              <option value="BGS">BGS / Other</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Your Name</label>
+            <input type="text" id="resAuthor" placeholder="e.g., Tanvir"
+                   class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Google Drive / MEGA / YouTube Link *</label>
+          <input type="url" id="resUrl" required placeholder="https://drive.google.com/..."
+                 class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" />
+          <p class="text-[11px] text-slate-500 mt-1">Tip: Set Google Drive links to "Anyone with the link can view".</p>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Short Description (Optional)</label>
+          <textarea id="resDesc" rows="2" placeholder="Important formulas and creative questions included..."
+                    class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"></textarea>
+        </div>
+
+        <div class="pt-2 flex justify-end gap-2">
+          <button type="button" onclick="closeModal()" class="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg">Cancel</button>
+          <button type="submit" id="submitBtn" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg shadow-sm">
+            Save & Share
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Connected directly to your Study Room SSC 2028 Supabase project
+    const SUPABASE_URL = 'https://grcnhjirkcolqekdoeoj.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_-4SxZGajx_1f2ZNjAvZnew_Jhl6039n';
+    const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let allResources = [];
+    let currentTab = 'home';
+
+    async function fetchResources() {
+      const statusEl = document.getElementById('statusMessage');
+      const gridEl = document.getElementById('resourceGrid');
+
+      const { data, error } = await db
+        .from('resources')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        statusEl.innerHTML = `<span class="text-red-600 font-medium">Connection Error:</span> ${error.message}`;
+        return;
+      }
+
+      allResources = data || [];
+      renderResources();
+    }
+
+    function switchTab(tab) {
+      currentTab = tab;
+      ['home', 'images', 'documents', 'videos', 'links'].forEach(t => {
+        const el = document.getElementById('tab-' + t);
+        if (t === tab) el.classList.add('tab-active');
+        else el.classList.remove('tab-active');
+      });
+
+      document.getElementById('home-banner').style.display = (tab === 'home') ? 'block' : 'none';
+      renderResources();
+    }
+
+    function renderResources() {
+      const statusEl = document.getElementById('statusMessage');
+      const gridEl = document.getElementById('resourceGrid');
+      const query = document.getElementById('searchInput').value.toLowerCase();
+      const subject = document.getElementById('subjectFilter').value;
+
+      const filtered = allResources.filter(item => {
+        const matchesTab = currentTab === 'home' || item.tab === currentTab;
+        const matchesSubject = subject === 'All' || item.subject === subject;
+        const matchesQuery =
+          (item.title && item.title.toLowerCase().includes(query)) ||
+          (item.description && item.description.toLowerCase().includes(query)) ||
+          (item.author && item.author.toLowerCase().includes(query));
+        return matchesTab && matchesSubject && matchesQuery;
+      });
+
+      if (filtered.length === 0) {
+        gridEl.classList.add('hidden');
+        statusEl.classList.remove('hidden');
+        statusEl.innerHTML = `No resources found here yet. Tap <strong>+ Add Resource</strong> to share the first one!`;
+        return;
+      }
+
+      statusEl.classList.add('hidden');
+      gridEl.classList.remove('hidden');
+
+      const badgeColors = {
+        documents: 'bg-amber-100 text-amber-800',
+        images: 'bg-purple-100 text-purple-800',
+        videos: 'bg-rose-100 text-rose-800',
+        links: 'bg-emerald-100 text-emerald-800'
+      };
+
+      gridEl.innerHTML = filtered.map(item => {
+        const badgeClass = badgeColors[item.tab] || 'bg-slate-100 text-slate-700';
+        const dateStr = item.created_at ? new Date(item.created_at).toLocaleDateString() : '';
+        return `
+          <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-xs hover:shadow-md transition flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-2">
+                <span class="text-[11px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-md ${badgeClass}">
+                  ${escapeHtml(item.tab)}
+                </span>
+                <span class="text-xs font-medium text-blue-600">${escapeHtml(item.subject || 'General')}</span>
+              </div>
+              <h3 class="font-bold text-slate-900 text-base mb-1">${escapeHtml(item.title)}</h3>
+              <p class="text-xs text-slate-600 mb-3 line-clamp-3">${escapeHtml(item.description || 'Shared study material for SSC 2028.')}</p>
+            </div>
+            <div class="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+              <span class="text-[11px] text-slate-400 truncate">By ${escapeHtml(item.author || 'Student')} • ${dateStr}</span>
+              <a href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer"
+                 class="bg-blue-50 hover:bg-blue-600 text-blue-700 hover:text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition shrink-0">
+                Open &rarr;
+              </a>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function handleAddResource(e) {
+      e.preventDefault();
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.textContent = 'Saving...';
+
+      const newItem = {
+        tab: document.getElementById('resTab').value,
+        title: document.getElementById('resTitle').value.trim(),
+        subject: document.getElementById('resSubject').value,
+        author: document.getElementById('resAuthor').value.trim() || 'Classmate',
+        url: document.getElementById('resUrl').value.trim(),
+        description: document.getElementById('resDesc').value.trim()
+      };
+
+      const { error } = await db.from('resources').insert([newItem]);
+
+      btn.disabled = false;
+      btn.textContent = 'Save & Share';
+
+      if (error) {
+        alert('Error saving resource: ' + error.message);
+        return;
+      }
+
+      document.getElementById('resourceForm').reset();
+      closeModal();
+      fetchResources();
+    }
+
+    function openModal() {
+      const modal = document.getElementById('resourceModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      if (currentTab !== 'home') {
+        document.getElementById('resTab').value = currentTab;
+      }
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('resourceModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    // Load resources on page start
+    fetchResources();
+  </script>
+</body>
+</html>
