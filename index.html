@@ -6,323 +6,486 @@
   <title>Study Room SSC 2028</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    body { font-family: 'Inter', sans-serif; }
-    .tab-active { border-bottom: 3px solid #2563eb; color: #1d4ed8; font-weight: 600; }
-  </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
 
-  <!-- Top Navbar -->
-  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
-    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-2">
+  <!-- Live Admin Toast Notification Banner -->
+  <div id="adminToast" class="hidden fixed bottom-4 right-4 z-50 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-lg border border-slate-700 max-w-xs text-sm">
+    <div class="font-semibold text-amber-400">Admin Activity &amp; Upload Alert</div>
+    <div id="adminToastMsg" class="mt-0.5 text-slate-200"></div>
+  </div>
+
+  <!-- Top Header -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
       <div class="flex items-center gap-2.5">
-        <div class="w-9 h-9 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-lg shadow-sm">
-          SR
-        </div>
+        <div class="w-9 h-9 rounded-lg bg-blue-600 text-white font-bold flex items-center justify-center">SR</div>
         <div>
-          <h1 class="font-bold text-slate-900 text-base sm:text-lg leading-tight">Study Room SSC 2028</h1>
-          <p class="text-xs text-slate-500">Shared Notes, PDFs, Videos & Links</p>
+          <h1 class="font-bold text-lg leading-tight text-slate-900">Study Room SSC 2028</h1>
+          <p class="text-xs text-slate-500">Shared Notes, PDFs, Videos &amp; Links</p>
         </div>
       </div>
-      <button onclick="openModal()" class="bg-blue-600 hover:bg-blue-700 active:scale-95 transition text-white text-sm font-medium px-3.5 py-2 rounded-lg shadow-sm flex items-center gap-1.5">
-        <span class="text-lg leading-none">+</span> Add Resource
-      </button>
-    </div>
 
-    <!-- Navigation Tabs -->
-    <nav class="max-w-5xl mx-auto px-4 flex overflow-x-auto no-scrollbar gap-6 text-sm text-slate-600">
-      <button onclick="switchTab('home')" id="tab-home" class="py-3 whitespace-nowrap tab-active">Home</button>
-      <button onclick="switchTab('images')" id="tab-images" class="py-3 whitespace-nowrap hover:text-blue-600">Images</button>
-      <button onclick="switchTab('documents')" id="tab-documents" class="py-3 whitespace-nowrap hover:text-blue-600">Documents</button>
-      <button onclick="switchTab('videos')" id="tab-videos" class="py-3 whitespace-nowrap hover:text-blue-600">Videos</button>
-      <button onclick="switchTab('links')" id="tab-links" class="py-3 whitespace-nowrap hover:text-blue-600">Links</button>
-    </nav>
+      <!-- User Status & Actions -->
+      <div class="flex items-center gap-2 flex-wrap">
+        <div id="userBadge" class="hidden items-center gap-1.5 bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-700">
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          <span id="userNameDisplay"></span>
+          <span id="adminTag" class="hidden bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded text-[10px]">ADMIN</span>
+        </div>
+
+        <button id="adminPanelBtn" onclick="openAdminModal()" class="hidden bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold px-3 py-2 rounded-lg relative">
+          Admin Panel <span id="pendingBadge" class="hidden absolute -top-1.5 -right-1.5 bg-rose-600 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">0</span>
+        </button>
+
+        <button id="authOpenBtn" onclick="openAuthModal('login')" class="bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold px-3.5 py-2 rounded-lg">
+          Login / Register
+        </button>
+
+        <button id="logoutBtn" onclick="handleLogout()" class="hidden bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-semibold px-3 py-2 rounded-lg">
+          Logout
+        </button>
+
+        <button onclick="openResourceModal()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3.5 py-2 rounded-lg">
+          + Add Resource
+        </button>
+      </div>
+    </div>
   </header>
 
   <!-- Main Content -->
   <main class="max-w-5xl w-full mx-auto px-4 py-6 flex-1">
-
-    <!-- Home Banner (Visible on Home tab) -->
-    <section id="home-banner" class="mb-6 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-5 sm:p-6 text-white shadow-md">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <span class="inline-block bg-white/20 text-xs font-semibold px-2.5 py-1 rounded-full mb-2">Batch SSC 2028</span>
-          <h2 class="text-xl sm:text-2xl font-bold mb-1">Welcome to Study Room SSC 2028</h2>
-          <p class="text-blue-100 text-sm max-w-xl">
-            Browse all shared class notes, guide PDFs, lecture videos, and study links in one place—or tap <strong>+ Add Resource</strong> to share yours with classmates.
-          </p>
-        </div>
-        <div class="flex flex-col gap-2 shrink-0">
-          <a id="whatsapp-btn" href="https://chat.whatsapp.com/IVS5nwQpGIiGOSqYg63vKR?s=cl&p=a&iam=2" target="_blank" rel="noopener noreferrer"
-             class="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold text-sm px-4 py-2.5 rounded-xl text-center shadow transition">
-            Join WhatsApp Group
-          </a>
-          <span class="text-[11px] text-blue-100 text-center">15–20+ GB Cloud Drive Ready</span>
-        </div>
+    <!-- WhatsApp Banner -->
+    <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div>
+        <h2 class="font-semibold text-emerald-950 text-sm">Official Batch Discussion Group</h2>
+        <p class="text-xs text-emerald-800 mt-0.5">Connect with SSC 2028 classmates for daily updates and Q&amp;A.</p>
       </div>
-    </section>
-
-    <!-- Search & Subject Filter -->
-    <div class="flex flex-col sm:flex-row gap-3 mb-6">
-      <input type="text" id="searchInput" oninput="renderResources()" placeholder="Search by title, topic, or contributor..."
-             class="flex-1 bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-      <select id="subjectFilter" onchange="renderResources()"
-              class="bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-        <option value="All">All Subjects</option>
-        <option value="Physics">Physics</option>
-        <option value="Chemistry">Chemistry</option>
-        <option value="Biology">Biology</option>
-        <option value="Higher Math">Higher Math</option>
-        <option value="General Math">General Math</option>
-        <option value="English">English</option>
-        <option value="Bangla">Bangla</option>
-        <option value="ICT">ICT</option>
-        <option value="BGS">BGS / Other</option>
-      </select>
+      <a id="whatsappLink" href="https://chat.whatsapp.com/IVS5nwQpGIiGOSqYg63vKR?s=cl&p=a&iam=2" target="_blank" rel="noopener"
+         class="inline-flex items-center justify-center bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2.5 rounded-lg shrink-0">
+        Join WhatsApp Group
+      </a>
     </div>
 
-    <!-- Status / Loading Indicator -->
-    <div id="statusMessage" class="text-center py-12 text-slate-500 text-sm">
-      Loading shared study resources...
+    <!-- Category Tabs -->
+    <div class="flex gap-2 overflow-x-auto pb-2 mb-5">
+      <button onclick="setTab('all')" id="tab-all" class="tab-btn bg-blue-600 text-white px-4 py-2 rounded-lg text-xs font-semibold">All</button>
+      <button onclick="setTab('Documents')" id="tab-Documents" class="tab-btn bg-white border border-slate-200 text-slate-700 px-4 py-2 rounded-lg text-xs font-semibold">Documents</button>
+      <button onclick="setTab('Images')" id="tab-Images" class="tab-btn bg-white border border-slate-200 text-slate-700 px-4 py-2 rounded-lg text-xs font-semibold">Images</button>
+      <button onclick="setTab('Videos')" id="tab-Videos" class="tab-btn bg-white border border-slate-200 text-slate-700 px-4 py-2 rounded-lg text-xs font-semibold">Videos</button>
+      <button onclick="setTab('Links')" id="tab-Links" class="tab-btn bg-white border border-slate-200 text-slate-700 px-4 py-2 rounded-lg text-xs font-semibold">Links</button>
     </div>
 
-    <!-- Resource Cards Grid -->
-    <div id="resourceGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 hidden"></div>
-
+    <!-- Resources Grid -->
+    <div id="resourcesList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <p class="text-sm text-slate-500">Loading study materials...</p>
+    </div>
   </main>
 
-  <!-- Footer -->
-  <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500">
-    Study Room SSC 2028 • Free Student Resource Hub
-  </footer>
-
   <!-- Add Resource Modal -->
-  <div id="resourceModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs hidden items-center justify-center p-4 z-50">
-    <div class="bg-white rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-xl">
+  <div id="resourceModal" class="hidden fixed inset-0 bg-slate-900/50 z-40 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-5 shadow-xl">
       <div class="flex items-center justify-between mb-4">
-        <h3 class="text-lg font-bold text-slate-900">Share a Study Resource</h3>
-        <button onclick="closeModal()" class="text-slate-400 hover:text-slate-700 text-2xl leading-none">&times;</button>
+        <h3 class="font-bold text-base">Share a Study Resource</h3>
+        <button onclick="closeResourceModal()" class="text-slate-400 hover:text-slate-700 font-bold">✕</button>
       </div>
-
-      <form id="resourceForm" onsubmit="handleAddResource(event)" class="space-y-3.5">
+      <form onsubmit="saveResource(event)" class="space-y-3">
         <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">Category Tab *</label>
-          <select id="resTab" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
-            <option value="documents">Documents (PDFs, Notes, Drive/MEGA)</option>
-            <option value="images">Images (Board Photos, Diagrams)</option>
-            <option value="videos">Videos (YouTube / Recorded Classes)</option>
-            <option value="links">Links (Websites, Quizzes, Tools)</option>
+          <label class="block text-xs font-semibold mb-1">Category *</label>
+          <select id="resCategory" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" required>
+            <option value="Documents">Documents (PDFs, Notes, Drive/MEGA)</option>
+            <option value="Images">Images (Diagrams, Board Photos)</option>
+            <option value="Videos">Videos (YouTube, Recorded Classes)</option>
+            <option value="Links">Links (Websites, Quizzes)</option>
           </select>
         </div>
-
         <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">Title *</label>
-          <input type="text" id="resTitle" required placeholder="e.g., Physics Chapter 4 Hand Notes"
-                 class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" />
+          <label class="block text-xs font-semibold mb-1">Title *</label>
+          <input id="resTitle" type="text" placeholder="e.g., Physics Chapter 3 Notes PDF" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" required />
         </div>
-
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Subject</label>
-            <select id="resSubject" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
-              <option value="Physics">Physics</option>
-              <option value="Chemistry">Chemistry</option>
-              <option value="Biology">Biology</option>
-              <option value="Higher Math">Higher Math</option>
-              <option value="General Math">General Math</option>
-              <option value="English">English</option>
-              <option value="Bangla">Bangla</option>
-              <option value="ICT">ICT</option>
-              <option value="BGS">BGS / Other</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Your Name</label>
-            <input type="text" id="resAuthor" placeholder="e.g., Tanvir"
-                   class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" />
-          </div>
-        </div>
-
         <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">Google Drive / MEGA / YouTube Link *</label>
-          <input type="url" id="resUrl" required placeholder="https://drive.google.com/..."
-                 class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" />
-          <p class="text-[11px] text-slate-500 mt-1">Tip: Set Google Drive links to "Anyone with the link can view".</p>
+          <label class="block text-xs font-semibold mb-1">Link (Drive / MEGA / YouTube) *</label>
+          <input id="resUrl" type="url" placeholder="https://..." class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" required />
         </div>
-
         <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">Short Description (Optional)</label>
-          <textarea id="resDesc" rows="2" placeholder="Important formulas and creative questions included..."
-                    class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"></textarea>
+          <label class="block text-xs font-semibold mb-1">Short Description</label>
+          <textarea id="resDesc" rows="2" placeholder="Important formulas and creative questions included..." class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"></textarea>
         </div>
-
-        <div class="pt-2 flex justify-end gap-2">
-          <button type="button" onclick="closeModal()" class="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg">Cancel</button>
-          <button type="submit" id="submitBtn" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg shadow-sm">
-            Save & Share
-          </button>
+        <p class="text-[11px] text-amber-700 bg-amber-50 border border-amber-200 p-2 rounded">Note: Non-admin uploads are held for admin review before appearing publicly.</p>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeResourceModal()" class="px-4 py-2 text-xs font-semibold text-slate-600">Cancel</button>
+          <button id="saveResBtn" type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-xs font-semibold">Submit for Review</button>
         </div>
       </form>
     </div>
   </div>
 
+  <!-- Login / Registration Modal -->
+  <div id="authModal" class="hidden fixed inset-0 bg-slate-900/50 z-40 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-5 shadow-xl">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex gap-2">
+          <button id="showLoginTab" onclick="switchAuthMode('login')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-900 text-white">Login</button>
+          <button id="showRegTab" onclick="switchAuthMode('register')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-700">Register</button>
+        </div>
+        <button onclick="closeAuthModal()" class="text-slate-400 hover:text-slate-700 font-bold">✕</button>
+      </div>
+
+      <!-- Login Form -->
+      <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-3">
+        <div>
+          <label class="block text-xs font-semibold mb-1">Phone Number *</label>
+          <input id="loginPhone" type="tel" placeholder="01XXXXXXXXX" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" required />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold mb-1">Password *</label>
+          <input id="loginPass" type="password" placeholder="Enter your password" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" required />
+        </div>
+        <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white py-2.5 rounded-lg text-xs font-semibold">Login</button>
+      </form>
+
+      <!-- Registration Form -->
+      <form id="registerForm" onsubmit="handleRegister(event)" class="hidden space-y-3">
+        <div>
+          <label class="block text-xs font-semibold mb-1">Full Name *</label>
+          <input id="regName" type="text" placeholder="Your Name" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" required />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold mb-1">Phone Number *</label>
+          <input id="regPhone" type="tel" placeholder="01XXXXXXXXX" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" required />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold mb-1">Create Password *</label>
+          <input id="regPass" type="password" placeholder="Minimum 4 characters" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" required />
+        </div>
+        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg text-xs font-semibold">Create Account</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Admin Panel Modal -->
+  <div id="adminModal" class="hidden fixed inset-0 bg-slate-900/50 z-40 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-2xl w-full p-5 shadow-xl max-h-[85vh] overflow-y-auto">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-bold text-base text-slate-900">Admin Privileges &amp; Control Panel</h3>
+        <button onclick="closeAdminModal()" class="text-slate-400 hover:text-slate-700 font-bold">✕</button>
+      </div>
+
+      <!-- Pending Content Approvals -->
+      <h4 class="text-xs font-bold uppercase tracking-wider text-amber-600 mb-2">Pending Content Submissions (Review &amp; Approve)</h4>
+      <div id="adminPendingList" class="divide-y divide-slate-100 border border-slate-200 rounded-xl mb-6 text-xs"></div>
+
+      <!-- Manage Members (Ban / Remove or Promote Admin) -->
+      <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Registered Members (Manage Admins / Ban Participants)</h4>
+      <div id="adminUsersList" class="divide-y divide-slate-100 border border-slate-200 rounded-xl mb-6 text-xs"></div>
+
+      <!-- Activity Logs -->
+      <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Activity &amp; Upload Notifications Log</h4>
+      <div id="adminLogsList" class="divide-y divide-slate-100 border border-slate-200 rounded-xl text-xs"></div>
+    </div>
+  </div>
+
   <script>
-    // Connected directly to your Study Room SSC 2028 Supabase project
-    const SUPABASE_URL = 'https://grcnhjirkcolqekdoeoj.supabase.co';
-    const SUPABASE_KEY = 'sb_publishable_-4SxZGajx_1f2ZNjAvZnew_Jhl6039n';
-    const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    // ==========================================
+    const SUPABASE_URL = "YOUR_SUPABASE_URL";
+    const SUPABASE_ANON_KEY = "YOUR_SUPABASE_PUBLISHABLE_KEY";
+    const WHATSAPP_INVITE_URL = "https://chat.whatsapp.com/";
+    // ==========================================
 
+    document.getElementById("whatsappLink").href = WHATSAPP_INVITE_URL;
+    const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let currentTab = "all";
     let allResources = [];
-    let currentTab = 'home';
+    let currentUser = JSON.parse(localStorage.getItem("sr_user") || "null");
+    let lastSeenLogId = Number(localStorage.getItem("sr_last_log_id") || "0");
 
-    async function fetchResources() {
-      const statusEl = document.getElementById('statusMessage');
-      const gridEl = document.getElementById('resourceGrid');
+    function updateAuthUI() {
+      const badge = document.getElementById("userBadge");
+      const nameEl = document.getElementById("userNameDisplay");
+      const adminTag = document.getElementById("adminTag");
+      const adminBtn = document.getElementById("adminPanelBtn");
+      const authBtn = document.getElementById("authOpenBtn");
+      const logoutBtn = document.getElementById("logoutBtn");
 
-      const { data, error } = await db
-        .from('resources')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        statusEl.innerHTML = `<span class="text-red-600 font-medium">Connection Error:</span> ${error.message}`;
-        return;
+      if (currentUser) {
+        badge.classList.remove("hidden");
+        badge.classList.add("flex");
+        nameEl.textContent = currentUser.name;
+        authBtn.classList.add("hidden");
+        logoutBtn.classList.remove("hidden");
+        if (currentUser.is_admin) {
+          adminTag.classList.remove("hidden");
+          adminBtn.classList.remove("hidden");
+        } else {
+          adminTag.classList.add("hidden");
+          adminBtn.classList.add("hidden");
+        }
+      } else {
+        badge.classList.add("hidden");
+        badge.classList.remove("flex");
+        adminBtn.classList.add("hidden");
+        logoutBtn.classList.add("hidden");
+        authBtn.classList.remove("hidden");
       }
-
-      allResources = data || [];
       renderResources();
     }
 
-    function switchTab(tab) {
-      currentTab = tab;
-      ['home', 'images', 'documents', 'videos', 'links'].forEach(t => {
-        const el = document.getElementById('tab-' + t);
-        if (t === tab) el.classList.add('tab-active');
-        else el.classList.remove('tab-active');
-      });
+    function openAuthModal(mode) {
+      switchAuthMode(mode);
+      document.getElementById("authModal").classList.remove("hidden");
+    }
+    function closeAuthModal() {
+      document.getElementById("authModal").classList.add("hidden");
+    }
+    function switchAuthMode(mode) {
+      const isLogin = mode === "login";
+      document.getElementById("loginForm").classList.toggle("hidden", !isLogin);
+      document.getElementById("registerForm").classList.toggle("hidden", isLogin);
+      document.getElementById("showLoginTab").className = isLogin
+        ? "px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-900 text-white"
+        : "px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-700";
+      document.getElementById("showRegTab").className = !isLogin
+        ? "px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white"
+        : "px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-700";
+    }
 
-      document.getElementById('home-banner').style.display = (tab === 'home') ? 'block' : 'none';
+    async function handleRegister(e) {
+      e.preventDefault();
+      const { data, error } = await db.rpc("register_user", {
+        p_name: document.getElementById("regName").value,
+        p_phone: document.getElementById("regPhone").value,
+        p_password: document.getElementById("regPass").value
+      });
+      if (error || !data || !data.ok) {
+        alert(data?.error || error?.message || "Registration failed.");
+        return;
+      }
+      currentUser = { id: data.id, name: data.name, phone: document.getElementById("regPhone").value, is_admin: data.is_admin, pass: document.getElementById("regPass").value };
+      localStorage.setItem("sr_user", JSON.stringify(currentUser));
+      closeAuthModal();
+      updateAuthUI();
+      alert(data.is_admin ? "Registered! You are founding Admin." : "Registered successfully!");
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const pass = document.getElementById("loginPass").value;
+      const phone = document.getElementById("loginPhone").value;
+      const { data, error } = await db.rpc("login_user", { p_phone: phone, p_password: pass });
+
+      if (error || !data || !data.ok) {
+        alert(data?.error || "Login failed.");
+        return;
+      }
+      currentUser = { id: data.id, name: data.name, phone: phone, is_admin: data.is_admin, pass: pass };
+      localStorage.setItem("sr_user", JSON.stringify(currentUser));
+      closeAuthModal();
+      updateAuthUI();
+    }
+
+    async function handleLogout() {
+      if (currentUser) await db.rpc("logout_user", { p_phone: currentUser.phone });
+      currentUser = null;
+      localStorage.removeItem("sr_user");
+      updateAuthUI();
+    }
+
+    async function loadResources() {
+      const { data, error } = await db.rpc("get_approved_resources");
+      if (!error && data) {
+        allResources = data;
+        renderResources();
+      }
+    }
+
+    function setTab(tab) {
+      currentTab = tab;
+      document.querySelectorAll(".tab-btn").forEach(btn => {
+        btn.className = "tab-btn bg-white border border-slate-200 text-slate-700 px-4 py-2 rounded-lg text-xs font-semibold";
+      });
+      document.getElementById("tab-" + tab).className = "tab-btn bg-blue-600 text-white px-4 py-2 rounded-lg text-xs font-semibold";
       renderResources();
     }
 
     function renderResources() {
-      const statusEl = document.getElementById('statusMessage');
-      const gridEl = document.getElementById('resourceGrid');
-      const query = document.getElementById('searchInput').value.toLowerCase();
-      const subject = document.getElementById('subjectFilter').value;
+      const list = document.getElementById("resourcesList");
+      const filtered = currentTab === "all" ? allResources : allResources.filter(r => r.category === currentTab);
 
-      const filtered = allResources.filter(item => {
-        const matchesTab = currentTab === 'home' || item.tab === currentTab;
-        const matchesSubject = subject === 'All' || item.subject === subject;
-        const matchesQuery =
-          (item.title && item.title.toLowerCase().includes(query)) ||
-          (item.description && item.description.toLowerCase().includes(query)) ||
-          (item.author && item.author.toLowerCase().includes(query));
-        return matchesTab && matchesSubject && matchesQuery;
+      if (!filtered.length) {
+        list.innerHTML = `<p class="text-sm text-slate-500 col-span-2">No approved study materials available here yet.</p>`;
+        return;
+      }
+
+      list.innerHTML = filtered.map(item => `
+        <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between gap-2 mb-1.5">
+              <span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-blue-50 text-blue-700">${item.category}</span>
+              ${currentUser && currentUser.is_admin ? `<button onclick="deleteResource(${item.id})" class="text-xs font-semibold text-rose-600 hover:underline">Delete</button>` : ""}
+            </div>
+            <h3 class="font-bold text-slate-900 text-sm">${item.title}</h3>
+            ${item.description ? `<p class="text-xs text-slate-600 mt-1">${item.description}</p>` : ""}
+          </div>
+          <div class="mt-3 pt-2.5 border-t border-slate-100">
+            <a href="${item.url}" target="_blank" rel="noopener" class="text-xs font-semibold text-blue-600 hover:underline">Open Resource ↗</a>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function openResourceModal() {
+      if (!currentUser) {
+        alert("Please Login or Register first.");
+        openAuthModal("login");
+        return;
+      }
+      document.getElementById("resourceModal").classList.remove("hidden");
+    }
+    function closeResourceModal() {
+      document.getElementById("resourceModal").classList.add("hidden");
+    }
+
+    async function saveResource(e) {
+      e.preventDefault();
+      const btn = document.getElementById("saveResBtn");
+      btn.textContent = "Submitting...";
+
+      const { data, error } = await db.rpc("submit_resource", {
+        p_phone: currentUser.phone,
+        p_password: currentUser.pass,
+        p_title: document.getElementById("resTitle").value.trim(),
+        p_category: document.getElementById("resCategory").value,
+        p_url: document.getElementById("resUrl").value.trim(),
+        p_description: document.getElementById("resDesc").value.trim()
       });
 
-      if (filtered.length === 0) {
-        gridEl.classList.add('hidden');
-        statusEl.classList.remove('hidden');
-        statusEl.innerHTML = `No resources found here yet. Tap <strong>+ Add Resource</strong> to share the first one!`;
+      btn.textContent = "Submit for Review";
+      if (error || !data || !data.ok) {
+        alert(data?.error || error?.message || "Submission failed.");
         return;
       }
+      e.target.reset();
+      closeResourceModal();
+      alert(data.auto_approved ? "Resource posted successfully!" : "Submitted for admin review! It will appear publicly once approved.");
+      loadResources();
+    }
 
-      statusEl.classList.add('hidden');
-      gridEl.classList.remove('hidden');
+    async function deleteResource(id) {
+      if (!currentUser || !currentUser.is_admin) return;
+      if (!confirm("Delete permanently?")) return;
+      await db.rpc("admin_delete_resource", { p_admin_phone: currentUser.phone, p_admin_password: currentUser.pass, p_resource_id: id });
+      loadResources();
+    }
 
-      const badgeColors = {
-        documents: 'bg-amber-100 text-amber-800',
-        images: 'bg-purple-100 text-purple-800',
-        videos: 'bg-rose-100 text-rose-800',
-        links: 'bg-emerald-100 text-emerald-800'
-      };
+    // Admin Panel & Notifications
+    async function openAdminModal() {
+      document.getElementById("adminModal").classList.remove("hidden");
+      await refreshAdminDashboard(false);
+    }
+    function closeAdminModal() {
+      document.getElementById("adminModal").classList.add("hidden");
+    }
 
-      gridEl.innerHTML = filtered.map(item => {
-        const badgeClass = badgeColors[item.tab] || 'bg-slate-100 text-slate-700';
-        const dateStr = item.created_at ? new Date(item.created_at).toLocaleDateString() : '';
-        return `
-          <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-xs hover:shadow-md transition flex flex-col justify-between">
+    async function approveResource(id) {
+      await db.rpc("admin_approve_resource", { p_admin_phone: currentUser.phone, p_admin_password: currentUser.pass, p_resource_id: id });
+      await refreshAdminDashboard(false);
+      loadResources();
+    }
+
+    async function toggleAdminRole(targetId) {
+      await db.rpc("admin_toggle_role", { p_admin_phone: currentUser.phone, p_admin_password: currentUser.pass, p_target_user_id: targetId });
+      await refreshAdminDashboard(false);
+    }
+
+    async function toggleBanUser(targetId) {
+      if (!confirm("Are you sure you want to ban/remove this participant?")) return;
+      await db.rpc("admin_toggle_ban", { p_admin_phone: currentUser.phone, p_admin_password: currentUser.pass, p_target_user_id: targetId });
+      await refreshAdminDashboard(false);
+    }
+
+    function showAdminToast(text) {
+      const toast = document.getElementById("adminToast");
+      document.getElementById("adminToastMsg").textContent = text;
+      toast.classList.remove("hidden");
+      setTimeout(() => toast.classList.add("hidden"), 6000);
+    }
+
+    async function refreshAdminDashboard(isBackgroundCheck) {
+      if (!currentUser || !currentUser.is_admin) return;
+      const { data } = await db.rpc("admin_get_dashboard", { p_admin_phone: currentUser.phone, p_admin_password: currentUser.pass });
+      if (!data || !data.ok) return;
+
+      const pendingCount = data.pending ? data.pending.length : 0;
+      const badge = document.getElementById("pendingBadge");
+      if (pendingCount > 0) {
+        badge.textContent = pendingCount;
+        badge.classList.remove("hidden");
+      } else {
+        badge.classList.add("hidden");
+      }
+
+      if (data.logs && data.logs.length > 0) {
+        const newest = data.logs[0];
+        if (lastSeenLogId && newest.id > lastSeenLogId && isBackgroundCheck) {
+          showAdminToast(`${newest.user_name}: ${newest.action}`);
+        }
+        lastSeenLogId = newest.id;
+        localStorage.setItem("sr_last_log_id", String(lastSeenLogId));
+      }
+
+      if (isBackgroundCheck) return;
+
+      document.getElementById("adminPendingList").innerHTML = pendingCount === 0 
+        ? `<div class="p-3 text-slate-500">No pending submissions to review.</div>`
+        : data.pending.map(p => `
+          <div class="p-3 flex items-center justify-between gap-2">
             <div>
-              <div class="flex items-center justify-between gap-2 mb-2">
-                <span class="text-[11px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-md ${badgeClass}">
-                  ${escapeHtml(item.tab)}
-                </span>
-                <span class="text-xs font-medium text-blue-600">${escapeHtml(item.subject || 'General')}</span>
-              </div>
-              <h3 class="font-bold text-slate-900 text-base mb-1">${escapeHtml(item.title)}</h3>
-              <p class="text-xs text-slate-600 mb-3 line-clamp-3">${escapeHtml(item.description || 'Shared study material for SSC 2028.')}</p>
+              <span class="font-bold text-slate-900">${p.title}</span> <span class="text-blue-600">[${p.category}]</span>
+              <div class="text-slate-500 truncate max-w-xs">${p.url}</div>
             </div>
-            <div class="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
-              <span class="text-[11px] text-slate-400 truncate">By ${escapeHtml(item.author || 'Student')} • ${dateStr}</span>
-              <a href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer"
-                 class="bg-blue-50 hover:bg-blue-600 text-blue-700 hover:text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition shrink-0">
-                Open &rarr;
-              </a>
+            <div class="flex gap-2 shrink-0">
+              <button onclick="approveResource(${p.id})" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded font-semibold">Approve</button>
+              <button onclick="deleteResource(${p.id}); openAdminModal();" class="bg-rose-100 text-rose-700 px-3 py-1.5 rounded font-semibold">Reject</button>
             </div>
           </div>
-        `;
-      }).join('');
+        `).join("");
+
+      document.getElementById("adminUsersList").innerHTML = data.users.map(u => `
+        <div class="p-3 flex items-center justify-between gap-2">
+          <div>
+            <div class="font-bold text-slate-900">${u.name} ${u.is_admin ? '<span class="text-amber-600">(Admin)</span>' : ''} ${u.is_banned ? '<span class="text-rose-600">(Banned)</span>' : ''}</div>
+            <div class="text-slate-500">${u.phone}</div>
+          </div>
+          ${u.id !== currentUser.id ? `
+            <div class="flex gap-1.5">
+              <button onclick="toggleAdminRole(${u.id})" class="px-2.5 py-1 rounded font-semibold ${u.is_admin ? 'bg-slate-100 text-slate-700' : 'bg-amber-100 text-amber-900'}">
+                ${u.is_admin ? 'Demote' : 'Make Admin'}
+              </button>
+              <button onclick="toggleBanUser(${u.id})" class="px-2.5 py-1 rounded font-semibold ${u.is_banned ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-50 text-rose-700'}">
+                ${u.is_banned ? 'Unban' : 'Remove/Ban'}
+              </button>
+            </div>
+          ` : '<span class="text-slate-400">You</span>'}
+        </div>
+      `).join("");
+
+      document.getElementById("adminLogsList").innerHTML = data.logs.map(l => `
+        <div class="p-2.5 flex items-center justify-between gap-2">
+          <div>
+            <span class="font-semibold text-slate-800">${l.user_name}</span>
+            <span class="text-slate-500">(${l.user_phone})</span>
+            <span class="ml-1 font-bold text-blue-700">${l.action}</span>
+          </div>
+          <span class="text-[11px] text-slate-400 shrink-0">${new Date(l.created_at).toLocaleTimeString()}</span>
+        </div>
+      `).join("");
     }
 
-    async function handleAddResource(e) {
-      e.preventDefault();
-      const btn = document.getElementById('submitBtn');
-      btn.disabled = true;
-      btn.textContent = 'Saving...';
+    setInterval(() => refreshAdminDashboard(true), 12000);
 
-      const newItem = {
-        tab: document.getElementById('resTab').value,
-        title: document.getElementById('resTitle').value.trim(),
-        subject: document.getElementById('resSubject').value,
-        author: document.getElementById('resAuthor').value.trim() || 'Classmate',
-        url: document.getElementById('resUrl').value.trim(),
-        description: document.getElementById('resDesc').value.trim()
-      };
-
-      const { error } = await db.from('resources').insert([newItem]);
-
-      btn.disabled = false;
-      btn.textContent = 'Save & Share';
-
-      if (error) {
-        alert('Error saving resource: ' + error.message);
-        return;
-      }
-
-      document.getElementById('resourceForm').reset();
-      closeModal();
-      fetchResources();
-    }
-
-    function openModal() {
-      const modal = document.getElementById('resourceModal');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-      if (currentTab !== 'home') {
-        document.getElementById('resTab').value = currentTab;
-      }
-    }
-
-    function closeModal() {
-      const modal = document.getElementById('resourceModal');
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-    }
-
-    function escapeHtml(str) {
-      if (!str) return '';
-      return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
-    }
-
-    // Load resources on page start
-    fetchResources();
+    updateAuthUI();
+    loadResources();
   </script>
 </body>
 </html>
