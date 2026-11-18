@@ -55,16 +55,26 @@
 
   <!-- Main Content -->
   <main class="max-w-5xl w-full mx-auto px-4 py-6 flex-1">
-    <!-- WhatsApp Banner -->
+    <!-- WhatsApp Banner with Direct Fallback Link & Copy Button -->
     <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       <div>
         <h2 class="font-semibold text-emerald-950 text-sm">Official Batch Discussion Group</h2>
         <p class="text-xs text-emerald-800 mt-0.5">Connect with SSC 2028 classmates for daily updates and Q&amp;A.</p>
       </div>
-      <a id="whatsappLink" href="https://chat.whatsapp.com/IVS5nwQpGIiGOSqYg63vKR?s=cl&p=a&iam=2" target="_blank" rel="noopener"
-         class="inline-flex items-center justify-center bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2.5 rounded-lg shrink-0">
-        Join WhatsApp Group
-      </a>
+      <div class="flex flex-col items-stretch sm:items-end gap-1.5 shrink-0">
+        <a id="whatsappLink" href="https://chat.whatsapp.com/IVS5nwQpGIiGOSqYg63vKR"
+           class="inline-flex items-center justify-center bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2.5 rounded-lg">
+          Join WhatsApp Group
+        </a>
+        <div class="flex items-center gap-1.5 text-[11px] text-emerald-900">
+          <a href="https://chat.whatsapp.com/IVS5nwQpGIiGOSqYg63vKR" class="underline break-all">
+            https://chat.whatsapp.com/IVS5nwQpGIiGOSqYg63vKR
+          </a>
+          <button type="button" onclick="copyWhatsAppLink()" id="copyWaBtn" class="bg-emerald-200/80 hover:bg-emerald-300 text-emerald-950 font-semibold px-2 py-0.5 rounded shrink-0">
+            Copy
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- Category Tabs -->
@@ -141,7 +151,7 @@
           <label class="block text-xs font-semibold mb-1">Password *</label>
           <input id="loginPass" type="password" placeholder="Enter your password" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" required />
         </div>
-        <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white py-2.5 rounded-lg text-xs font-semibold">Login</button>
+        <button id="loginSubmitBtn" type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white py-2.5 rounded-lg text-xs font-semibold">Login</button>
       </form>
 
       <!-- Registration Form -->
@@ -158,7 +168,7 @@
           <label class="block text-xs font-semibold mb-1">Create Password *</label>
           <input id="regPass" type="password" placeholder="Minimum 4 characters" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" required />
         </div>
-        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg text-xs font-semibold">Create Account</button>
+        <button id="regSubmitBtn" type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg text-xs font-semibold">Create Account</button>
       </form>
     </div>
   </div>
@@ -175,7 +185,7 @@
       <h4 class="text-xs font-bold uppercase tracking-wider text-amber-600 mb-2">Pending Content Submissions (Review &amp; Approve)</h4>
       <div id="adminPendingList" class="divide-y divide-slate-100 border border-slate-200 rounded-xl mb-6 text-xs"></div>
 
-      <!-- Manage Members (Ban / Remove or Promote Admin) -->
+      <!-- Manage Members -->
       <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Registered Members (Manage Admins / Ban Participants)</h4>
       <div id="adminUsersList" class="divide-y divide-slate-100 border border-slate-200 rounded-xl mb-6 text-xs"></div>
 
@@ -186,19 +196,24 @@
   </div>
 
   <script>
-    // ==========================================
-    const SUPABASE_URL = "YOUR_SUPABASE_URL";
-    const SUPABASE_ANON_KEY = "YOUR_SUPABASE_PUBLISHABLE_KEY";
-    const WHATSAPP_INVITE_URL = "https://chat.whatsapp.com/";
-    // ==========================================
+    const SUPABASE_URL = "https://grcnhjirkcolqekdoeoj.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_-4SxZGajx_1f2ZNjAvZnew_Jhl6039n";
+    const WHATSAPP_INVITE_URL = "https://chat.whatsapp.com/IVS5nwQpGIiGOSqYg63vKR";
 
-    document.getElementById("whatsappLink").href = WHATSAPP_INVITE_URL;
     const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let currentTab = "all";
     let allResources = [];
     let currentUser = JSON.parse(localStorage.getItem("sr_user") || "null");
     let lastSeenLogId = Number(localStorage.getItem("sr_last_log_id") || "0");
+
+    function copyWhatsAppLink() {
+      navigator.clipboard.writeText(WHATSAPP_INVITE_URL).then(() => {
+        const btn = document.getElementById("copyWaBtn");
+        btn.textContent = "Copied!";
+        setTimeout(() => { btn.textContent = "Copy"; }, 2000);
+      });
+    }
 
     function updateAuthUI() {
       const badge = document.getElementById("userBadge");
@@ -252,36 +267,54 @@
 
     async function handleRegister(e) {
       e.preventDefault();
-      const { data, error } = await db.rpc("register_user", {
-        p_name: document.getElementById("regName").value,
-        p_phone: document.getElementById("regPhone").value,
-        p_password: document.getElementById("regPass").value
-      });
-      if (error || !data || !data.ok) {
-        alert(data?.error || error?.message || "Registration failed.");
-        return;
+      const btn = document.getElementById("regSubmitBtn");
+      btn.textContent = "Creating...";
+      try {
+        const cleanPhone = document.getElementById("regPhone").value.replace(/\s+/g, "");
+        const password = document.getElementById("regPass").value;
+        const { data, error } = await db.rpc("register_user", {
+          p_name: document.getElementById("regName").value,
+          p_phone: cleanPhone,
+          p_password: password
+        });
+        if (error || !data || !data.ok) {
+          alert(data?.error || error?.message || "Registration failed.");
+          return;
+        }
+        currentUser = { id: data.id, name: data.name, phone: cleanPhone, is_admin: data.is_admin, pass: password };
+        localStorage.setItem("sr_user", JSON.stringify(currentUser));
+        closeAuthModal();
+        updateAuthUI();
+        alert(data.is_admin ? "Registered! You are the founding Admin." : "Registered successfully!");
+      } catch (err) {
+        alert("Network error: " + err.message);
+      } finally {
+        btn.textContent = "Create Account";
       }
-      currentUser = { id: data.id, name: data.name, phone: document.getElementById("regPhone").value, is_admin: data.is_admin, pass: document.getElementById("regPass").value };
-      localStorage.setItem("sr_user", JSON.stringify(currentUser));
-      closeAuthModal();
-      updateAuthUI();
-      alert(data.is_admin ? "Registered! You are founding Admin." : "Registered successfully!");
     }
 
     async function handleLogin(e) {
       e.preventDefault();
-      const pass = document.getElementById("loginPass").value;
-      const phone = document.getElementById("loginPhone").value;
-      const { data, error } = await db.rpc("login_user", { p_phone: phone, p_password: pass });
+      const btn = document.getElementById("loginSubmitBtn");
+      btn.textContent = "Logging in...";
+      try {
+        const cleanPhone = document.getElementById("loginPhone").value.replace(/\s+/g, "");
+        const pass = document.getElementById("loginPass").value;
+        const { data, error } = await db.rpc("login_user", { p_phone: cleanPhone, p_password: pass });
 
-      if (error || !data || !data.ok) {
-        alert(data?.error || "Login failed.");
-        return;
+        if (error || !data || !data.ok) {
+          alert(data?.error || error?.message || "Login failed.");
+          return;
+        }
+        currentUser = { id: data.id, name: data.name, phone: cleanPhone, is_admin: data.is_admin, pass: pass };
+        localStorage.setItem("sr_user", JSON.stringify(currentUser));
+        closeAuthModal();
+        updateAuthUI();
+      } catch (err) {
+        alert("Network error: " + err.message);
+      } finally {
+        btn.textContent = "Login";
       }
-      currentUser = { id: data.id, name: data.name, phone: phone, is_admin: data.is_admin, pass: pass };
-      localStorage.setItem("sr_user", JSON.stringify(currentUser));
-      closeAuthModal();
-      updateAuthUI();
     }
 
     async function handleLogout() {
@@ -378,7 +411,6 @@
       loadResources();
     }
 
-    // Admin Panel & Notifications
     async function openAdminModal() {
       document.getElementById("adminModal").classList.remove("hidden");
       await refreshAdminDashboard(false);
@@ -442,7 +474,7 @@
           <div class="p-3 flex items-center justify-between gap-2">
             <div>
               <span class="font-bold text-slate-900">${p.title}</span> <span class="text-blue-600">[${p.category}]</span>
-              <div class="text-slate-500 truncate max-w-xs">${p.url}</div>
+              <div class="text-slate-500 truncate max-w-xs"><a href="${p.url}" target="_blank" class="underline text-blue-600">${p.url}</a></div>
             </div>
             <div class="flex gap-2 shrink-0">
               <button onclick="approveResource(${p.id})" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded font-semibold">Approve</button>
