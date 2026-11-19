@@ -17,8 +17,8 @@
 </head>
 <body class="bg-gradient-to-br from-slate-50 via-indigo-50/40 to-sky-50/50 text-slate-800 min-h-screen flex flex-col selection:bg-indigo-600 selection:text-white">
 
-  <!-- Live Admin Toast Notification Banner -->
-  <div id="adminToast" class="hidden fixed bottom-5 right-5 z-50 bg-slate-900/95 backdrop-blur-md text-white px-4 py-3.5 rounded-2xl shadow-2xl shadow-indigo-950/30 border border-indigo-500/40 max-w-xs text-sm transition-all">
+  <!-- Live Admin Toast Banner (respects Safe Lock) -->
+  <div id="adminToast" class="hidden fixed bottom-5 right-5 z-50 bg-slate-900/95 backdrop-blur-md text-white px-4 py-3.5 rounded-2xl shadow-2xl border border-indigo-500/40 max-w-xs text-sm">
     <div class="flex items-center gap-2 font-bold text-amber-400 text-xs uppercase tracking-wider">
       <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
       Admin Live Alert
@@ -26,20 +26,23 @@
     <div id="adminToastMsg" class="mt-1 text-slate-100 text-xs leading-relaxed"></div>
   </div>
 
-  <!-- Vibrant Sticky Top Navigation -->
-  <header class="bg-white/85 backdrop-blur-lg border-b border-indigo-100/80 sticky top-0 z-30 shadow-sm shadow-indigo-950/5">
+  <!-- Top Navigation -->
+  <header class="bg-white/85 backdrop-blur-lg border-b border-indigo-100/80 sticky top-0 z-30 shadow-sm">
     <div class="max-w-5xl mx-auto px-4 py-3.5 flex flex-wrap items-center justify-between gap-3">
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-blue-600 to-violet-600 text-white font-extrabold flex items-center justify-center shadow-md shadow-indigo-500/30 text-sm tracking-tight">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-blue-600 to-violet-600 text-white font-extrabold flex items-center justify-center shadow-md text-sm">
           SR
         </div>
         <div>
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 flex-wrap">
             <h1 class="font-extrabold text-lg leading-tight bg-gradient-to-r from-slate-900 via-indigo-950 to-indigo-800 bg-clip-text text-transparent">
               Study Room SSC 2028
             </h1>
             <span id="headerPrivacyPill" class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800">
               PRIVATE
+            </span>
+            <span id="headerSafeLockPill" class="hidden text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+              SAFE LOCK ON
             </span>
           </div>
           <p class="text-[11px] font-medium text-slate-500">Academic Resource Hub &amp; Batch Portal</p>
@@ -48,26 +51,31 @@
 
       <!-- User Status & Actions -->
       <div class="flex items-center gap-2 flex-wrap">
-        <div id="userBadge" class="hidden items-center gap-2 bg-indigo-50/90 border border-indigo-200/80 px-3 py-1.5 rounded-xl text-xs font-semibold text-indigo-950 shadow-sm">
-          <span class="w-2 h-2 rounded-full bg-emerald-500 ring-4 ring-emerald-500/20"></span>
+        <div id="userBadge" class="hidden items-center gap-2 bg-indigo-50 border border-indigo-200 px-3 py-1.5 rounded-xl text-xs font-semibold text-indigo-950">
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
           <span id="userNameDisplay"></span>
-          <span id="adminTag" class="hidden bg-gradient-to-r from-amber-500 to-orange-500 text-white font-extrabold px-2 py-0.5 rounded-md text-[10px] tracking-wide shadow-sm">ADMIN</span>
+          <span id="adminTag" class="hidden bg-gradient-to-r from-amber-500 to-orange-500 text-white font-extrabold px-2 py-0.5 rounded-md text-[10px]">ADMIN</span>
         </div>
 
-        <button id="adminPanelBtn" onclick="openAdminModal()" class="hidden bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-md shadow-amber-500/25 transition-all active:scale-95 relative">
+        <button id="adminPanelBtn" onclick="openAdminModal()" class="hidden bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-md transition active:scale-95 relative">
           Admin Panel
-          <span id="pendingBadge" class="hidden absolute -top-2 -right-2 bg-rose-600 text-white text-[10px] px-1.5 py-0.5 rounded-full font-extrabold shadow ring-2 ring-white">0</span>
+          <span id="pendingBadge" class="hidden absolute -top-2 -right-2 bg-rose-600 text-white text-[10px] px-1.5 py-0.5 rounded-full font-extrabold ring-2 ring-white">0</span>
         </button>
 
-        <button id="authOpenBtn" onclick="openAuthModal('login')" class="bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-md shadow-slate-900/15 transition-all active:scale-95">
+        <button id="authOpenBtn" onclick="openAuthModal('login')" class="bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-md transition active:scale-95">
           Login / Register
         </button>
 
-        <button id="logoutBtn" onclick="handleLogout()" class="hidden bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold px-3 py-2 rounded-xl transition-all active:scale-95">
+        <button id="logoutBtn" onclick="handleLogout()" class="hidden bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold px-3 py-2 rounded-xl transition active:scale-95">
           Logout
         </button>
 
-        <button id="addResHeaderBtn" onclick="openResourceModal()" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-md shadow-indigo-600/25 transition-all active:scale-95">
+        <!-- Activity Log Button directly beside Add Resource -->
+        <button id="activityLogHeaderBtn" onclick="openActivityLogModal()" class="hidden bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-md transition active:scale-95">
+          📋 Activity Log
+        </button>
+
+        <button id="addResHeaderBtn" onclick="openResourceModal()" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-md transition active:scale-95">
           + Add Resource
         </button>
       </div>
@@ -77,38 +85,35 @@
   <!-- Main Content -->
   <main class="max-w-5xl w-full mx-auto px-4 py-6 flex-1">
 
-    <!-- LOCKED PRIVATE SCREEN -->
-    <div id="privateLockScreen" class="hidden max-w-md mx-auto my-8 bg-white border border-indigo-100 rounded-3xl p-7 shadow-xl shadow-indigo-950/10 text-center">
-      <div class="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-600 text-white flex items-center justify-center shadow-lg shadow-indigo-600/30 mb-4 text-xl font-extrabold">
+    <!-- Locked Private Screen -->
+    <div id="privateLockScreen" class="hidden max-w-md mx-auto my-8 bg-white border border-indigo-100 rounded-3xl p-7 shadow-xl text-center">
+      <div class="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-600 text-white flex items-center justify-center shadow-lg mb-4 text-xl font-extrabold">
         🔒
       </div>
-      <span class="inline-block bg-indigo-50 text-indigo-700 border border-indigo-200/80 text-[10px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-full mb-2">
+      <span class="inline-block bg-indigo-50 text-indigo-700 border border-indigo-200 text-[10px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-full mb-2">
         Members Only Portal
       </span>
       <h2 class="font-extrabold text-xl text-slate-900">Study Room SSC 2028 is Private</h2>
       <p class="text-xs text-slate-600 mt-2 leading-relaxed">
-        All class notes, PDFs, videos, and study links are protected for registered SSC 2028 batch members only. Please log in or create an account to view materials.
+        All class notes, PDFs, videos, chat, and study links are protected for registered SSC 2028 members. Please log in or register.
       </p>
       <div class="mt-6 flex flex-col sm:flex-row gap-2.5">
         <button onclick="openAuthModal('login')" class="flex-1 bg-slate-900 hover:bg-slate-800 text-white py-3 rounded-xl text-xs font-bold shadow-md transition">
           Member Login
         </button>
-        <button onclick="openAuthModal('register')" class="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-3 rounded-xl text-xs font-bold shadow-md shadow-indigo-600/25 transition">
+        <button onclick="openAuthModal('register')" class="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-3 rounded-xl text-xs font-bold shadow-md transition">
           Register Account
         </button>
       </div>
     </div>
 
-    <!-- UNLOCKED PORTAL CONTENT -->
+    <!-- Unlocked Portal Content -->
     <div id="portalContent">
-      <!-- Vibrant WhatsApp Community Hero Card -->
-      <div class="relative overflow-hidden bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 rounded-2xl p-5 mb-7 text-white shadow-xl shadow-emerald-900/15">
-        <div class="absolute -right-8 -top-8 w-40 h-40 rounded-full bg-white/10 blur-2xl pointer-events-none"></div>
-        <div class="absolute right-20 -bottom-10 w-32 h-32 rounded-full bg-teal-300/15 blur-xl pointer-events-none"></div>
-
+      <!-- WhatsApp Community Banner -->
+      <div class="relative overflow-hidden bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 rounded-2xl p-5 mb-7 text-white shadow-xl">
         <div class="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <span class="inline-block bg-white/20 backdrop-blur-sm text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full mb-2">
+            <span class="inline-block bg-white/20 text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full mb-2">
               Official Batch Community
             </span>
             <h2 class="font-extrabold text-base sm:text-lg tracking-tight">SSC 2028 Study Discussion Group</h2>
@@ -116,15 +121,14 @@
               Join classmates on WhatsApp for instant class notes, exam routines, and daily Q&amp;A.
             </p>
           </div>
-
           <div class="flex flex-col items-stretch sm:items-end gap-2 shrink-0">
-            <a id="whatsappLink" href="https://chat.whatsapp.com/IVS5nwQpGIiGOSqYg63vKR"
-               class="inline-flex items-center justify-center gap-2 bg-white text-emerald-800 hover:bg-emerald-50 text-xs font-extrabold px-5 py-2.5 rounded-xl shadow-lg shadow-emerald-950/20 transition-all active:scale-95">
+            <a href="https://chat.whatsapp.com/IVS5nwQpGIiGOSqYg63vKR" target="_blank" rel="noopener"
+               class="inline-flex items-center justify-center gap-2 bg-white text-emerald-800 hover:bg-emerald-50 text-xs font-extrabold px-5 py-2.5 rounded-xl shadow-lg transition active:scale-95">
               <span>Join WhatsApp Group</span>
               <span>↗</span>
             </a>
-            <div class="flex items-center justify-between sm:justify-end gap-1.5 bg-emerald-950/30 backdrop-blur-sm border border-white/15 px-2.5 py-1 rounded-lg text-[11px] text-emerald-50">
-              <a href="https://chat.whatsapp.com/IVS5nwQpGIiGOSqYg63vKR" class="underline decoration-emerald-200/70 truncate max-w-[200px] sm:max-w-[230px]">
+            <div class="flex items-center justify-between sm:justify-end gap-1.5 bg-emerald-950/30 border border-white/15 px-2.5 py-1 rounded-lg text-[11px] text-emerald-50">
+              <a href="https://chat.whatsapp.com/IVS5nwQpGIiGOSqYg63vKR" target="_blank" rel="noopener" class="underline truncate max-w-[200px] sm:max-w-[230px]">
                 chat.whatsapp.com/IVS5nwQpGIiGOSqYg63vKR
               </a>
               <button type="button" onclick="copyWhatsAppLink()" id="copyWaBtn" class="bg-white/20 hover:bg-white/30 text-white font-bold px-2 py-0.5 rounded text-[10px] transition shrink-0">
@@ -138,36 +142,86 @@
       <!-- Search & Category Filter Bar -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
         <div class="flex gap-2 overflow-x-auto no-scrollbar pb-1">
-          <button onclick="setTab('all')" id="tab-all" class="tab-btn bg-gradient-to-r from-indigo-600 to-blue-600 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md shadow-indigo-600/20 transition-all shrink-0">
+          <button onclick="setTab('all')" id="tab-all" class="tab-btn bg-gradient-to-r from-indigo-600 to-blue-600 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md transition shrink-0">
             All Materials
           </button>
-          <button onclick="setTab('Documents')" id="tab-Documents" class="tab-btn bg-white hover:bg-indigo-50/70 border border-slate-200/80 text-slate-700 px-4 py-2 rounded-xl text-xs font-bold shadow-sm transition-all shrink-0">
+          <button onclick="setTab('Documents')" id="tab-Documents" class="tab-btn bg-white hover:bg-indigo-50 border border-slate-200 text-slate-700 px-4 py-2 rounded-xl text-xs font-bold shadow-sm transition shrink-0">
             Documents
           </button>
-          <button onclick="setTab('Images')" id="tab-Images" class="tab-btn bg-white hover:bg-purple-50/70 border border-slate-200/80 text-slate-700 px-4 py-2 rounded-xl text-xs font-bold shadow-sm transition-all shrink-0">
+          <button onclick="setTab('Images')" id="tab-Images" class="tab-btn bg-white hover:bg-purple-50 border border-slate-200 text-slate-700 px-4 py-2 rounded-xl text-xs font-bold shadow-sm transition shrink-0">
             Images
           </button>
-          <button onclick="setTab('Videos')" id="tab-Videos" class="tab-btn bg-white hover:bg-rose-50/70 border border-slate-200/80 text-slate-700 px-4 py-2 rounded-xl text-xs font-bold shadow-sm transition-all shrink-0">
+          <button onclick="setTab('Videos')" id="tab-Videos" class="tab-btn bg-white hover:bg-rose-50 border border-slate-200 text-slate-700 px-4 py-2 rounded-xl text-xs font-bold shadow-sm transition shrink-0">
             Videos
           </button>
-          <button onclick="setTab('Links')" id="tab-Links" class="tab-btn bg-white hover:bg-amber-50/70 border border-slate-200/80 text-slate-700 px-4 py-2 rounded-xl text-xs font-bold shadow-sm transition-all shrink-0">
+          <button onclick="setTab('Links')" id="tab-Links" class="tab-btn bg-white hover:bg-amber-50 border border-slate-200 text-slate-700 px-4 py-2 rounded-xl text-xs font-bold shadow-sm transition shrink-0">
             Links
           </button>
         </div>
 
-        <!-- Search Input -->
         <div class="relative w-full sm:w-64">
           <input id="searchInput" type="text" oninput="renderResources()" placeholder="Search notes, chapters..."
-                 class="w-full bg-white border border-slate-200/90 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-xl pl-3.5 pr-8 py-2 text-xs font-medium text-slate-800 shadow-sm outline-none transition" />
+                 class="w-full bg-white border border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-xl pl-3.5 pr-8 py-2 text-xs font-medium text-slate-800 shadow-sm outline-none transition" />
           <span class="absolute right-3 top-2 text-slate-400 text-xs">⌕</span>
         </div>
       </div>
 
       <!-- Resources Grid -->
-      <div id="resourcesList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div id="resourcesList" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
         <div class="col-span-2 bg-white/80 border border-indigo-100 rounded-2xl p-8 text-center text-sm font-medium text-slate-500 shadow-sm">
           Loading study materials...
         </div>
+      </div>
+
+      <!-- Dedicated Member Comment Box & Dedicated Member Chat Box -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- 1. Dedicated Member Comment Box -->
+        <section class="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm flex flex-col">
+          <div class="flex items-center justify-between mb-3">
+            <div>
+              <h3 class="font-extrabold text-sm text-slate-900">💬 Member Comment Board</h3>
+              <p class="text-[11px] text-slate-500">Leave comments, study tips, or updates for batch members</p>
+            </div>
+            <span class="text-[10px] font-bold bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-full">Comments</span>
+          </div>
+
+          <div id="portalCommentsList" class="space-y-2.5 max-h-64 overflow-y-auto mb-3.5 pr-1 text-xs">
+            <div class="text-slate-400 text-center py-4">Loading comments...</div>
+          </div>
+
+          <form onsubmit="submitPortalComment(event)" class="mt-auto flex gap-2">
+            <input id="portalCommentInput" type="text" placeholder="Write a comment for members..."
+                   class="flex-1 bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 rounded-xl px-3.5 py-2 text-xs outline-none transition" required />
+            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-4 py-2 rounded-xl shadow-sm transition shrink-0">
+              Comment
+            </button>
+          </form>
+        </section>
+
+        <!-- 2. Dedicated Live Chat Box -->
+        <section class="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm flex flex-col">
+          <div class="flex items-center justify-between mb-3">
+            <div>
+              <h3 class="font-extrabold text-sm text-slate-900">⚡ Member Live Chat</h3>
+              <p class="text-[11px] text-slate-500">Real-time chat room for registered &amp; logged-in members</p>
+            </div>
+            <span class="text-[10px] font-bold bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full">Live Chat</span>
+          </div>
+
+          <div id="portalChatList" class="space-y-2 max-h-64 overflow-y-auto mb-3.5 pr-1 text-xs bg-slate-50/70 border border-slate-100 rounded-xl p-3">
+            <div class="text-slate-400 text-center py-4">Log in as a member to join live chat.</div>
+          </div>
+
+          <form onsubmit="submitPortalChat(event)" class="mt-auto flex gap-2">
+            <input id="portalChatInput" type="text" placeholder="Type a chat message..."
+                   class="flex-1 bg-slate-50 border border-slate-200 focus:bg-white focus:border-emerald-500 rounded-xl px-3.5 py-2 text-xs outline-none transition" required />
+            <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2 rounded-xl shadow-sm transition shrink-0">
+              Send
+            </button>
+          </form>
+        </section>
+
       </div>
     </div>
   </main>
@@ -180,6 +234,28 @@
     </div>
   </footer>
 
+  <!-- Dedicated Activity Log Modal (with Save Logs button) -->
+  <div id="activityLogModal" class="hidden fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-40 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-slate-100 max-h-[85vh] flex flex-col">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-100">
+        <div>
+          <h3 class="font-extrabold text-base text-slate-900">📋 Activity Log</h3>
+          <p class="text-xs text-slate-500">Automatic record of member adds, removals/bans, uploads &amp; website changes</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="saveLogsToDevice()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold px-3.5 py-2 rounded-xl shadow-sm transition active:scale-95">
+            💾 Save Logs
+          </button>
+          <button type="button" onclick="closeActivityLogModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 font-bold text-xs">✕</button>
+        </div>
+      </div>
+
+      <div id="dedicatedActivityLogsList" class="divide-y divide-slate-100 border border-slate-200 rounded-2xl text-xs overflow-y-auto flex-1">
+        <div class="p-4 text-slate-500">Loading activity logs...</div>
+      </div>
+    </div>
+  </div>
+
   <!-- Add Resource Modal -->
   <div id="resourceModal" class="hidden fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-40 flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100">
@@ -188,12 +264,12 @@
           <h3 class="font-extrabold text-base text-slate-900">Share a Study Resource</h3>
           <p class="text-xs text-slate-500 mt-0.5">Add notes, PDFs, videos, or helpful links</p>
         </div>
-        <button onclick="closeResourceModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center font-bold text-xs transition">✕</button>
+        <button onclick="closeResourceModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 font-bold text-xs">✕</button>
       </div>
       <form onsubmit="saveResource(event)" class="space-y-3.5">
         <div>
           <label class="block text-xs font-bold text-slate-700 mb-1">Category *</label>
-          <select id="resCategory" class="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-xl px-3.5 py-2.5 text-sm outline-none transition" required>
+          <select id="resCategory" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm outline-none" required>
             <option value="Documents">Documents (PDFs, Notes, Drive/MEGA)</option>
             <option value="Images">Images (Diagrams, Board Photos)</option>
             <option value="Videos">Videos (YouTube, Recorded Classes)</option>
@@ -202,22 +278,22 @@
         </div>
         <div>
           <label class="block text-xs font-bold text-slate-700 mb-1">Title *</label>
-          <input id="resTitle" type="text" placeholder="e.g., Physics Chapter 3 Notes PDF" class="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-xl px-3.5 py-2.5 text-sm outline-none transition" required />
+          <input id="resTitle" type="text" placeholder="e.g., Physics Chapter 3 Notes PDF" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm outline-none" required />
         </div>
         <div>
           <label class="block text-xs font-bold text-slate-700 mb-1">Link (Drive / MEGA / YouTube) *</label>
-          <input id="resUrl" type="url" placeholder="https://..." class="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-xl px-3.5 py-2.5 text-sm outline-none transition" required />
+          <input id="resUrl" type="url" placeholder="https://..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm outline-none" required />
         </div>
         <div>
           <label class="block text-xs font-bold text-slate-700 mb-1">Short Description</label>
-          <textarea id="resDesc" rows="2" placeholder="Important formulas and creative questions included..." class="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-xl px-3.5 py-2.5 text-sm outline-none transition"></textarea>
+          <textarea id="resDesc" rows="2" placeholder="Important formulas and creative questions included..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm outline-none"></textarea>
         </div>
         <div class="text-[11px] text-amber-800 bg-amber-50 border border-amber-200/80 p-3 rounded-xl font-medium">
           Non-admin uploads are reviewed by an admin before appearing publicly.
         </div>
         <div class="flex justify-end gap-2 pt-2">
-          <button type="button" onclick="closeResourceModal()" class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">Cancel</button>
-          <button id="saveResBtn" type="submit" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold shadow-md shadow-indigo-600/25 transition">Submit Resource</button>
+          <button type="button" onclick="closeResourceModal()" class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100">Cancel</button>
+          <button id="saveResBtn" type="submit" class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 py-2.5 rounded-xl text-xs font-bold shadow-md">Submit Resource</button>
         </div>
       </form>
     </div>
@@ -228,40 +304,38 @@
     <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100">
       <div class="flex items-center justify-between mb-5">
         <div class="flex gap-1.5 bg-slate-100 p-1 rounded-xl">
-          <button id="showLoginTab" onclick="switchAuthMode('login')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-sm transition">Login</button>
-          <button id="showRegTab" onclick="switchAuthMode('register')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold text-slate-600 transition">Register</button>
+          <button id="showLoginTab" onclick="switchAuthMode('login')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-sm">Login</button>
+          <button id="showRegTab" onclick="switchAuthMode('register')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold text-slate-600">Register</button>
         </div>
-        <button onclick="closeAuthModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center font-bold text-xs transition">✕</button>
+        <button onclick="closeAuthModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 font-bold text-xs">✕</button>
       </div>
 
-      <!-- Login Form -->
       <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-3.5">
         <div>
           <label class="block text-xs font-bold text-slate-700 mb-1">Phone Number *</label>
-          <input id="loginPhone" type="tel" placeholder="01XXXXXXXXX" class="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-xl px-3.5 py-2.5 text-sm outline-none transition" required />
+          <input id="loginPhone" type="tel" placeholder="01XXXXXXXXX" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm outline-none" required />
         </div>
         <div>
           <label class="block text-xs font-bold text-slate-700 mb-1">Password *</label>
-          <input id="loginPass" type="password" placeholder="Enter your password" class="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-xl px-3.5 py-2.5 text-sm outline-none transition" required />
+          <input id="loginPass" type="password" placeholder="Enter your password" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm outline-none" required />
         </div>
-        <button id="loginSubmitBtn" type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white py-3 rounded-xl text-xs font-bold shadow-lg shadow-slate-900/20 transition">Login to Portal</button>
+        <button id="loginSubmitBtn" type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white py-3 rounded-xl text-xs font-bold shadow-lg">Login to Portal</button>
       </form>
 
-      <!-- Registration Form -->
       <form id="registerForm" onsubmit="handleRegister(event)" class="hidden space-y-3.5">
         <div>
           <label class="block text-xs font-bold text-slate-700 mb-1">Full Name *</label>
-          <input id="regName" type="text" placeholder="Your Full Name" class="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-xl px-3.5 py-2.5 text-sm outline-none transition" required />
+          <input id="regName" type="text" placeholder="Your Full Name" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm outline-none" required />
         </div>
         <div>
           <label class="block text-xs font-bold text-slate-700 mb-1">Phone Number *</label>
-          <input id="regPhone" type="tel" placeholder="01XXXXXXXXX" class="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-xl px-3.5 py-2.5 text-sm outline-none transition" required />
+          <input id="regPhone" type="tel" placeholder="01XXXXXXXXX" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm outline-none" required />
         </div>
         <div>
           <label class="block text-xs font-bold text-slate-700 mb-1">Create Password *</label>
-          <input id="regPass" type="password" placeholder="Minimum 4 characters" class="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-xl px-3.5 py-2.5 text-sm outline-none transition" required />
+          <input id="regPass" type="password" placeholder="Minimum 4 characters" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm outline-none" required />
         </div>
-        <button id="regSubmitBtn" type="submit" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-3 rounded-xl text-xs font-bold shadow-lg shadow-indigo-600/25 transition">Create Account</button>
+        <button id="regSubmitBtn" type="submit" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-xl text-xs font-bold shadow-lg">Create Account</button>
       </form>
     </div>
   </div>
@@ -272,9 +346,24 @@
       <div class="flex items-center justify-between mb-5 pb-3 border-b border-slate-100">
         <div>
           <h3 class="font-extrabold text-base text-slate-900">Admin Control &amp; Moderation Center</h3>
-          <p class="text-xs text-slate-500">Control portal visibility, approve uploads, assign admins &amp; manage members</p>
+          <p class="text-xs text-slate-500">Safe Lock, visibility, approvals, members &amp; protected logs</p>
         </div>
-        <button onclick="closeAdminModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center font-bold text-xs transition">✕</button>
+        <button onclick="closeAdminModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 font-bold text-xs">✕</button>
+      </div>
+
+      <!-- Admin-Only Safe Lock Box -->
+      <div class="bg-emerald-50/70 border border-emerald-200 rounded-2xl p-4 mb-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h4 class="text-xs font-extrabold uppercase tracking-wider text-emerald-950">🛡️ Admin Safe Lock</h4>
+            <p class="text-xs text-slate-600 mt-0.5">
+              Keeps all activity logs safely preserved and pauses member-added alerts when enabled.
+            </p>
+          </div>
+          <button type="button" id="modalSafeLockBtn" onclick="toggleSafeLockFromModal()" class="px-4 py-2 rounded-xl text-xs font-extrabold transition shrink-0">
+            Safe Lock: OFF
+          </button>
+        </div>
       </div>
 
       <!-- Portal Privacy / Public Visibility Toggle -->
@@ -305,8 +394,13 @@
       <h4 class="text-xs font-extrabold uppercase tracking-wider text-indigo-900 mb-2.5">Registered Members &amp; Roles</h4>
       <div id="adminUsersList" class="divide-y divide-slate-100 border border-slate-200/90 rounded-2xl mb-6 text-xs overflow-hidden"></div>
 
-      <!-- Activity Logs -->
-      <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-600 mb-2.5">Live Activity &amp; Login Logs</h4>
+      <!-- Protected Activity Logs + Save Logs -->
+      <div class="flex items-center justify-between mb-2.5">
+        <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-600">Safe Activity &amp; Login Logs</h4>
+        <button type="button" onclick="saveLogsToDevice()" class="text-xs font-bold text-emerald-700 hover:underline">
+          💾 Save Logs
+        </button>
+      </div>
       <div id="adminLogsList" class="divide-y divide-slate-100 border border-slate-200/90 rounded-2xl text-xs overflow-hidden"></div>
     </div>
   </div>
@@ -320,32 +414,23 @@
 
     let currentTab = "all";
     let allResources = [];
+    let allActivityLogs = [];
+    let resourceCommentsMap = {};
     let isPortalPublic = false;
+    let isSafeLockOn = false;
     let currentUser = JSON.parse(localStorage.getItem("sr_user") || "null");
     let lastSeenLogId = Number(localStorage.getItem("sr_last_log_id") || "0");
 
     const CATEGORY_STYLES = {
-      Documents: {
-        badge: "bg-blue-50 text-blue-700 border-blue-200/80",
-        accent: "border-t-blue-500",
-        btn: "text-blue-600 hover:text-blue-800 bg-blue-50/70 hover:bg-blue-100/80"
-      },
-      Images: {
-        badge: "bg-purple-50 text-purple-700 border-purple-200/80",
-        accent: "border-t-purple-500",
-        btn: "text-purple-600 hover:text-purple-800 bg-purple-50/70 hover:bg-purple-100/80"
-      },
-      Videos: {
-        badge: "bg-rose-50 text-rose-700 border-rose-200/80",
-        accent: "border-t-rose-500",
-        btn: "text-rose-600 hover:text-rose-800 bg-rose-50/70 hover:bg-rose-100/80"
-      },
-      Links: {
-        badge: "bg-amber-50 text-amber-800 border-amber-200/80",
-        accent: "border-t-amber-500",
-        btn: "text-amber-700 hover:text-amber-900 bg-amber-50/70 hover:bg-amber-100/80"
-      }
+      Documents: { badge: "bg-blue-50 text-blue-700 border-blue-200/80", accent: "border-t-blue-500", btn: "text-blue-600 bg-blue-50/70 hover:bg-blue-100" },
+      Images:    { badge: "bg-purple-50 text-purple-700 border-purple-200/80", accent: "border-t-purple-500", btn: "text-purple-600 bg-purple-50/70 hover:bg-purple-100" },
+      Videos:    { badge: "bg-rose-50 text-rose-700 border-rose-200/80", accent: "border-t-rose-500", btn: "text-rose-600 bg-rose-50/70 hover:bg-rose-100" },
+      Links:     { badge: "bg-amber-50 text-amber-800 border-amber-200/80", accent: "border-t-amber-500", btn: "text-amber-700 bg-amber-50/70 hover:bg-amber-100" }
     };
+
+    function escapeHtml(str) {
+      return String(str || "").replace(/[&<>"']/g, m => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));
+    }
 
     function copyWhatsAppLink() {
       navigator.clipboard.writeText(WHATSAPP_INVITE_URL).then(() => {
@@ -353,6 +438,106 @@
         btn.textContent = "Copied!";
         setTimeout(() => { btn.textContent = "Copy"; }, 2000);
       });
+    }
+
+    async function requestAdminNotificationPermission() {
+      if (!("Notification" in window)) return;
+      if (Notification.permission === "default") {
+        await Notification.requestPermission();
+      }
+    }
+
+    function sendSystemNotification(title, body) {
+      if (isSafeLockOn) return;
+      if ("Notification" in window && Notification.permission === "granted") {
+        try {
+          if (navigator.serviceWorker && navigator.serviceWorker.ready) {
+            navigator.serviceWorker.ready.then(reg => {
+              if (reg && reg.showNotification) {
+                reg.showNotification(title, { body, tag: "ssc2028-admin", renotify: true });
+              } else {
+                new Notification(title, { body });
+              }
+            }).catch(() => new Notification(title, { body }));
+          } else {
+            new Notification(title, { body });
+          }
+        } catch (_) {}
+      }
+    }
+
+    function saveLogsToDevice() {
+      if (!currentUser || !currentUser.is_admin) {
+        alert("Only Admin can save activity logs.");
+        return;
+      }
+      const lines = (allActivityLogs || []).map(l => {
+        const timeStr = l.created_at ? new Date(l.created_at).toLocaleString() : "";
+        return `[${timeStr}] ${l.user_name} (${l.user_phone}) - ${l.action}`;
+      });
+      const content = lines.length
+        ? "Study Room SSC 2028 — Activity Log Export\n==========================================\n" + lines.join("\n")
+        : "Study Room SSC 2028 — Activity Log Export\nNo logs available.";
+
+      const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const dateStamp = new Date().toISOString().slice(0, 10);
+      a.href = url;
+      a.download = `study-room-ssc2028-activity-logs-${dateStamp}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    async function openActivityLogModal() {
+      if (!currentUser || !currentUser.is_admin) {
+        alert("Only Admin can access Activity Logs.");
+        return;
+      }
+      document.getElementById("activityLogModal").classList.remove("hidden");
+      await refreshAdminDashboard(false);
+    }
+
+    function closeActivityLogModal() {
+      document.getElementById("activityLogModal").classList.add("hidden");
+    }
+
+    function updateSafeLockUI() {
+      const modalBtn = document.getElementById("modalSafeLockBtn");
+      const pill = document.getElementById("headerSafeLockPill");
+
+      if (isSafeLockOn) {
+        pill.classList.remove("hidden");
+        if (modalBtn) {
+          modalBtn.textContent = "🛡️ Safe Lock: ON (Click to Turn OFF)";
+          modalBtn.className = "px-4 py-2 rounded-xl text-xs font-extrabold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition shrink-0";
+        }
+      } else {
+        pill.classList.add("hidden");
+        if (modalBtn) {
+          modalBtn.textContent = "🛡️ Safe Lock: OFF (Click to Turn ON)";
+          modalBtn.className = "px-4 py-2 rounded-xl text-xs font-extrabold bg-slate-900 hover:bg-slate-800 text-white shadow-sm transition shrink-0";
+        }
+      }
+    }
+
+    async function toggleSafeLockFromModal() {
+      if (!currentUser || !currentUser.is_admin) return;
+      const nextState = !isSafeLockOn;
+      const { data, error } = await db.rpc("admin_set_safe_lock", {
+        p_admin_phone: currentUser.phone,
+        p_admin_password: currentUser.pass,
+        p_safe_lock: nextState
+      });
+      if (error || !data || !data.ok) {
+        alert(data?.error || error?.message || "Could not update Safe Lock.");
+        return;
+      }
+      isSafeLockOn = nextState;
+      updateSafeLockUI();
+      await refreshAdminDashboard(false);
     }
 
     function updateVisibilityUI() {
@@ -390,12 +575,14 @@
       }
     }
 
-    async function fetchPortalVisibility() {
-      const { data, error } = await db.rpc("get_portal_visibility");
-      if (!error && typeof data === "boolean") {
-        isPortalPublic = data;
+    async function fetchPortalStatus() {
+      const { data, error } = await db.rpc("get_portal_status");
+      if (!error && data) {
+        isPortalPublic = Boolean(data.is_public);
+        isSafeLockOn = Boolean(data.safe_lock);
       }
       updateVisibilityUI();
+      updateSafeLockUI();
     }
 
     async function changePortalVisibility(makePublic) {
@@ -420,6 +607,7 @@
       const nameEl = document.getElementById("userNameDisplay");
       const adminTag = document.getElementById("adminTag");
       const adminBtn = document.getElementById("adminPanelBtn");
+      const activityBtn = document.getElementById("activityLogHeaderBtn");
       const authBtn = document.getElementById("authOpenBtn");
       const logoutBtn = document.getElementById("logoutBtn");
       const addResBtn = document.getElementById("addResHeaderBtn");
@@ -434,19 +622,24 @@
         if (currentUser.is_admin) {
           adminTag.classList.remove("hidden");
           adminBtn.classList.remove("hidden");
+          activityBtn.classList.remove("hidden");
+          requestAdminNotificationPermission();
         } else {
           adminTag.classList.add("hidden");
           adminBtn.classList.add("hidden");
+          activityBtn.classList.add("hidden");
         }
       } else {
         badge.classList.add("hidden");
         badge.classList.remove("flex");
         adminBtn.classList.add("hidden");
+        activityBtn.classList.add("hidden");
         logoutBtn.classList.add("hidden");
         authBtn.classList.remove("hidden");
         addResBtn.classList.add("hidden");
       }
       updateVisibilityUI();
+      updateSafeLockUI();
       renderResources();
     }
 
@@ -462,11 +655,11 @@
       document.getElementById("loginForm").classList.toggle("hidden", !isLogin);
       document.getElementById("registerForm").classList.toggle("hidden", isLogin);
       document.getElementById("showLoginTab").className = isLogin
-        ? "px-3.5 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-sm transition"
-        : "px-3.5 py-1.5 rounded-lg text-xs font-bold text-slate-600 transition";
+        ? "px-3.5 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-sm"
+        : "px-3.5 py-1.5 rounded-lg text-xs font-bold text-slate-600";
       document.getElementById("showRegTab").className = !isLogin
-        ? "px-3.5 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 text-white shadow-sm transition"
-        : "px-3.5 py-1.5 rounded-lg text-xs font-bold text-slate-600 transition";
+        ? "px-3.5 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 text-white shadow-sm"
+        : "px-3.5 py-1.5 rounded-lg text-xs font-bold text-slate-600";
     }
 
     async function handleRegister(e) {
@@ -489,7 +682,7 @@
         localStorage.setItem("sr_user", JSON.stringify(currentUser));
         closeAuthModal();
         updateAuthUI();
-        await loadResources();
+        await loadAllPortalData();
         alert(data.is_admin ? "Registered! You are the founding Admin." : "Registered successfully!");
       } catch (err) {
         alert("Network error: " + err.message);
@@ -515,7 +708,7 @@
         localStorage.setItem("sr_user", JSON.stringify(currentUser));
         closeAuthModal();
         updateAuthUI();
-        await loadResources();
+        await loadAllPortalData();
       } catch (err) {
         alert("Network error: " + err.message);
       } finally {
@@ -529,7 +722,7 @@
       allResources = [];
       localStorage.removeItem("sr_user");
       updateAuthUI();
-      if (isPortalPublic) await loadResources();
+      await loadAllPortalData();
     }
 
     async function loadResources() {
@@ -544,16 +737,153 @@
       });
       if (!error && data) {
         allResources = data;
+        await Promise.all(allResources.map(r => loadCommentsForResource(r.id, false)));
         renderResources();
       }
+    }
+
+    async function loadCommentsForResource(resourceId, shouldRender = true) {
+      const { data, error } = await db.rpc("get_resource_comments", {
+        p_resource_id: resourceId,
+        p_phone: currentUser ? currentUser.phone : null,
+        p_password: currentUser ? currentUser.pass : null
+      });
+      if (!error && data) {
+        resourceCommentsMap[resourceId] = data;
+        if (shouldRender) renderResources();
+      }
+    }
+
+    async function submitResourceComment(e, resourceId) {
+      e.preventDefault();
+      if (!currentUser) {
+        alert("Please log in as a registered member to ask or comment.");
+        openAuthModal("login");
+        return;
+      }
+      const input = document.getElementById("res-comment-input-" + resourceId);
+      const text = input ? input.value.trim() : "";
+      if (!text) return;
+
+      const { data, error } = await db.rpc("add_resource_comment", {
+        p_phone: currentUser.phone,
+        p_password: currentUser.pass,
+        p_resource_id: resourceId,
+        p_comment: text
+      });
+      if (error || !data || !data.ok) {
+        alert(data?.error || error?.message || "Could not post comment.");
+        return;
+      }
+      input.value = "";
+      await loadCommentsForResource(resourceId, true);
+    }
+
+    async function loadPortalComments() {
+      const box = document.getElementById("portalCommentsList");
+      if (!isPortalPublic && !currentUser) {
+        box.innerHTML = `<div class="text-slate-400 text-center py-4">Log in to view member comments.</div>`;
+        return;
+      }
+      const { data, error } = await db.rpc("get_portal_comments", {
+        p_phone: currentUser ? currentUser.phone : null,
+        p_password: currentUser ? currentUser.pass : null
+      });
+      if (error || !data || !data.length) {
+        box.innerHTML = `<div class="text-slate-400 text-center py-4">No comments yet. Start the discussion!</div>`;
+        return;
+      }
+      box.innerHTML = data.map(c => `
+        <div class="bg-slate-50 border border-slate-100 rounded-xl p-2.5">
+          <div class="flex items-center justify-between gap-2">
+            <span class="font-bold text-slate-900">${escapeHtml(c.user_name)}</span>
+            <span class="text-[10px] text-slate-400">${new Date(c.created_at).toLocaleTimeString()}</span>
+          </div>
+          <p class="text-slate-700 mt-0.5 break-words">${escapeHtml(c.message)}</p>
+        </div>
+      `).join("");
+    }
+
+    async function submitPortalComment(e) {
+      e.preventDefault();
+      if (!currentUser) {
+        alert("Please log in as a registered member to comment.");
+        openAuthModal("login");
+        return;
+      }
+      const input = document.getElementById("portalCommentInput");
+      const msg = input.value.trim();
+      if (!msg) return;
+
+      const { data, error } = await db.rpc("add_portal_comment", {
+        p_phone: currentUser.phone,
+        p_password: currentUser.pass,
+        p_message: msg
+      });
+      if (error || !data || !data.ok) {
+        alert(data?.error || error?.message || "Failed to post comment.");
+        return;
+      }
+      input.value = "";
+      await loadPortalComments();
+    }
+
+    async function loadPortalChat() {
+      const box = document.getElementById("portalChatList");
+      if (!currentUser) {
+        box.innerHTML = `<div class="text-slate-400 text-center py-4">Log in as a registered member to use live chat.</div>`;
+        return;
+      }
+      const { data, error } = await db.rpc("get_portal_chat", {
+        p_phone: currentUser.phone,
+        p_password: currentUser.pass
+      });
+      if (error || !data || !data.length) {
+        box.innerHTML = `<div class="text-slate-400 text-center py-4">No chat messages yet. Say hi!</div>`;
+        return;
+      }
+      box.innerHTML = data.map(m => `
+        <div class="bg-white border border-slate-200/70 rounded-xl px-3 py-2">
+          <div class="flex items-center justify-between gap-2">
+            <span class="font-bold text-emerald-800">${escapeHtml(m.user_name)}</span>
+            <span class="text-[10px] text-slate-400">${new Date(m.created_at).toLocaleTimeString()}</span>
+          </div>
+          <p class="text-slate-800 mt-0.5 break-words">${escapeHtml(m.message)}</p>
+        </div>
+      `).join("");
+      box.scrollTop = box.scrollHeight;
+    }
+
+    async function submitPortalChat(e) {
+      e.preventDefault();
+      if (!currentUser) {
+        alert("Please log in as a registered member to chat.");
+        openAuthModal("login");
+        return;
+      }
+      const input = document.getElementById("portalChatInput");
+      const msg = input.value.trim();
+      if (!msg) return;
+
+      const { data, error } = await db.rpc("send_portal_chat", {
+        p_phone: currentUser.phone,
+        p_password: currentUser.pass,
+        p_message: msg
+      });
+      if (error || !data || !data.ok) {
+        alert(data?.error || error?.message || "Could not send chat message.");
+        return;
+      }
+      input.value = "";
+      await loadPortalChat();
     }
 
     function setTab(tab) {
       currentTab = tab;
       document.querySelectorAll(".tab-btn").forEach(btn => {
-        btn.className = "tab-btn bg-white hover:bg-indigo-50/70 border border-slate-200/80 text-slate-700 px-4 py-2 rounded-xl text-xs font-bold shadow-sm transition-all shrink-0";
+        btn.className = "tab-btn bg-white hover:bg-indigo-50 border border-slate-200 text-slate-700 px-4 py-2 rounded-xl text-xs font-bold shadow-sm transition shrink-0";
       });
-      document.getElementById("tab-" + tab).className = "tab-btn bg-gradient-to-r from-indigo-600 to-blue-600 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md shadow-indigo-600/20 transition-all shrink-0";
+      document.getElementById("tab-" + tab).className = "tab-btn bg-gradient-to-r from-indigo-600 to-blue-600 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md transition shrink-0";
       renderResources();
     }
 
@@ -571,31 +901,49 @@
 
       if (!filtered.length) {
         list.innerHTML = `
-          <div class="col-span-2 bg-white/90 border border-slate-200/80 rounded-2xl p-8 text-center shadow-sm">
+          <div class="col-span-2 bg-white/90 border border-slate-200 rounded-2xl p-8 text-center shadow-sm">
             <p class="font-bold text-slate-800 text-sm">No study materials found here yet</p>
-            <p class="text-xs text-slate-500 mt-1">Tap <span class="font-bold text-indigo-600">+ Add Resource</span> at the top to share notes or links with your classmates.</p>
+            <p class="text-xs text-slate-500 mt-1">Tap <span class="font-bold text-indigo-600">+ Add Resource</span> to share notes, PDFs, or links.</p>
           </div>`;
         return;
       }
 
       list.innerHTML = filtered.map(item => {
         const style = CATEGORY_STYLES[item.category] || CATEGORY_STYLES.Documents;
+        const rComments = resourceCommentsMap[item.id] || [];
         return `
-          <div class="group bg-white border border-slate-200/80 border-t-4 ${style.accent} rounded-2xl p-5 shadow-sm hover:shadow-xl hover:shadow-indigo-950/5 hover:-translate-y-0.5 transition-all duration-200 flex flex-col justify-between">
+          <div class="bg-white border border-slate-200/90 border-t-4 ${style.accent} rounded-2xl p-5 shadow-sm flex flex-col justify-between gap-4">
             <div>
               <div class="flex items-center justify-between gap-2 mb-2.5">
-                <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-lg border ${style.badge}">${item.category}</span>
-                ${currentUser && currentUser.is_admin ? `<button onclick="deleteResource(${item.id})" class="text-[11px] font-bold text-rose-600 hover:bg-rose-50 px-2 py-0.5 rounded-lg transition">Delete</button>` : ""}
+                <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-lg border ${style.badge}">${escapeHtml(item.category)}</span>
+                ${currentUser && currentUser.is_admin ? `<button onclick="deleteResource(${item.id})" class="text-[11px] font-bold text-rose-600 hover:bg-rose-50 px-2 py-0.5 rounded-lg">Delete</button>` : ""}
               </div>
-              <h3 class="font-extrabold text-slate-900 text-sm leading-snug group-hover:text-indigo-950 transition">${item.title}</h3>
-              ${item.description ? `<p class="text-xs text-slate-600 mt-1.5 leading-relaxed">${item.description}</p>` : ""}
+              <h3 class="font-extrabold text-slate-900 text-sm leading-snug">${escapeHtml(item.title)}</h3>
+              ${item.description ? `<p class="text-xs text-slate-600 mt-1.5 leading-relaxed">${escapeHtml(item.description)}</p>` : ""}
+              <div class="mt-3 flex items-center justify-between">
+                <a href="${escapeHtml(item.url)}" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-xl ${style.btn} transition">
+                  <span>Open Link / File</span>
+                  <span>↗</span>
+                </a>
+                <span class="text-[10px] text-slate-400">${item.created_at ? new Date(item.created_at).toLocaleDateString() : ""}</span>
+              </div>
             </div>
-            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
-              <a href="${item.url}" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-xl ${style.btn} transition">
-                <span>Open Resource</span>
-                <span>↗</span>
-              </a>
-              <span class="text-[10px] font-medium text-slate-400">${item.created_at ? new Date(item.created_at).toLocaleDateString() : ""}</span>
+
+            <div class="pt-3 border-t border-slate-100">
+              <div class="text-[11px] font-extrabold text-slate-700 mb-2">Questions &amp; Comments on this item (${rComments.length})</div>
+              <div class="space-y-1.5 max-h-32 overflow-y-auto mb-2.5 text-xs">
+                ${rComments.length ? rComments.map(c => `
+                  <div class="bg-slate-50 rounded-lg px-2.5 py-1.5 border border-slate-100">
+                    <span class="font-bold text-slate-900">${escapeHtml(c.user_name)}:</span>
+                    <span class="text-slate-700 break-words">${escapeHtml(c.comment)}</span>
+                  </div>
+                `).join("") : `<div class="text-[11px] text-slate-400">No questions yet. Ask below!</div>`}
+              </div>
+              <form onsubmit="submitResourceComment(event, ${item.id})" class="flex gap-1.5">
+                <input id="res-comment-input-${item.id}" type="text" placeholder="Ask a question about this..."
+                       class="flex-1 bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 rounded-lg px-2.5 py-1.5 text-xs outline-none" required />
+                <button type="submit" class="bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold px-3 py-1.5 rounded-lg shrink-0">Ask</button>
+              </form>
             </div>
           </div>
         `;
@@ -635,7 +983,7 @@
       }
       e.target.reset();
       closeResourceModal();
-      alert(data.auto_approved ? "Resource posted successfully!" : "Submitted for admin review! It will appear publicly once approved.");
+      alert(data.auto_approved ? "Resource posted successfully!" : "Submitted for admin review! It will appear once approved.");
       loadResources();
     }
 
@@ -649,6 +997,7 @@
     async function openAdminModal() {
       document.getElementById("adminModal").classList.remove("hidden");
       updateVisibilityUI();
+      updateSafeLockUI();
       await refreshAdminDashboard(false);
     }
     function closeAdminModal() {
@@ -667,22 +1016,43 @@
     }
 
     async function toggleBanUser(targetId) {
-      if (!confirm("Are you sure you want to ban/remove this participant?")) return;
+      if (!confirm("Are you sure you want to ban/remove this participant? Activity logs will remain safe.")) return;
       await db.rpc("admin_toggle_ban", { p_admin_phone: currentUser.phone, p_admin_password: currentUser.pass, p_target_user_id: targetId });
       await refreshAdminDashboard(false);
     }
 
     function showAdminToast(text) {
+      if (isSafeLockOn) return;
       const toast = document.getElementById("adminToast");
       document.getElementById("adminToastMsg").textContent = text;
       toast.classList.remove("hidden");
       setTimeout(() => toast.classList.add("hidden"), 6000);
+      sendSystemNotification("Study Room SSC 2028 — Admin Alert", text);
+    }
+
+    function renderActivityLogsHtml(logs) {
+      if (!logs || !logs.length) {
+        return `<div class="p-3.5 text-slate-500 bg-white">No activity logs recorded yet.</div>`;
+      }
+      return logs.map(l => `
+        <div class="p-3 bg-white flex items-center justify-between gap-2">
+          <div>
+            <span class="font-bold text-slate-800">${escapeHtml(l.user_name)}</span>
+            <span class="text-slate-400">(${escapeHtml(l.user_phone)})</span>
+            <span class="ml-1 font-bold text-indigo-600">${escapeHtml(l.action)}</span>
+          </div>
+          <span class="text-[11px] text-slate-400 shrink-0">${new Date(l.created_at).toLocaleTimeString()}</span>
+        </div>
+      `).join("");
     }
 
     async function refreshAdminDashboard(isBackgroundCheck) {
+      await fetchPortalStatus();
       if (!currentUser || !currentUser.is_admin) return;
       const { data } = await db.rpc("admin_get_dashboard", { p_admin_phone: currentUser.phone, p_admin_password: currentUser.pass });
       if (!data || !data.ok) return;
+
+      allActivityLogs = data.logs || [];
 
       const pendingCount = data.pending ? data.pending.length : 0;
       const badge = document.getElementById("pendingBadge");
@@ -693,9 +1063,9 @@
         badge.classList.add("hidden");
       }
 
-      if (data.logs && data.logs.length > 0) {
-        const newest = data.logs[0];
-        if (lastSeenLogId && newest.id > lastSeenLogId && isBackgroundCheck) {
+      if (allActivityLogs.length > 0) {
+        const newest = allActivityLogs[0];
+        if (lastSeenLogId && newest.id > lastSeenLogId && isBackgroundCheck && !isSafeLockOn) {
           showAdminToast(`${newest.user_name}: ${newest.action}`);
         }
         lastSeenLogId = newest.id;
@@ -704,13 +1074,16 @@
 
       if (isBackgroundCheck) return;
 
+      document.getElementById("dedicatedActivityLogsList").innerHTML = renderActivityLogsHtml(allActivityLogs);
+      document.getElementById("adminLogsList").innerHTML = renderActivityLogsHtml(allActivityLogs);
+
       document.getElementById("adminPendingList").innerHTML = pendingCount === 0
         ? `<div class="p-3.5 text-slate-500 bg-white">No pending submissions to review.</div>`
         : data.pending.map(p => `
           <div class="p-3.5 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div class="min-w-0 flex-1">
-              <div class="font-bold text-slate-900 break-words">${p.title} <span class="text-indigo-600 font-semibold">[${p.category}]</span></div>
-              <div class="text-slate-500 break-all mt-0.5"><a href="${p.url}" target="_blank" rel="noopener" class="underline text-blue-600">${p.url}</a></div>
+              <div class="font-bold text-slate-900 break-words">${escapeHtml(p.title)} <span class="text-indigo-600 font-semibold">[${escapeHtml(p.category)}]</span></div>
+              <div class="text-slate-500 break-all mt-0.5"><a href="${escapeHtml(p.url)}" target="_blank" rel="noopener" class="underline text-blue-600">${escapeHtml(p.url)}</a></div>
             </div>
             <div class="flex gap-2 shrink-0 self-end sm:self-center">
               <button type="button" onclick="approveResource(${p.id})" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-1.5 rounded-lg font-bold shadow-sm transition">Approve</button>
@@ -722,40 +1095,38 @@
       document.getElementById("adminUsersList").innerHTML = data.users.map(u => `
         <div class="p-3.5 bg-white flex items-center justify-between gap-2">
           <div>
-            <div class="font-bold text-slate-900">${u.name} ${u.is_admin ? '<span class="text-amber-600 font-extrabold">(Admin)</span>' : ''} ${u.is_banned ? '<span class="text-rose-600 font-extrabold">(Banned)</span>' : ''}</div>
-            <div class="text-slate-500">${u.phone}</div>
+            <div class="font-bold text-slate-900">${escapeHtml(u.name)} ${u.is_admin ? '<span class="text-amber-600 font-extrabold">(Admin)</span>' : ''} ${u.is_banned ? '<span class="text-rose-600 font-extrabold">(Banned)</span>' : ''}</div>
+            <div class="text-slate-500">${escapeHtml(u.phone)}</div>
           </div>
           ${u.id !== currentUser.id ? `
             <div class="flex gap-1.5">
-              <button onclick="toggleAdminRole(${u.id})" class="px-2.5 py-1.5 rounded-lg font-bold transition ${u.is_admin ? 'bg-slate-100 hover:bg-slate-200 text-slate-700' : 'bg-amber-100 hover:bg-amber-200 text-amber-900'}">
+              <button onclick="toggleAdminRole(${u.id})" class="px-2.5 py-1.5 rounded-lg font-bold transition ${u.is_admin ? 'bg-slate-100 text-slate-700' : 'bg-amber-100 text-amber-900'}">
                 ${u.is_admin ? 'Demote' : 'Make Admin'}
               </button>
-              <button onclick="toggleBanUser(${u.id})" class="px-2.5 py-1.5 rounded-lg font-bold transition ${u.is_banned ? 'bg-emerald-100 hover:bg-emerald-200 text-emerald-800' : 'bg-rose-50 hover:bg-rose-100 text-rose-700'}">
+              <button onclick="toggleBanUser(${u.id})" class="px-2.5 py-1.5 rounded-lg font-bold transition ${u.is_banned ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-50 text-rose-700'}">
                 ${u.is_banned ? 'Unban' : 'Remove/Ban'}
               </button>
             </div>
           ` : '<span class="text-slate-400 font-semibold">You</span>'}
         </div>
       `).join("");
-
-      document.getElementById("adminLogsList").innerHTML = data.logs.map(l => `
-        <div class="p-3 bg-white flex items-center justify-between gap-2">
-          <div>
-            <span class="font-bold text-slate-800">${l.user_name}</span>
-            <span class="text-slate-400">(${l.user_phone})</span>
-            <span class="ml-1 font-bold text-indigo-600">${l.action}</span>
-          </div>
-          <span class="text-[11px] text-slate-400 shrink-0">${new Date(l.created_at).toLocaleTimeString()}</span>
-        </div>
-      `).join("");
     }
 
-    setInterval(() => refreshAdminDashboard(true), 12000);
+    async function loadAllPortalData() {
+      await loadResources();
+      await loadPortalComments();
+      await loadPortalChat();
+    }
+
+    setInterval(() => {
+      refreshAdminDashboard(true);
+      if (currentUser) loadPortalChat();
+    }, 10000);
 
     (async function init() {
       updateAuthUI();
-      await fetchPortalVisibility();
-      await loadResources();
+      await fetchPortalStatus();
+      await loadAllPortalData();
     })();
   </script>
 </body>
