@@ -77,7 +77,7 @@
   <!-- Main Content -->
   <main class="max-w-5xl w-full mx-auto px-4 py-6 flex-1">
 
-    <!-- LOCKED PRIVATE SCREEN (Shown to visitors when portal is Private & user is not logged in) -->
+    <!-- LOCKED PRIVATE SCREEN -->
     <div id="privateLockScreen" class="hidden max-w-md mx-auto my-8 bg-white border border-indigo-100 rounded-3xl p-7 shadow-xl shadow-indigo-950/10 text-center">
       <div class="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-600 text-white flex items-center justify-center shadow-lg shadow-indigo-600/30 mb-4 text-xl font-extrabold">
         🔒
@@ -99,7 +99,7 @@
       </div>
     </div>
 
-    <!-- UNLOCKED PORTAL CONTENT (Shown when logged in OR when Admin sets portal to Public) -->
+    <!-- UNLOCKED PORTAL CONTENT -->
     <div id="portalContent">
       <!-- Vibrant WhatsApp Community Hero Card -->
       <div class="relative overflow-hidden bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 rounded-2xl p-5 mb-7 text-white shadow-xl shadow-emerald-900/15">
@@ -320,7 +320,7 @@
 
     let currentTab = "all";
     let allResources = [];
-    let isPortalPublic = false; // Default Private
+    let isPortalPublic = false;
     let currentUser = JSON.parse(localStorage.getItem("sr_user") || "null");
     let lastSeenLogId = Number(localStorage.getItem("sr_last_log_id") || "0");
 
@@ -381,7 +381,6 @@
         }
       }
 
-      // Lock screen if portal is Private AND no user is logged in
       if (!isPortalPublic && !currentUser) {
         lockScreen.classList.remove("hidden");
         portalContent.classList.add("hidden");
@@ -705,17 +704,17 @@
 
       if (isBackgroundCheck) return;
 
-      document.getElementById("adminPendingList").innerHTML = pendingCount === 0 
+      document.getElementById("adminPendingList").innerHTML = pendingCount === 0
         ? `<div class="p-3.5 text-slate-500 bg-white">No pending submissions to review.</div>`
         : data.pending.map(p => `
-          <div class="p-3.5 bg-white flex items-center justify-between gap-2">
-            <div>
-              <span class="font-bold text-slate-900">${p.title}</span> <span class="text-indigo-600 font-semibold">[${p.category}]</span>
-              <div class="text-slate-500 truncate max-w-xs mt-0.5"><a href="${p.url}" target="_blank" class="underline text-blue-600">${p.url}</a></div>
+          <div class="p-3.5 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="min-w-0 flex-1">
+              <div class="font-bold text-slate-900 break-words">${p.title} <span class="text-indigo-600 font-semibold">[${p.category}]</span></div>
+              <div class="text-slate-500 break-all mt-0.5"><a href="${p.url}" target="_blank" rel="noopener" class="underline text-blue-600">${p.url}</a></div>
             </div>
-            <div class="flex gap-2 shrink-0">
-              <button onclick="approveResource(${p.id})" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg font-bold shadow-sm transition">Approve</button>
-              <button onclick="deleteResource(${p.id}); openAdminModal();" class="bg-rose-100 hover:bg-rose-200 text-rose-700 px-3 py-1.5 rounded-lg font-bold transition">Reject</button>
+            <div class="flex gap-2 shrink-0 self-end sm:self-center">
+              <button type="button" onclick="approveResource(${p.id})" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-1.5 rounded-lg font-bold shadow-sm transition">Approve</button>
+              <button type="button" onclick="deleteResource(${p.id}); openAdminModal();" class="bg-rose-100 hover:bg-rose-200 text-rose-700 px-3.5 py-1.5 rounded-lg font-bold transition">Reject</button>
             </div>
           </div>
         `).join("");
