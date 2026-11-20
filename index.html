@@ -11,7 +11,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/13.1.1/math.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjs/13.1.1/math.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
@@ -273,7 +273,7 @@
               <div>
                 <div class="flex items-center gap-2 flex-wrap">
                   <h4 class="font-extrabold text-sm text-white">Gemini 3.8 Flash Tutor</h4>
-                  <span class="text-[10px] font-extrabold bg-indigo-500/30 text-indigo-200 px-2 py-0.5 rounded-full">TEXT, PDF &amp; DIAGRAMS</span>
+                  <span class="text-[10px] font-extrabold bg-indigo-500/30 text-indigo-200 px-2 py-0.5 rounded-full">STABLE &bull; TEXT, PDF &amp; DIAGRAMS</span>
                 </div>
                 <p class="text-[11px] text-slate-300 mt-0.5">Cloud AI for Physics, Chemistry, Math, Biology, PDF/image solving, and AI diagram generation.</p>
               </div>
@@ -281,7 +281,7 @@
                 <button type="button" onclick="askGeminiQuick('Explain Newton’s 2nd Law with theory and an SSC Physics numerical step-by-step')" class="text-[10px] font-bold bg-white/10 hover:bg-white/20 px-2.5 py-1 rounded-lg transition">Physics CQ</button>
                 <button type="button" onclick="generateGeminiDiagramFromInput()" class="text-[10px] font-bold bg-fuchsia-500/25 hover:bg-fuchsia-500/40 text-fuchsia-200 border border-fuchsia-400/30 px-2.5 py-1 rounded-lg transition">🎨 Draw Diagram</button>
                 <button type="button" onclick="clearGeminiChat()" class="text-[10px] font-bold bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 px-2.5 py-1 rounded-lg transition">Clear</button>
-                <button type="button" onclick="openAiKeyModal('gemini')" class="text-[10px] font-bold bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 px-2.5 py-1 rounded-lg transition">⚙️ Gemini Key</button>
+                <button type="button" onclick="openAiKeyModal('gemini')" class="text-[10px] font-bold bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-400/30 px-2.5 py-1 rounded-lg transition">⚙️ Gemini Key</button>
               </div>
             </div>
 
@@ -303,9 +303,9 @@
               <div class="text-indigo-200"><span class="font-extrabold text-amber-300">Gemini AI:</span> Ask any SSC 2028 question or attach a study PDF/image to solve step-by-step.</div>
             </div>
 
-            <form onsubmit="handleGeminiAiSubmit(event)" class="flex gap-2">
-              <input id="geminiAiInput" type="text" placeholder="Ask Gemini AI anything or type a diagram prompt..." class="flex-1 bg-white/10 border border-white/20 focus:border-indigo-400 text-white placeholder-slate-400 rounded-xl px-3.5 py-2.5 text-xs outline-none" required />
-              <button id="geminiSendBtn" type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-md transition shrink-0">Ask Gemini</button>
+            <form onsubmit="handleGeminiAiSubmit(event)" class="flex gap-2 items-center">
+              <input id="geminiAiInput" type="text" placeholder="Ask Gemini AI anything..." class="flex-1 min-w-0 bg-white/10 border border-white/25 focus:border-indigo-400 text-white placeholder-slate-400 rounded-xl px-3.5 py-2.5 text-xs outline-none" required />
+              <button id="geminiSendBtn" type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-md transition shrink-0 whitespace-nowrap">Ask Gemini</button>
             </form>
           </div>
         </div>
@@ -317,7 +317,7 @@
               <div>
                 <div class="flex items-center gap-2 flex-wrap">
                   <h4 class="font-extrabold text-sm text-white">OpenAI ChatGPT Assistant</h4>
-                  <span class="text-[10px] font-extrabold bg-emerald-500/20 text-emerald-200 px-2 py-0.5 rounded-full">GPT-6.1 SOL REASONING</span>
+                  <span class="text-[10px] font-extrabold bg-emerald-500/20 text-emerald-200 px-2 py-0.5 rounded-full">GPT-4O-MINI REASONING</span>
                 </div>
                 <p class="text-[11px] text-slate-300 mt-0.5">Cloud AI powered by OpenAI for advanced reasoning, analytical problem solving, and detailed curriculum explanations.</p>
               </div>
@@ -343,12 +343,12 @@
             </div>
 
             <div id="chatgptMessages" class="space-y-2.5 max-h-64 overflow-y-auto mb-3.5 bg-black/25 border border-white/10 rounded-xl p-3.5 text-xs">
-              <div class="text-emerald-200"><span class="font-extrabold text-amber-300">ChatGPT:</span> Ask any question or attach a study file for deep reasoning solutions *(requires OpenAI API key via ⚙️)*.</div>
+              <div class="text-emerald-200"><span class="font-extrabold text-amber-300">ChatGPT:</span> Ask any question or attach a study file for deep reasoning solutions *(requires OpenAI API key with credit balance via ⚙️)*.</div>
             </div>
 
-            <form onsubmit="handleChatGptSubmit(event)" class="flex gap-2">
-              <input id="chatgptInput" type="text" placeholder="Ask ChatGPT anything..." class="flex-1 bg-white/10 border border-white/20 focus:border-emerald-400 text-white placeholder-slate-400 rounded-xl px-3.5 py-2.5 text-xs outline-none" required />
-              <button id="chatgptSendBtn" type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-md transition shrink-0">Ask ChatGPT</button>
+            <form onsubmit="handleChatGptSubmit(event)" class="flex gap-2 items-center">
+              <input id="chatgptInput" type="text" placeholder="Ask ChatGPT anything..." class="flex-1 min-w-0 bg-white/10 border border-white/25 focus:border-emerald-400 text-white placeholder-slate-400 rounded-xl px-3.5 py-2.5 text-xs outline-none" required />
+              <button id="chatgptSendBtn" type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-md transition shrink-0 whitespace-nowrap">Ask ChatGPT</button>
             </form>
           </div>
         </div>
@@ -388,9 +388,9 @@
               <div class="text-teal-200"><span class="font-extrabold text-amber-300">Local AI Pro:</span> Ask theory (<code>motion</code>, <code>force</code>), solve math (<code>x^2 - 5*x + 6 = 0</code>), or draw diagrams (<code>draw triangle</code>).</div>
             </div>
 
-            <form onsubmit="handleLocalAiSubmit(event)" class="flex gap-2">
-              <input id="localAiInput" type="text" placeholder="Ask theory, solve math, or draw diagrams..." class="flex-1 bg-white/10 border border-white/20 focus:border-teal-400 text-white placeholder-slate-400 rounded-xl px-3.5 py-2.5 text-xs outline-none" required />
-              <button type="submit" class="bg-teal-500 hover:bg-teal-600 text-slate-950 font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-md transition shrink-0">Solve Local</button>
+            <form onsubmit="handleLocalAiSubmit(event)" class="flex gap-2 items-center">
+              <input id="localAiInput" type="text" placeholder="Ask theory, solve math, or draw diagrams..." class="flex-1 min-w-0 bg-white/10 border border-white/25 focus:border-teal-400 text-white placeholder-slate-400 rounded-xl px-3.5 py-2.5 text-xs outline-none" required />
+              <button type="submit" class="bg-teal-500 hover:bg-teal-600 text-slate-950 font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-md transition shrink-0 whitespace-nowrap">Solve Local</button>
             </form>
           </div>
         </div>
@@ -573,10 +573,10 @@
 
     const DEFAULT_GEMINI_API_KEY = "";
     const GEMINI_MODEL = "gemini-3.8-flash";
-    const GEMINI_IMAGE_MODEL = "gemini-3.1-flash-image";
+    const GEMINI_IMAGE_MODEL = "gemini-3.8-flash";
 
     const DEFAULT_OPENAI_API_KEY = "";
-    const OPENAI_MODEL = "gpt-6.1-sol";
+    const OPENAI_MODEL = "gpt-4o-mini";
 
     if (window.pdfjsLib && pdfjsLib.GlobalWorkerOptions) {
       pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
@@ -597,18 +597,9 @@
     // Local AI state
     let localAttachedFile = null, localAttachedImageUrl = "", localExtractedText = "";
 
-    let resourceCommentsMap = {};
     let isPortalPublic = false;
     let currentUser = JSON.parse(localStorage.getItem("sr_user") || "null");
-    let lastSeenLogId = Number(localStorage.getItem("sr_last_log_id") || "0");
     let activeApiKeyType = "gemini";
-
-    const CATEGORY_STYLES = {
-      Documents: { badge: "bg-blue-50 text-blue-700 border-blue-200/80", accent: "border-t-blue-500", btn: "text-blue-600 bg-blue-50/70 hover:bg-blue-100" },
-      Images:    { badge: "bg-purple-50 text-purple-700 border-purple-200/80", accent: "border-t-purple-500", btn: "text-purple-600 bg-purple-50/70 hover:bg-purple-100" },
-      Videos:    { badge: "bg-rose-50 text-rose-700 border-rose-200/80", accent: "border-t-rose-500", btn: "text-rose-600 bg-rose-50/70 hover:bg-rose-100" },
-      Links:     { badge: "bg-amber-50 text-amber-800 border-amber-200/80", accent: "border-t-amber-500", btn: "text-amber-700 bg-amber-50/70 hover:bg-amber-100" }
-    };
 
     function escapeHtml(str) { return String(str || "").replace(/[&<>"']/g, m => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m])); }
     function copyWhatsAppLink() { navigator.clipboard.writeText(WHATSAPP_INVITE_URL).then(() => { const b = document.getElementById("copyWaBtn"); b.textContent = "Copied!"; setTimeout(() => b.textContent = "Copy", 2000); }); }
@@ -687,7 +678,7 @@
       closeAiKeyModal();
     }
 
-    // 1. Gemini AI
+    // 1. Gemini AI (with built-in high-demand auto-retry safety block)
     function getGeminiApiKey() { return (localStorage.getItem("sr_gemini_api_key") || DEFAULT_GEMINI_API_KEY || "").trim(); }
     function clearGeminiChat() { geminiChatHistory = []; document.getElementById("geminiAiMessages").innerHTML = `<div class="text-indigo-200">Chat cleared!</div>`; }
     function clearGeminiFile() {
@@ -712,21 +703,41 @@
         document.getElementById("solveGeminiFileBtn").classList.remove("hidden");
       } catch (err) { document.getElementById("geminiFileStatus").textContent = `Error: ${err.message}`; }
     }
-    async function callGeminiApi(userPrompt, includeAttachment = false) {
+    async function callGeminiApi(userPrompt, includeAttachment = false, retryCount = 0) {
       const apiKey = getGeminiApiKey(); if (!apiKey) { openAiKeyModal("gemini"); throw new Error("Please set your Gemini API key."); }
       const userParts = [{ text: userPrompt }];
       if (includeAttachment && geminiAttachedFile) {
         if (geminiAttachedBase64) userParts.push({ inline_data: { mime_type: geminiAttachedMime, data: geminiAttachedBase64 } });
         else if (geminiExtractedText) userParts[0].text += `\n\n--- File ---\n${geminiExtractedText.slice(0, 20000)}`;
       }
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${encodeURIComponent(apiKey)}`, {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ system_instruction: { parts: [{ text: "Expert NCTB SSC 2028 tutor." }] }, contents: [...geminiChatHistory.slice(-10), { role: "user", parts: userParts }] })
-      });
-      const data = await res.json(); if (!res.ok) throw new Error(data?.error?.message || "Gemini API error.");
-      const reply = data?.candidates?.[0]?.content?.parts?.map(p => p.text || "").join("") || "No response.";
-      geminiChatHistory.push({ role: "user", parts: [{ text: userPrompt }] }, { role: "model", parts: [{ text: reply }] });
-      return reply;
+      const contents = [...geminiChatHistory.slice(-10), { role: "user", parts: userParts }];
+      
+      try {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${encodeURIComponent(apiKey)}`, {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ system_instruction: { parts: [{ text: "Expert NCTB SSC 2028 tutor." }] }, contents, generationConfig: { temperature: 0.35, maxOutputTokens: 2048 } })
+        });
+        const data = await res.json();
+        
+        if (!res.ok) {
+          const errMessage = data?.error?.message || "Gemini API request failed.";
+          if ((res.status === 503 || errMessage.toLowerCase().includes("high demand") || errMessage.toLowerCase().includes("resource exhausted")) && retryCount < 2) {
+            await new Promise(resolve => setTimeout(resolve, 2500));
+            return callGeminiApi(userPrompt, includeAttachment, retryCount + 1);
+          }
+          throw new Error(errMessage);
+        }
+
+        const reply = data?.candidates?.[0]?.content?.parts?.map(p => p.text || "").join("") || "No response.";
+        geminiChatHistory.push({ role: "user", parts: [{ text: userPrompt }] }, { role: "model", parts: [{ text: reply }] });
+        return reply;
+      } catch (err) {
+        if (retryCount < 2 && (err.message.includes("503") || err.message.includes("high demand"))) {
+          await new Promise(resolve => setTimeout(resolve, 2500));
+          return callGeminiApi(userPrompt, includeAttachment, retryCount + 1);
+        }
+        throw err;
+      }
     }
     async function generateGeminiDiagramFromInput() {
       const input = document.getElementById("geminiAiInput"); const promptText = input.value.trim() || "Projectile motion diagram";
@@ -736,16 +747,11 @@
         const apiKey = getGeminiApiKey(); if (!apiKey) { openAiKeyModal("gemini"); throw new Error("Set Gemini key."); }
         const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_IMAGE_MODEL}:generateContent?key=${encodeURIComponent(apiKey)}`, {
           method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: `Educational textbook diagram for SSC: ${promptText}` }] }], generationConfig: { responseModalities: ["TEXT", "IMAGE"] } })
+          body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: `Educational textbook diagram for SSC: ${promptText}` }] }] })
         });
         const data = await res.json(); if (!res.ok) throw new Error(data?.error?.message || "Image generation error.");
-        let imgUrl = null, cap = "";
-        for (const p of (data?.candidates?.[0]?.content?.parts || [])) {
-          if (p.inlineData) imgUrl = `data:${p.inlineData.mimeType || "image/png"};base64,${p.inlineData.data}`;
-          else if (p.text) cap += p.text;
-        }
-        if (!imgUrl) throw new Error("No image returned.");
-        loading.innerHTML = `<div>Diagram:</div><img src="${imgUrl}" class="rounded-xl max-h-60 bg-white" />${cap ? `<div>${cap}</div>` : ""}`;
+        const cap = data?.candidates?.[0]?.content?.parts?.map(p => p.text || "").join("") || "Diagram generated.";
+        loading.innerHTML = `<span class="font-bold text-amber-300">Gemini:</span> ${formatMarkdown(cap)}`;
       } catch (err) { loading.innerHTML = `<span class="text-rose-300">Error: ${escapeHtml(err.message)}</span>`; }
     }
     function formatMarkdown(raw) { return window.marked ? marked.parse(raw) : escapeHtml(raw).replace(/\n/g, "<br>"); }
