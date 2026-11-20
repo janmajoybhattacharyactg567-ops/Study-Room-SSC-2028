@@ -9,22 +9,24 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/13.1.1/math.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .ai-markdown p { margin-bottom: 0.45rem; }
+    .ai-markdown p:last-child { margin-bottom: 0; }
+    .ai-markdown ul, .ai-markdown ol { margin-left: 1.25rem; margin-bottom: 0.45rem; list-style-type: disc; }
+    .ai-markdown ol { list-style-type: decimal; }
+    .ai-markdown code { background: rgba(255,255,255,0.12); padding: 0.1rem 0.35rem; border-radius: 0.3rem; font-family: monospace; }
+    .ai-markdown pre { background: rgba(0,0,0,0.4); padding: 0.6rem; border-radius: 0.5rem; overflow-x: auto; margin: 0.45rem 0; }
+    .ai-markdown strong { color: #fde68a; }
   </style>
 </head>
 <body class="bg-gradient-to-br from-slate-50 via-indigo-50/40 to-sky-50/50 text-slate-800 min-h-screen flex flex-col selection:bg-indigo-600 selection:text-white">
-
-  <!-- Live Admin Toast Banner (respects Safe Lock) -->
-  <div id="adminToast" class="hidden fixed bottom-5 right-5 z-50 bg-slate-900/95 backdrop-blur-md text-white px-4 py-3.5 rounded-2xl shadow-2xl border border-indigo-500/40 max-w-xs text-sm">
-    <div class="flex items-center gap-2 font-bold text-amber-400 text-xs uppercase tracking-wider">
-      <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
-      Admin Live Alert
-    </div>
-    <div id="adminToastMsg" class="mt-1 text-slate-100 text-xs leading-relaxed"></div>
-  </div>
 
   <!-- Top Navigation -->
   <header class="bg-white/85 backdrop-blur-lg border-b border-indigo-100/80 sticky top-0 z-30 shadow-sm">
@@ -40,9 +42,6 @@
             </h1>
             <span id="headerPrivacyPill" class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800">
               PRIVATE
-            </span>
-            <span id="headerSafeLockPill" class="hidden text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
-              SAFE LOCK ON
             </span>
           </div>
           <p class="text-[11px] font-medium text-slate-500">Academic Resource Hub &amp; Batch Portal</p>
@@ -71,8 +70,9 @@
         </button>
 
         <!-- Activity Log Button directly beside Add Resource -->
-        <button id="activityLogHeaderBtn" onclick="openActivityLogModal()" class="hidden bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-md transition active:scale-95">
+        <button id="activityLogHeaderBtn" onclick="openActivityLogModal()" class="hidden bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-md transition active:scale-95 relative">
           📋 Activity Log
+          <span id="logAlertDot" class="hidden absolute -top-1.5 -right-1.5 w-3 h-3 rounded-full bg-rose-500 ring-2 ring-white"></span>
         </button>
 
         <button id="addResHeaderBtn" onclick="openResourceModal()" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-md transition active:scale-95">
@@ -173,56 +173,171 @@
         </div>
       </div>
 
-      <!-- Dedicated Member Comment Box & Dedicated Member Chat Box -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Dedicated Member Live Chat & Comment Board -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
 
-        <!-- 1. Dedicated Member Comment Box -->
-        <section class="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm flex flex-col">
+        <!-- 1. Dedicated Member Live Chat -->
+        <section class="bg-white border-2 border-emerald-200/80 rounded-2xl p-5 shadow-sm flex flex-col">
           <div class="flex items-center justify-between mb-3">
             <div>
-              <h3 class="font-extrabold text-sm text-slate-900">💬 Member Comment Board</h3>
-              <p class="text-[11px] text-slate-500">Leave comments, study tips, or updates for batch members</p>
+              <h3 class="font-extrabold text-sm text-slate-900">⚡ Member Live Chat Room</h3>
+              <p class="text-[11px] text-slate-500">Registered students can chat live with each other here</p>
             </div>
-            <span class="text-[10px] font-bold bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-full">Comments</span>
+            <span class="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full">Members Chat</span>
           </div>
 
-          <div id="portalCommentsList" class="space-y-2.5 max-h-64 overflow-y-auto mb-3.5 pr-1 text-xs">
-            <div class="text-slate-400 text-center py-4">Loading comments...</div>
-          </div>
-
-          <form onsubmit="submitPortalComment(event)" class="mt-auto flex gap-2">
-            <input id="portalCommentInput" type="text" placeholder="Write a comment for members..."
-                   class="flex-1 bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 rounded-xl px-3.5 py-2 text-xs outline-none transition" required />
-            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-4 py-2 rounded-xl shadow-sm transition shrink-0">
-              Comment
-            </button>
-          </form>
-        </section>
-
-        <!-- 2. Dedicated Live Chat Box -->
-        <section class="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm flex flex-col">
-          <div class="flex items-center justify-between mb-3">
-            <div>
-              <h3 class="font-extrabold text-sm text-slate-900">⚡ Member Live Chat</h3>
-              <p class="text-[11px] text-slate-500">Real-time chat room for registered &amp; logged-in members</p>
-            </div>
-            <span class="text-[10px] font-bold bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full">Live Chat</span>
-          </div>
-
-          <div id="portalChatList" class="space-y-2 max-h-64 overflow-y-auto mb-3.5 pr-1 text-xs bg-slate-50/70 border border-slate-100 rounded-xl p-3">
-            <div class="text-slate-400 text-center py-4">Log in as a member to join live chat.</div>
+          <div id="portalChatList" class="space-y-2 h-64 overflow-y-auto mb-3.5 pr-1 text-xs bg-slate-50 border border-slate-200/70 rounded-xl p-3">
+            <div class="text-slate-400 text-center py-4">Log in as a registered member to join live chat.</div>
           </div>
 
           <form onsubmit="submitPortalChat(event)" class="mt-auto flex gap-2">
-            <input id="portalChatInput" type="text" placeholder="Type a chat message..."
-                   class="flex-1 bg-slate-50 border border-slate-200 focus:bg-white focus:border-emerald-500 rounded-xl px-3.5 py-2 text-xs outline-none transition" required />
-            <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2 rounded-xl shadow-sm transition shrink-0">
+            <input id="portalChatInput" type="text" placeholder="Type a message to chat with classmates..."
+                   class="flex-1 bg-slate-50 border border-slate-200 focus:bg-white focus:border-emerald-500 rounded-xl px-3.5 py-2.5 text-xs outline-none transition" required />
+            <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-sm transition shrink-0">
               Send
             </button>
           </form>
         </section>
 
+        <!-- 2. Dedicated Member Comment Board -->
+        <section class="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm flex flex-col">
+          <div class="flex items-center justify-between mb-3">
+            <div>
+              <h3 class="font-extrabold text-sm text-slate-900">💬 Member Comment Board</h3>
+              <p class="text-[11px] text-slate-500">Post study announcements, feedback, or discussion notes</p>
+            </div>
+            <span class="text-[10px] font-bold bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-full">Comments</span>
+          </div>
+
+          <div id="portalCommentsList" class="space-y-2.5 h-64 overflow-y-auto mb-3.5 pr-1 text-xs">
+            <div class="text-slate-400 text-center py-4">Loading comments...</div>
+          </div>
+
+          <form onsubmit="submitPortalComment(event)" class="mt-auto flex gap-2">
+            <input id="portalCommentInput" type="text" placeholder="Write a comment for members..."
+                   class="flex-1 bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 rounded-xl px-3.5 py-2.5 text-xs outline-none transition" required />
+            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-sm transition shrink-0">
+              Comment
+            </button>
+          </form>
+        </section>
+
       </div>
+
+      <!-- AI Chat Boxes Stack: 1. Gemini AI (Online) then 2. Local AI (Browser-Only) -->
+      <div class="space-y-6">
+
+        <!-- AI Chat Box #1: Gemini AI (Online) -->
+        <section class="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white rounded-2xl p-5 shadow-xl border border-indigo-500/30">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <div>
+              <div class="flex items-center gap-2 flex-wrap">
+                <h3 class="font-extrabold text-sm text-white">✨ 1. Gemini AI Tutor (Online)</h3>
+                <span class="text-[10px] font-extrabold bg-indigo-500/30 text-indigo-200 border border-indigo-400/30 px-2 py-0.5 rounded-full">
+                  ONLINE &bull; ALL SUBJECTS &amp; MULTIMODAL
+                </span>
+              </div>
+              <p class="text-[11px] text-slate-300 mt-0.5">
+                Cloud AI for complex Physics, Chemistry, General Math, Higher Math, Biology, CQs/MCQs, and image/PDF problem solving (English or বাংলা).
+              </p>
+            </div>
+            <div class="flex gap-1.5 flex-wrap items-center">
+              <button type="button" onclick="askGeminiQuick('Explain Newton’s 2nd Law with an SSC Physics numerical step-by-step')" class="text-[10px] font-bold bg-white/10 hover:bg-white/20 px-2.5 py-1 rounded-lg transition">Physics CQ</button>
+              <button type="button" onclick="askGeminiQuick('Explain mole calculation and chemical equation balancing for SSC Chemistry')" class="text-[10px] font-bold bg-white/10 hover:bg-white/20 px-2.5 py-1 rounded-lg transition">Chemistry</button>
+              <button type="button" onclick="askGeminiQuick('Solve a Higher Math trigonometric proof step-by-step')" class="text-[10px] font-bold bg-white/10 hover:bg-white/20 px-2.5 py-1 rounded-lg transition">Higher Math</button>
+              <button type="button" onclick="clearGeminiChat()" class="text-[10px] font-bold bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 px-2.5 py-1 rounded-lg transition">Clear</button>
+              <button type="button" onclick="openAiKeyModal()" class="text-[10px] font-bold bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-400/30 px-2.5 py-1 rounded-lg transition">⚙️ AI Key</button>
+            </div>
+          </div>
+
+          <!-- Gemini File Attachment Bar -->
+          <div class="flex flex-wrap items-center justify-between gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-2 mb-3 text-xs">
+            <div class="flex items-center gap-2 flex-wrap">
+              <label class="cursor-pointer bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-[11px] px-3 py-1.5 rounded-lg transition">
+                📎 Attach Image / PDF / File
+                <input id="geminiFileInput" type="file" accept=".txt,.md,.csv,.json,.pdf,image/*" onchange="handleGeminiFileSelected(event)" class="hidden" />
+              </label>
+              <span id="geminiFileStatus" class="text-[11px] text-slate-300">No file attached for Gemini AI</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <button type="button" id="clearGeminiFileBtn" onclick="clearGeminiFile()" class="hidden bg-white/10 hover:bg-white/20 text-slate-200 font-bold text-[11px] px-2.5 py-1.5 rounded-lg transition">
+                ✕ Remove
+              </button>
+              <button type="button" id="solveGeminiFileBtn" onclick="solveGeminiAttachedFile()" class="hidden bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-extrabold text-[11px] px-3 py-1.5 rounded-lg transition">
+                ⚡ Solve with Gemini
+              </button>
+            </div>
+          </div>
+
+          <div id="geminiAiMessages" class="space-y-2.5 max-h-64 overflow-y-auto mb-3.5 bg-black/25 border border-white/10 rounded-xl p-3.5 text-xs">
+            <div class="text-indigo-200">
+              <span class="font-extrabold text-amber-300">Gemini AI:</span> Ask any SSC 2028 question across any subject or attach a photo/PDF of a problem to solve step-by-step.
+            </div>
+          </div>
+
+          <form onsubmit="handleGeminiAiSubmit(event)" class="flex gap-2">
+            <input id="geminiAiInput" type="text" placeholder="Ask Gemini AI anything (Physics, Chemistry, General/Higher Math, Biology, chapters)..."
+                   class="flex-1 bg-white/10 border border-white/20 focus:bg-white/15 focus:border-indigo-400 text-white placeholder-slate-400 rounded-xl px-3.5 py-2.5 text-xs outline-none transition" required />
+            <button id="geminiSendBtn" type="submit" class="bg-gradient-to-r from-indigo-500 to-blue-500 hover:from-indigo-600 hover:to-blue-600 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-md transition shrink-0">
+              Ask Gemini
+            </button>
+          </form>
+        </section>
+
+        <!-- AI Chat Box #2: Local AI (Browser-Only) -->
+        <section class="bg-gradient-to-br from-slate-900 via-teal-950 to-slate-900 text-white rounded-2xl p-5 shadow-xl border border-teal-500/30">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <div>
+              <div class="flex items-center gap-2 flex-wrap">
+                <h3 class="font-extrabold text-sm text-white">📐 2. Local Study Engine (Browser-Only)</h3>
+                <span class="text-[10px] font-extrabold bg-emerald-500/20 text-emerald-200 border border-emerald-400/30 px-2 py-0.5 rounded-full">
+                  LOCAL &bull; NO API KEY
+                </span>
+              </div>
+              <p class="text-[11px] text-slate-300 mt-0.5">
+                Runs locally in your browser: evaluate math/trig/log expressions (<code>sin(30) + cos(60)</code>, <code>log(16, 2)</code>, <code>2*x + 6 = 14</code>), view built-in formula cards, or scan files locally.
+              </p>
+            </div>
+            <div class="flex gap-1.5 flex-wrap">
+              <button type="button" onclick="askLocalQuick('physics formulas')" class="text-[10px] font-bold bg-white/10 hover:bg-white/20 px-2.5 py-1 rounded-lg transition">Physics</button>
+              <button type="button" onclick="askLocalQuick('chemistry formulas')" class="text-[10px] font-bold bg-white/10 hover:bg-white/20 px-2.5 py-1 rounded-lg transition">Chemistry</button>
+              <button type="button" onclick="askLocalQuick('biology notes')" class="text-[10px] font-bold bg-white/10 hover:bg-white/20 px-2.5 py-1 rounded-lg transition">Biology</button>
+              <button type="button" onclick="askLocalQuick('trigonometry formulas')" class="text-[10px] font-bold bg-white/10 hover:bg-white/20 px-2.5 py-1 rounded-lg transition">Trig Formulas</button>
+              <button type="button" onclick="askLocalQuick('logarithm laws')" class="text-[10px] font-bold bg-white/10 hover:bg-white/20 px-2.5 py-1 rounded-lg transition">Log Laws</button>
+            </div>
+          </div>
+
+          <!-- Local File Attachment Bar -->
+          <div class="flex flex-wrap items-center justify-between gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-2 mb-3 text-xs">
+            <div class="flex items-center gap-2 flex-wrap">
+              <label class="cursor-pointer bg-teal-500 hover:bg-teal-600 text-slate-950 font-extrabold text-[11px] px-3 py-1.5 rounded-lg transition">
+                📎 Add File to Scan Locally
+                <input id="localAiFileInput" type="file" accept=".txt,.md,.csv,.json,.pdf,image/*" onchange="handleLocalFileSelected(event)" class="hidden" />
+              </label>
+              <span id="localAiFileStatus" class="text-[11px] text-slate-300">No file attached</span>
+            </div>
+            <button type="button" id="solveLocalFileBtn" onclick="solveLocalAttachedFile()" class="hidden bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-extrabold text-[11px] px-3 py-1.5 rounded-lg transition">
+              ⚡ Scan &amp; Solve Locally
+            </button>
+          </div>
+
+          <div id="localAiMessages" class="space-y-2.5 max-h-64 overflow-y-auto mb-3.5 bg-black/25 border border-white/10 rounded-xl p-3.5 text-xs">
+            <div class="text-teal-200">
+              <span class="font-extrabold text-amber-300">Local AI:</span> Runs in your browser without an API key. Try <code>sin(30) + cos(60)</code>, <code>log(8, 2)</code>, <code>2*x + 4 = 12</code>, or ask for <strong>Physics</strong>, <strong>Chemistry</strong>, <strong>Biology</strong>, <strong>General Math</strong>, or <strong>Higher Math</strong> formulas.
+            </div>
+          </div>
+
+          <form onsubmit="handleLocalAiSubmit(event)" class="flex gap-2">
+            <input id="localAiInput" type="text" placeholder="Enter math/trig/log expression, equation, or formula topic..."
+                   class="flex-1 bg-white/10 border border-white/20 focus:bg-white/15 focus:border-teal-400 text-white placeholder-slate-400 rounded-xl px-3.5 py-2.5 text-xs outline-none transition" required />
+            <button type="submit" class="bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 text-slate-950 font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-md transition shrink-0">
+              Solve Local
+            </button>
+          </form>
+        </section>
+
+      </div>
+
     </div>
   </main>
 
@@ -234,15 +349,44 @@
     </div>
   </footer>
 
-  <!-- Dedicated Activity Log Modal (with Save Logs button) -->
+  <!-- AI API Key Setup Modal -->
+  <div id="aiKeyModal" class="hidden fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="font-extrabold text-base text-slate-900">⚙️ Configure Gemini AI API Key</h3>
+          <p class="text-xs text-slate-500 mt-0.5">Used by the online Gemini AI chat box</p>
+        </div>
+        <button onclick="closeAiKeyModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 font-bold text-xs">✕</button>
+      </div>
+      <div class="space-y-3 text-xs text-slate-600">
+        <p>
+          Create an API key in <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" class="text-indigo-600 font-bold underline">Google AI Studio</a> and paste it below. It stays in your browser's local storage.
+        </p>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Gemini API Key</label>
+          <input id="geminiApiKeyInput" type="password" placeholder="AIzaSy..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm outline-none" />
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeAiKeyModal()" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100">Cancel</button>
+          <button type="button" onclick="saveGeminiApiKey()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-xl text-xs font-bold shadow-md">Save Key</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dedicated Activity Log Modal (Notifications + Save Logs) -->
   <div id="activityLogModal" class="hidden fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-40 flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-slate-100 max-h-[85vh] flex flex-col">
       <div class="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-100">
         <div>
-          <h3 class="font-extrabold text-base text-slate-900">📋 Activity Log</h3>
-          <p class="text-xs text-slate-500">Automatic record of member adds, removals/bans, uploads &amp; website changes</p>
+          <h3 class="font-extrabold text-base text-slate-900">📋 Activity Log &amp; Alerts</h3>
+          <p class="text-xs text-slate-500">Member adds, removals/bans, uploads, website changes &amp; live notifications</p>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 flex-wrap">
+          <button type="button" id="toggleLogAlertsBtn" onclick="toggleActivityNotifications()" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-900 text-xs font-extrabold px-3 py-2 rounded-xl transition">
+            🔔 Alerts: ON
+          </button>
           <button type="button" onclick="saveLogsToDevice()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold px-3.5 py-2 rounded-xl shadow-sm transition active:scale-95">
             💾 Save Logs
           </button>
@@ -250,6 +394,16 @@
         </div>
       </div>
 
+      <!-- Recent Notifications Feed inside Activity Log -->
+      <div class="mb-4">
+        <div class="text-[11px] font-extrabold uppercase tracking-wider text-amber-700 mb-1.5">Recent Notification Alerts</div>
+        <div id="activityNotificationsFeed" class="bg-amber-50/70 border border-amber-200/80 rounded-2xl p-3 max-h-32 overflow-y-auto text-xs space-y-1.5">
+          <div class="text-slate-500">No new alerts yet.</div>
+        </div>
+      </div>
+
+      <!-- Full Activity Log Table -->
+      <div class="text-[11px] font-extrabold uppercase tracking-wider text-slate-600 mb-1.5">Recorded Activity History</div>
       <div id="dedicatedActivityLogsList" class="divide-y divide-slate-100 border border-slate-200 rounded-2xl text-xs overflow-y-auto flex-1">
         <div class="p-4 text-slate-500">Loading activity logs...</div>
       </div>
@@ -346,24 +500,9 @@
       <div class="flex items-center justify-between mb-5 pb-3 border-b border-slate-100">
         <div>
           <h3 class="font-extrabold text-base text-slate-900">Admin Control &amp; Moderation Center</h3>
-          <p class="text-xs text-slate-500">Safe Lock, visibility, approvals, members &amp; protected logs</p>
+          <p class="text-xs text-slate-500">Portal visibility, pending submissions &amp; member roles</p>
         </div>
         <button onclick="closeAdminModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 font-bold text-xs">✕</button>
-      </div>
-
-      <!-- Admin-Only Safe Lock Box -->
-      <div class="bg-emerald-50/70 border border-emerald-200 rounded-2xl p-4 mb-4">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
-            <h4 class="text-xs font-extrabold uppercase tracking-wider text-emerald-950">🛡️ Admin Safe Lock</h4>
-            <p class="text-xs text-slate-600 mt-0.5">
-              Keeps all activity logs safely preserved and pauses member-added alerts when enabled.
-            </p>
-          </div>
-          <button type="button" id="modalSafeLockBtn" onclick="toggleSafeLockFromModal()" class="px-4 py-2 rounded-xl text-xs font-extrabold transition shrink-0">
-            Safe Lock: OFF
-          </button>
-        </div>
       </div>
 
       <!-- Portal Privacy / Public Visibility Toggle -->
@@ -392,16 +531,7 @@
 
       <!-- Manage Members -->
       <h4 class="text-xs font-extrabold uppercase tracking-wider text-indigo-900 mb-2.5">Registered Members &amp; Roles</h4>
-      <div id="adminUsersList" class="divide-y divide-slate-100 border border-slate-200/90 rounded-2xl mb-6 text-xs overflow-hidden"></div>
-
-      <!-- Protected Activity Logs + Save Logs -->
-      <div class="flex items-center justify-between mb-2.5">
-        <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-600">Safe Activity &amp; Login Logs</h4>
-        <button type="button" onclick="saveLogsToDevice()" class="text-xs font-bold text-emerald-700 hover:underline">
-          💾 Save Logs
-        </button>
-      </div>
-      <div id="adminLogsList" class="divide-y divide-slate-100 border border-slate-200/90 rounded-2xl text-xs overflow-hidden"></div>
+      <div id="adminUsersList" class="divide-y divide-slate-100 border border-slate-200/90 rounded-2xl text-xs overflow-hidden"></div>
     </div>
   </div>
 
@@ -410,14 +540,35 @@
     const SUPABASE_ANON_KEY = "sb_publishable_-4SxZGajx_1f2ZNjAvZnew_Jhl6039n";
     const WHATSAPP_INVITE_URL = "https://chat.whatsapp.com/IVS5nwQpGIiGOSqYg63vKR";
 
+    // Optional fallback key for the online Gemini AI chat box (avoid sharing a key publicly if you want quota isolation)
+    const DEFAULT_GEMINI_API_KEY = "";
+    const GEMINI_MODEL = "gemini-2.5-flash";
+
+    if (window.pdfjsLib && pdfjsLib.GlobalWorkerOptions) {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+    }
+
     const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let currentTab = "all";
     let allResources = [];
     let allActivityLogs = [];
+    let activityAlertsFeed = JSON.parse(localStorage.getItem("sr_activity_alerts") || "[]");
+    let logAlertsEnabled = localStorage.getItem("sr_log_alerts_enabled") !== "false";
+
+    // Gemini AI state
+    let geminiAttachedFile = null;
+    let geminiAttachedBase64 = null;
+    let geminiAttachedMime = "";
+    let geminiExtractedText = "";
+    let geminiChatHistory = [];
+
+    // Local AI state
+    let localAttachedFile = null;
+    let localExtractedText = "";
+
     let resourceCommentsMap = {};
     let isPortalPublic = false;
-    let isSafeLockOn = false;
     let currentUser = JSON.parse(localStorage.getItem("sr_user") || "null");
     let lastSeenLogId = Number(localStorage.getItem("sr_last_log_id") || "0");
 
@@ -440,27 +591,531 @@
       });
     }
 
-    async function requestAdminNotificationPermission() {
-      if (!("Notification" in window)) return;
-      if (Notification.permission === "default") {
-        await Notification.requestPermission();
+    // Shared file helpers (Base64 for Gemini + Local text/PDF/OCR extraction)
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const result = String(reader.result || "");
+          resolve(result.split(",")[1] || "");
+        };
+        reader.onerror = () => reject(new Error("Failed to read file."));
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function extractTextFromUploadedFile(file) {
+      const name = (file.name || "").toLowerCase();
+      if (file.type.startsWith("text/") || /\.(txt|md|csv|json|tex)$/i.test(name)) {
+        return await file.text();
+      }
+      if (file.type === "application/pdf" || name.endsWith(".pdf")) {
+        if (!window.pdfjsLib) throw new Error("PDF reader library not loaded.");
+        const buf = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+        let fullText = "";
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const content = await page.getTextContent();
+          fullText += content.items.map(it => it.str).join(" ") + "\n";
+        }
+        return fullText;
+      }
+      if (file.type.startsWith("image/")) {
+        if (!window.Tesseract) throw new Error("Image OCR library not loaded.");
+        const res = await Tesseract.recognize(file, "eng");
+        return res?.data?.text || "";
+      }
+      throw new Error("Unsupported file type. Attach a PDF, image, or text file.");
+    }
+
+    // =========================================================================
+    // 1. GEMINI AI (ONLINE)
+    // =========================================================================
+    function getGeminiApiKey() {
+      return (localStorage.getItem("sr_gemini_api_key") || DEFAULT_GEMINI_API_KEY || "").trim();
+    }
+
+    function openAiKeyModal() {
+      document.getElementById("geminiApiKeyInput").value = localStorage.getItem("sr_gemini_api_key") || "";
+      document.getElementById("aiKeyModal").classList.remove("hidden");
+    }
+
+    function closeAiKeyModal() {
+      document.getElementById("aiKeyModal").classList.add("hidden");
+    }
+
+    function saveGeminiApiKey() {
+      const key = document.getElementById("geminiApiKeyInput").value.trim();
+      if (key) {
+        localStorage.setItem("sr_gemini_api_key", key);
+      } else {
+        localStorage.removeItem("sr_gemini_api_key");
+      }
+      closeAiKeyModal();
+      appendGeminiMessage("Gemini AI", key ? "API key saved for this browser!" : "API key cleared.", false);
+    }
+
+    function clearGeminiChat() {
+      geminiChatHistory = [];
+      document.getElementById("geminiAiMessages").innerHTML = `
+        <div class="text-indigo-200">
+          <span class="font-extrabold text-amber-300">Gemini AI:</span> Chat cleared! Ask any SSC 2028 subject or chapter question.
+        </div>`;
+    }
+
+    function clearGeminiFile() {
+      geminiAttachedFile = null;
+      geminiAttachedBase64 = null;
+      geminiAttachedMime = "";
+      geminiExtractedText = "";
+      document.getElementById("geminiFileInput").value = "";
+      document.getElementById("geminiFileStatus").textContent = "No file attached for Gemini AI";
+      document.getElementById("solveGeminiFileBtn").classList.add("hidden");
+      document.getElementById("clearGeminiFileBtn").classList.add("hidden");
+    }
+
+    async function handleGeminiFileSelected(e) {
+      const file = e.target.files?.[0];
+      const statusEl = document.getElementById("geminiFileStatus");
+      const solveBtn = document.getElementById("solveGeminiFileBtn");
+      const clearBtn = document.getElementById("clearGeminiFileBtn");
+      if (!file) return;
+
+      geminiAttachedFile = file;
+      geminiAttachedMime = file.type || (file.name.toLowerCase().endsWith(".pdf") ? "application/pdf" : "text/plain");
+      geminiExtractedText = "";
+      statusEl.textContent = `Preparing ${file.name}...`;
+      solveBtn.classList.add("hidden");
+      clearBtn.classList.remove("hidden");
+
+      try {
+        if (file.size <= 15 * 1024 * 1024 && (geminiAttachedMime.startsWith("image/") || geminiAttachedMime === "application/pdf")) {
+          geminiAttachedBase64 = await fileToBase64(file);
+        } else {
+          geminiAttachedBase64 = null;
+          geminiExtractedText = await extractTextFromUploadedFile(file);
+        }
+        statusEl.textContent = `Attached: ${file.name} (Ready for Gemini)`;
+        solveBtn.classList.remove("hidden");
+      } catch (err) {
+        statusEl.textContent = `Error: ${err.message}`;
       }
     }
 
-    function sendSystemNotification(title, body) {
-      if (isSafeLockOn) return;
+    async function callGeminiApi(userPrompt, includeAttachment = false) {
+      const apiKey = getGeminiApiKey();
+      if (!apiKey) {
+        openAiKeyModal();
+        throw new Error("Please set your Gemini API key using ⚙️ AI Key.");
+      }
+
+      const systemInstruction =
+        "You are an expert tutor for NCTB SSC 2028 (Class 9-10) students. " +
+        "Solve and explain Physics, Chemistry, General Math, Higher Math, Biology, ICT, English, and textbook chapters step-by-step in the user's language (English or Bangla).";
+
+      const userParts = [{ text: userPrompt }];
+      if (includeAttachment && geminiAttachedFile) {
+        if (geminiAttachedBase64 && (geminiAttachedMime.startsWith("image/") || geminiAttachedMime === "application/pdf")) {
+          userParts.push({
+            inline_data: {
+              mime_type: geminiAttachedMime,
+              data: geminiAttachedBase64
+            }
+          });
+        } else if (geminiExtractedText) {
+          userParts[0].text += `\n\n--- Attached File (${geminiAttachedFile.name}) ---\n${geminiExtractedText.slice(0, 25000)}`;
+        }
+      }
+
+      const contents = [
+        ...geminiChatHistory.slice(-10),
+        { role: "user", parts: userParts }
+      ];
+
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${encodeURIComponent(apiKey)}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            system_instruction: { parts: [{ text: systemInstruction }] },
+            contents,
+            generationConfig: { temperature: 0.35, maxOutputTokens: 2048 }
+          })
+        }
+      );
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data?.error?.message || "Gemini API request failed.");
+      }
+
+      const replyText =
+        data?.candidates?.[0]?.content?.parts?.map(p => p.text || "").join("") ||
+        "No response returned.";
+
+      geminiChatHistory.push({ role: "user", parts: [{ text: userPrompt }] });
+      geminiChatHistory.push({ role: "model", parts: [{ text: replyText }] });
+
+      return replyText;
+    }
+
+    function formatMarkdown(rawText) {
+      if (window.marked) {
+        return `<div class="ai-markdown">${marked.parse(rawText)}</div>`;
+      }
+      return escapeHtml(rawText).replace(/\n/g, "<br>");
+    }
+
+    function appendGeminiMessage(sender, htmlBody, isUser) {
+      const box = document.getElementById("geminiAiMessages");
+      const div = document.createElement("div");
+      div.className = isUser ? "text-right" : "text-left text-indigo-100";
+      div.innerHTML = isUser
+        ? `<span class="inline-block bg-indigo-600/80 text-white px-3 py-1.5 rounded-xl text-left max-w-[85%]"><strong>You:</strong> ${escapeHtml(htmlBody)}</span>`
+        : `<div class="bg-white/10 border border-white/10 px-3.5 py-2.5 rounded-xl leading-relaxed"><span class="font-extrabold text-amber-300">${sender}:</span> ${htmlBody}</div>`;
+      box.appendChild(div);
+      box.scrollTop = box.scrollHeight;
+      return div;
+    }
+
+    async function solveGeminiAttachedFile() {
+      if (!geminiAttachedFile) {
+        alert("Attach a file or image for Gemini AI first.");
+        return;
+      }
+      const prompt = `Examine ${geminiAttachedFile.name} and solve all questions, math problems, or concepts in it step-by-step.`;
+      appendGeminiMessage("You", `Solve file with Gemini: ${geminiAttachedFile.name}`, true);
+      const loadingEl = appendGeminiMessage("Gemini AI", `<span class="italic text-indigo-200">Solving ${escapeHtml(geminiAttachedFile.name)}...</span>`, false);
+      try {
+        const reply = await callGeminiApi(prompt, true);
+        loadingEl.innerHTML = `<div class="bg-white/10 border border-white/10 px-3.5 py-2.5 rounded-xl leading-relaxed"><span class="font-extrabold text-amber-300">Gemini AI:</span> ${formatMarkdown(reply)}</div>`;
+      } catch (err) {
+        loadingEl.innerHTML = `<div class="bg-rose-500/20 border border-rose-400/30 px-3.5 py-2.5 rounded-xl text-rose-200"><span class="font-extrabold">Error:</span> ${escapeHtml(err.message)}</div>`;
+      }
+    }
+
+    async function askGeminiQuick(promptText) {
+      const sendBtn = document.getElementById("geminiSendBtn");
+      const hasFile = Boolean(geminiAttachedFile);
+      appendGeminiMessage("You", hasFile ? `${promptText} [📎 ${geminiAttachedFile.name}]` : promptText, true);
+      const loadingEl = appendGeminiMessage("Gemini AI", `<span class="italic text-indigo-200">Thinking...</span>`, false);
+      if (sendBtn) sendBtn.disabled = true;
+      try {
+        const reply = await callGeminiApi(promptText, hasFile);
+        loadingEl.innerHTML = `<div class="bg-white/10 border border-white/10 px-3.5 py-2.5 rounded-xl leading-relaxed"><span class="font-extrabold text-amber-300">Gemini AI:</span> ${formatMarkdown(reply)}</div>`;
+      } catch (err) {
+        loadingEl.innerHTML = `<div class="bg-rose-500/20 border border-rose-400/30 px-3.5 py-2.5 rounded-xl text-rose-200"><span class="font-extrabold">Error:</span> ${escapeHtml(err.message)}</div>`;
+      } finally {
+        if (sendBtn) sendBtn.disabled = false;
+      }
+    }
+
+    function handleGeminiAiSubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById("geminiAiInput");
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = "";
+      askGeminiQuick(text);
+    }
+
+    // =========================================================================
+    // 2. LOCAL AI (BROWSER-ONLY)
+    // =========================================================================
+    const SSC_STUDY_NOTES = [
+      {
+        keys: ["trig", "trigonometry", "sin", "cos", "tan", "sec", "cosec", "cot"],
+        title: "SSC Class 9–10 Trigonometry Formulas & Ratios",
+        body: `&bull; <code>sin θ = Opposite / Hypotenuse</code>, <code>cosec θ = 1 / sin θ</code><br>
+               &bull; <code>cos θ = Adjacent / Hypotenuse</code>, <code>sec θ = 1 / cos θ</code><br>
+               &bull; <code>tan θ = Opposite / Adjacent = sin θ / cos θ</code>, <code>cot θ = 1 / tan θ</code><br>
+               &bull; Identities: <code>sin²θ + cos²θ = 1</code>, <code>sec²θ - tan²θ = 1</code>, <code>cosec²θ - cot²θ = 1</code><br>
+               &bull; Standard Angles: <code>sin 30° = 1/2</code>, <code>cos 60° = 1/2</code>, <code>sin 45° = cos 45° = 1/√2</code>, <code>tan 30° = 1/√3</code>, <code>tan 60° = √3</code>`
+      },
+      {
+        keys: ["log", "logarithm", "exponent", "indices", "power"],
+        title: "SSC Class 9–10 Logarithm & Indices Laws",
+        body: `&bull; Product: <code>log_a(m · n) = log_a(m) + log_a(n)</code><br>
+               &bull; Quotient: <code>log_a(m / n) = log_a(m) - log_a(n)</code><br>
+               &bull; Power: <code>log_a(m^r) = r · log_a(m)</code><br>
+               &bull; Base Change: <code>log_a(m) = log_b(m) / log_b(a)</code>, <code>log_a(1) = 0</code>, <code>log_a(a) = 1</code>`
+      },
+      {
+        keys: ["physics", "motion", "velocity", "acceleration", "force", "newton", "work", "energy", "power", "ohm", "current", "voltage"],
+        title: "SSC Physics Core Formulas",
+        body: `&bull; Motion: <code>v = u + at</code>, <code>s = ut + ½at²</code>, <code>v² = u² + 2as</code><br>
+               &bull; Force &amp; Momentum: <code>F = ma</code>, <code>p = mv</code><br>
+               &bull; Work, Power &amp; Energy: <code>W = Fs cosθ</code>, <code>P = W/t</code>, <code>KE = ½mv²</code>, <code>PE = mgh</code><br>
+               &bull; Electricity: <code>V = IR</code>, <code>P = VI = I²R</code>`
+      },
+      {
+        keys: ["chemistry", "mole", "molar", "atom", "periodic", "bond", "acid", "base", "redox"],
+        title: "SSC Chemistry Core Formulas",
+        body: `&bull; Mole &amp; Avogadro's Number: <code>n = m / M</code>, <code>N = n · N_A</code> (<code>N_A ≈ 6.022 × 10²³</code>)<br>
+               &bull; Gas Molar Volume (STP): <code>1 mole gas ≈ 22.4 L</code> at STP<br>
+               &bull; Molarity: <code>M = n / V(L)</code>`
+      },
+      {
+        keys: ["biology", "cell", "mitosis", "meiosis", "photosynthesis", "respiration", "tissue"],
+        title: "SSC Biology Key Summaries",
+        body: `&bull; Photosynthesis: <code>6CO₂ + 6H₂O --(Light & Chlorophyll)--> C₆H₁₂O₆ + 6O₂</code><br>
+               &bull; Aerobic Respiration: <code>C₆H₁₂O₆ + 6O₂ --> 6CO₂ + 6H₂O + ATP</code><br>
+               &bull; Cell Division: Mitosis = 2 identical diploid cells; Meiosis = 4 haploid cells`
+      },
+      {
+        keys: ["algebra", "general math", "higher math", "quadratic", "ap", "gp", "progression", "series", "mensuration"],
+        title: "SSC General & Higher Math Formulas",
+        body: `&bull; Identities: <code>(a + b)² = a² + 2ab + b²</code>, <code>(a - b)² = a² - 2ab + b²</code>, <code>a² - b² = (a + b)(a - b)</code><br>
+               &bull; Arithmetic Series: <code>a_n = a + (n - 1)d</code>, <code>S_n = (n/2)[2a + (n - 1)d]</code>`
+      }
+    ];
+
+    function evaluateLocalMathExpression(rawExpr) {
+      const expr = String(rawExpr || "").trim();
+      if (!expr || !window.math) return null;
+
+      if (/^[a-zA-Z0-9_().+\-*/^\s]+=[a-zA-Z0-9_().+\-*/^\s]+$/.test(expr) && /[a-zA-Z]/.test(expr)) {
+        const [lhs, rhs] = expr.split("=");
+        const varMatch = expr.match(/\b([a-zA-Z])\b/);
+        if (varMatch) {
+          const v = varMatch[1];
+          try {
+            const f0 = Number(math.evaluate(`(${lhs}) - (${rhs})`, { [v]: 0 }));
+            const f1 = Number(math.evaluate(`(${lhs}) - (${rhs})`, { [v]: 1 }));
+            const a = f1 - f0;
+            const b = f0;
+            if (Number.isFinite(a) && Number.isFinite(b) && Math.abs(a) > 1e-12) {
+              return `${v} = <strong>${Number((-b / a).toFixed(8))}</strong>`;
+            }
+          } catch (_) {}
+        }
+      }
+
+      const deg2rad = d => (d * Math.PI) / 180;
+      const scope = {
+        sin: d => {
+          const v = Math.sin(deg2rad(d));
+          return Math.abs(v) < 1e-12 ? 0 : Number(v.toFixed(8));
+        },
+        cos: d => {
+          const v = Math.cos(deg2rad(d));
+          return Math.abs(v) < 1e-12 ? 0 : Number(v.toFixed(8));
+        },
+        tan: d => {
+          const mod180 = ((d % 180) + 180) % 180;
+          if (Math.abs(mod180 - 90) < 1e-9) return Infinity;
+          const v = Math.tan(deg2rad(d));
+          return Math.abs(v) < 1e-12 ? 0 : Number(v.toFixed(8));
+        },
+        cot: d => {
+          const t = scope.tan(d);
+          return t === 0 ? Infinity : Number((1 / t).toFixed(8));
+        },
+        sec: d => {
+          const c = scope.cos(d);
+          return c === 0 ? Infinity : Number((1 / c).toFixed(8));
+        },
+        csc: d => {
+          const s = scope.sin(d);
+          return s === 0 ? Infinity : Number((1 / s).toFixed(8));
+        },
+        cosec: d => scope.csc(d),
+        log10: x => Number(Math.log10(x).toFixed(8)),
+        ln: x => Number(Math.log(x).toFixed(8)),
+        log: (x, base = 10) => Number((Math.log(x) / Math.log(base)).toFixed(8))
+      };
+
+      try {
+        const val = math.evaluate(expr, scope);
+        if (typeof val === "number" || typeof val === "boolean" || (val && typeof val.toString === "function")) {
+          const formatted = typeof val === "number" ? Number(val.toFixed(8)) : String(val);
+          return `<strong>${escapeHtml(formatted)}</strong>`;
+        }
+      } catch (_) {}
+      return null;
+    }
+
+    async function handleLocalFileSelected(e) {
+      const file = e.target.files?.[0];
+      const statusEl = document.getElementById("localAiFileStatus");
+      const solveBtn = document.getElementById("solveLocalFileBtn");
+      if (!file) return;
+
+      localAttachedFile = file;
+      localExtractedText = "";
+      statusEl.textContent = `Scanning ${file.name} locally...`;
+      solveBtn.classList.add("hidden");
+
+      try {
+        localExtractedText = await extractTextFromUploadedFile(file);
+        statusEl.textContent = `Attached: ${file.name} (${localExtractedText.trim().length} chars extracted)`;
+        solveBtn.classList.remove("hidden");
+      } catch (err) {
+        statusEl.textContent = `Error: ${err.message}`;
+      }
+    }
+
+    function solveLocalExpressionsInText(text) {
+      return String(text || "")
+        .split(/[\n;]+/)
+        .map(line => line.trim())
+        .filter(Boolean)
+        .map(line => {
+          const ans = evaluateLocalMathExpression(line);
+          return ans !== null ? `<code>${escapeHtml(line)}</code> = ${ans}` : null;
+        })
+        .filter(Boolean);
+    }
+
+    async function solveLocalAttachedFile() {
+      if (!localAttachedFile) {
+        alert("Attach a file first.");
+        return;
+      }
+      appendLocalAiMessage("You", `Scan & solve locally: ${localAttachedFile.name}`, true);
+      try {
+        if (!localExtractedText) {
+          localExtractedText = await extractTextFromUploadedFile(localAttachedFile);
+        }
+        const solutions = solveLocalExpressionsInText(localExtractedText);
+        const note = findMatchingLocalNote(localExtractedText);
+        const sections = [];
+        if (solutions.length) {
+          sections.push(`Solved <strong>${solutions.length}</strong> expression(s) from <strong>${escapeHtml(localAttachedFile.name)}</strong>:<br>` + solutions.slice(0, 20).join("<br>"));
+        }
+        if (note) {
+          sections.push(`<strong>${escapeHtml(note.title)}:</strong><br>${note.body}`);
+        }
+        if (!sections.length) {
+          const preview = escapeHtml(localExtractedText.trim().slice(0, 500));
+          sections.push(`Extracted text from <strong>${escapeHtml(localAttachedFile.name)}</strong> locally:<br><pre class="mt-1 p-2 bg-black/30 rounded text-[11px] whitespace-pre-wrap">${preview || "(Empty text)"}</pre>`);
+        }
+        appendLocalAiMessage("Local AI", sections.join("<br><br>"), false);
+      } catch (err) {
+        appendLocalAiMessage("Local AI", `Could not scan file: ${escapeHtml(err.message)}`, false);
+      }
+    }
+
+    function findMatchingLocalNote(queryText) {
+      const lower = String(queryText || "").toLowerCase();
+      return SSC_STUDY_NOTES.find(n => n.keys.some(k => lower.includes(k))) || null;
+    }
+
+    function generateLocalReply(rawQuestion) {
+      const q = rawQuestion.trim();
+      const mathAns = evaluateLocalMathExpression(q);
+      const note = findMatchingLocalNote(q);
+
+      if (mathAns !== null && note) {
+        return `<code>${escapeHtml(q)}</code> = ${mathAns}<br><br><strong>${escapeHtml(note.title)}:</strong><br>${note.body}`;
+      }
+      if (mathAns !== null) {
+        return `<code>${escapeHtml(q)}</code> = ${mathAns}`;
+      }
+      if (note) {
+        return `<strong>${escapeHtml(note.title)}:</strong><br>${note.body}`;
+      }
+      if (localExtractedText) {
+        const fileSol = solveLocalExpressionsInText(localExtractedText);
+        if (fileSol.length) {
+          return `Solved from <strong>${escapeHtml(localAttachedFile?.name || "file")}</strong>:<br>` + fileSol.slice(0, 15).join("<br>");
+        }
+      }
+      return `Local AI evaluates math/trig/log expressions &amp; linear equations (e.g., <code>sin(30) + cos(60)</code>, <code>log(16, 2)</code>, <code>2*x + 4 = 12</code>) and shows formula cards for <strong>Physics</strong>, <strong>Chemistry</strong>, <strong>Biology</strong>, <strong>General Math</strong>, <strong>Higher Math</strong>, <strong>Trig Formulas</strong>, and <strong>Log Laws</strong>.`;
+    }
+
+    function appendLocalAiMessage(sender, htmlBody, isUser) {
+      const box = document.getElementById("localAiMessages");
+      const div = document.createElement("div");
+      div.className = isUser ? "text-right" : "text-left text-teal-100";
+      div.innerHTML = isUser
+        ? `<span class="inline-block bg-teal-600/80 text-white px-3 py-1.5 rounded-xl"><strong>You:</strong> ${escapeHtml(htmlBody)}</span>`
+        : `<div class="bg-white/10 border border-white/10 px-3 py-2 rounded-xl leading-relaxed"><span class="font-extrabold text-amber-300">${sender}:</span> ${htmlBody}</div>`;
+      box.appendChild(div);
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function askLocalQuick(promptText) {
+      appendLocalAiMessage("You", promptText, true);
+      appendLocalAiMessage("Local AI", generateLocalReply(promptText), false);
+    }
+
+    function handleLocalAiSubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById("localAiInput");
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = "";
+      askLocalQuick(text);
+    }
+
+    // =========================================================================
+    // ACTIVITY LOG, AUTH, RESOURCES, CHAT & COMMENTS
+    // =========================================================================
+    function updateActivityAlertToggleUI() {
+      const btn = document.getElementById("toggleLogAlertsBtn");
+      if (!btn) return;
+      if (logAlertsEnabled) {
+        btn.textContent = "🔔 Alerts: ON";
+        btn.className = "bg-indigo-100 hover:bg-indigo-200 text-indigo-900 text-xs font-extrabold px-3 py-2 rounded-xl transition";
+      } else {
+        btn.textContent = "🔕 Alerts: OFF";
+        btn.className = "bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-extrabold px-3 py-2 rounded-xl transition";
+      }
+    }
+
+    function renderActivityNotificationsFeed() {
+      const feed = document.getElementById("activityNotificationsFeed");
+      const dot = document.getElementById("logAlertDot");
+      if (!feed) return;
+
+      if (dot) {
+        dot.classList.toggle("hidden", !logAlertsEnabled || activityAlertsFeed.length === 0);
+      }
+
+      if (!activityAlertsFeed.length) {
+        feed.innerHTML = `<div class="text-slate-500">No new activity notifications yet.</div>`;
+        return;
+      }
+      feed.innerHTML = activityAlertsFeed.slice(0, 15).map(n => `
+        <div class="flex items-center justify-between gap-2 bg-white/80 rounded-lg px-2.5 py-1.5 border border-amber-200/60">
+          <span class="font-semibold text-slate-800">${escapeHtml(n.text)}</span>
+          <span class="text-[10px] text-slate-400 shrink-0">${escapeHtml(n.time)}</span>
+        </div>
+      `).join("");
+    }
+
+    async function toggleActivityNotifications() {
+      logAlertsEnabled = !logAlertsEnabled;
+      localStorage.setItem("sr_log_alerts_enabled", String(logAlertsEnabled));
+      if (logAlertsEnabled && "Notification" in window && Notification.permission === "default") {
+        await Notification.requestPermission();
+      }
+      updateActivityAlertToggleUI();
+      renderActivityNotificationsFeed();
+    }
+
+    function recordActivityNotification(text) {
+      if (!logAlertsEnabled) return;
+      const entry = { text, time: new Date().toLocaleTimeString() };
+      activityAlertsFeed = [entry, ...activityAlertsFeed].slice(0, 30);
+      localStorage.setItem("sr_activity_alerts", JSON.stringify(activityAlertsFeed));
+      renderActivityNotificationsFeed();
+
       if ("Notification" in window && Notification.permission === "granted") {
         try {
           if (navigator.serviceWorker && navigator.serviceWorker.ready) {
             navigator.serviceWorker.ready.then(reg => {
               if (reg && reg.showNotification) {
-                reg.showNotification(title, { body, tag: "ssc2028-admin", renotify: true });
+                reg.showNotification("Study Room SSC 2028 — Activity Alert", { body: text, tag: "ssc2028-log", renotify: true });
               } else {
-                new Notification(title, { body });
+                new Notification("Study Room SSC 2028 — Activity Alert", { body: text });
               }
-            }).catch(() => new Notification(title, { body }));
+            }).catch(() => new Notification("Study Room SSC 2028 — Activity Alert", { body: text }));
           } else {
-            new Notification(title, { body });
+            new Notification("Study Room SSC 2028 — Activity Alert", { body: text });
           }
         } catch (_) {}
       }
@@ -496,48 +1151,14 @@
         alert("Only Admin can access Activity Logs.");
         return;
       }
+      updateActivityAlertToggleUI();
+      renderActivityNotificationsFeed();
       document.getElementById("activityLogModal").classList.remove("hidden");
       await refreshAdminDashboard(false);
     }
 
     function closeActivityLogModal() {
       document.getElementById("activityLogModal").classList.add("hidden");
-    }
-
-    function updateSafeLockUI() {
-      const modalBtn = document.getElementById("modalSafeLockBtn");
-      const pill = document.getElementById("headerSafeLockPill");
-
-      if (isSafeLockOn) {
-        pill.classList.remove("hidden");
-        if (modalBtn) {
-          modalBtn.textContent = "🛡️ Safe Lock: ON (Click to Turn OFF)";
-          modalBtn.className = "px-4 py-2 rounded-xl text-xs font-extrabold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition shrink-0";
-        }
-      } else {
-        pill.classList.add("hidden");
-        if (modalBtn) {
-          modalBtn.textContent = "🛡️ Safe Lock: OFF (Click to Turn ON)";
-          modalBtn.className = "px-4 py-2 rounded-xl text-xs font-extrabold bg-slate-900 hover:bg-slate-800 text-white shadow-sm transition shrink-0";
-        }
-      }
-    }
-
-    async function toggleSafeLockFromModal() {
-      if (!currentUser || !currentUser.is_admin) return;
-      const nextState = !isSafeLockOn;
-      const { data, error } = await db.rpc("admin_set_safe_lock", {
-        p_admin_phone: currentUser.phone,
-        p_admin_password: currentUser.pass,
-        p_safe_lock: nextState
-      });
-      if (error || !data || !data.ok) {
-        alert(data?.error || error?.message || "Could not update Safe Lock.");
-        return;
-      }
-      isSafeLockOn = nextState;
-      updateSafeLockUI();
-      await refreshAdminDashboard(false);
     }
 
     function updateVisibilityUI() {
@@ -579,10 +1200,8 @@
       const { data, error } = await db.rpc("get_portal_status");
       if (!error && data) {
         isPortalPublic = Boolean(data.is_public);
-        isSafeLockOn = Boolean(data.safe_lock);
       }
       updateVisibilityUI();
-      updateSafeLockUI();
     }
 
     async function changePortalVisibility(makePublic) {
@@ -623,7 +1242,6 @@
           adminTag.classList.remove("hidden");
           adminBtn.classList.remove("hidden");
           activityBtn.classList.remove("hidden");
-          requestAdminNotificationPermission();
         } else {
           adminTag.classList.add("hidden");
           adminBtn.classList.add("hidden");
@@ -639,7 +1257,6 @@
         addResBtn.classList.add("hidden");
       }
       updateVisibilityUI();
-      updateSafeLockUI();
       renderResources();
     }
 
@@ -838,7 +1455,11 @@
         p_phone: currentUser.phone,
         p_password: currentUser.pass
       });
-      if (error || !data || !data.length) {
+      if (error) {
+        box.innerHTML = `<div class="text-rose-500 text-center py-4">Chat setup pending in Supabase SQL Editor.</div>`;
+        return;
+      }
+      if (!data || !data.length) {
         box.innerHTML = `<div class="text-slate-400 text-center py-4">No chat messages yet. Say hi!</div>`;
         return;
       }
@@ -997,7 +1618,6 @@
     async function openAdminModal() {
       document.getElementById("adminModal").classList.remove("hidden");
       updateVisibilityUI();
-      updateSafeLockUI();
       await refreshAdminDashboard(false);
     }
     function closeAdminModal() {
@@ -1016,18 +1636,9 @@
     }
 
     async function toggleBanUser(targetId) {
-      if (!confirm("Are you sure you want to ban/remove this participant? Activity logs will remain safe.")) return;
+      if (!confirm("Are you sure you want to ban/remove this participant?")) return;
       await db.rpc("admin_toggle_ban", { p_admin_phone: currentUser.phone, p_admin_password: currentUser.pass, p_target_user_id: targetId });
       await refreshAdminDashboard(false);
-    }
-
-    function showAdminToast(text) {
-      if (isSafeLockOn) return;
-      const toast = document.getElementById("adminToast");
-      document.getElementById("adminToastMsg").textContent = text;
-      toast.classList.remove("hidden");
-      setTimeout(() => toast.classList.add("hidden"), 6000);
-      sendSystemNotification("Study Room SSC 2028 — Admin Alert", text);
     }
 
     function renderActivityLogsHtml(logs) {
@@ -1065,8 +1676,8 @@
 
       if (allActivityLogs.length > 0) {
         const newest = allActivityLogs[0];
-        if (lastSeenLogId && newest.id > lastSeenLogId && isBackgroundCheck && !isSafeLockOn) {
-          showAdminToast(`${newest.user_name}: ${newest.action}`);
+        if (lastSeenLogId && newest.id > lastSeenLogId && isBackgroundCheck) {
+          recordActivityNotification(`${newest.user_name}: ${newest.action}`);
         }
         lastSeenLogId = newest.id;
         localStorage.setItem("sr_last_log_id", String(lastSeenLogId));
@@ -1075,7 +1686,7 @@
       if (isBackgroundCheck) return;
 
       document.getElementById("dedicatedActivityLogsList").innerHTML = renderActivityLogsHtml(allActivityLogs);
-      document.getElementById("adminLogsList").innerHTML = renderActivityLogsHtml(allActivityLogs);
+      renderActivityNotificationsFeed();
 
       document.getElementById("adminPendingList").innerHTML = pendingCount === 0
         ? `<div class="p-3.5 text-slate-500 bg-white">No pending submissions to review.</div>`
@@ -1125,6 +1736,8 @@
 
     (async function init() {
       updateAuthUI();
+      updateActivityAlertToggleUI();
+      renderActivityNotificationsFeed();
       await fetchPortalStatus();
       await loadAllPortalData();
     })();
