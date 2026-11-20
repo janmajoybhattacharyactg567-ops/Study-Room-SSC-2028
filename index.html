@@ -69,7 +69,6 @@
           Logout
         </button>
 
-        <!-- Activity Log Button directly beside Add Resource -->
         <button id="activityLogHeaderBtn" onclick="openActivityLogModal()" class="hidden bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-md transition active:scale-95 relative">
           📋 Activity Log
           <span id="logAlertDot" class="hidden absolute -top-1.5 -right-1.5 w-3 h-3 rounded-full bg-rose-500 ring-2 ring-white"></span>
@@ -234,17 +233,17 @@
               <div class="flex items-center gap-2 flex-wrap">
                 <h3 class="font-extrabold text-sm text-white">✨ 1. Gemini AI Tutor (Online)</h3>
                 <span class="text-[10px] font-extrabold bg-indigo-500/30 text-indigo-200 border border-indigo-400/30 px-2 py-0.5 rounded-full">
-                  ONLINE &bull; ALL SUBJECTS &amp; MULTIMODAL
+                  GEMINI 3.8 FLASH &bull; TEXT, VISION &amp; DIAGRAMS
                 </span>
               </div>
               <p class="text-[11px] text-slate-300 mt-0.5">
-                Cloud AI for complex Physics, Chemistry, General Math, Higher Math, Biology, CQs/MCQs, and image/PDF problem solving (English or বাংলা).
+                Cloud AI for Physics, Chemistry, General/Higher Math, Biology, CQs/MCQs, image/PDF solving, and AI diagram generation (English or বাংলা).
               </p>
             </div>
             <div class="flex gap-1.5 flex-wrap items-center">
-              <button type="button" onclick="askGeminiQuick('Explain Newton’s 2nd Law with an SSC Physics numerical step-by-step')" class="text-[10px] font-bold bg-white/10 hover:bg-white/20 px-2.5 py-1 rounded-lg transition">Physics CQ</button>
+              <button type="button" onclick="askGeminiQuick('Explain Newton’s 2nd Law with theory and an SSC Physics numerical step-by-step')" class="text-[10px] font-bold bg-white/10 hover:bg-white/20 px-2.5 py-1 rounded-lg transition">Physics CQ</button>
               <button type="button" onclick="askGeminiQuick('Explain mole calculation and chemical equation balancing for SSC Chemistry')" class="text-[10px] font-bold bg-white/10 hover:bg-white/20 px-2.5 py-1 rounded-lg transition">Chemistry</button>
-              <button type="button" onclick="askGeminiQuick('Solve a Higher Math trigonometric proof step-by-step')" class="text-[10px] font-bold bg-white/10 hover:bg-white/20 px-2.5 py-1 rounded-lg transition">Higher Math</button>
+              <button type="button" onclick="generateGeminiDiagramFromInput()" class="text-[10px] font-bold bg-fuchsia-500/25 hover:bg-fuchsia-500/40 text-fuchsia-200 border border-fuchsia-400/30 px-2.5 py-1 rounded-lg transition">🎨 Draw Diagram</button>
               <button type="button" onclick="clearGeminiChat()" class="text-[10px] font-bold bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 px-2.5 py-1 rounded-lg transition">Clear</button>
               <button type="button" onclick="openAiKeyModal()" class="text-[10px] font-bold bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-400/30 px-2.5 py-1 rounded-lg transition">⚙️ AI Key</button>
             </div>
@@ -269,14 +268,14 @@
             </div>
           </div>
 
-          <div id="geminiAiMessages" class="space-y-2.5 max-h-64 overflow-y-auto mb-3.5 bg-black/25 border border-white/10 rounded-xl p-3.5 text-xs">
+          <div id="geminiAiMessages" class="space-y-2.5 max-h-72 overflow-y-auto mb-3.5 bg-black/25 border border-white/10 rounded-xl p-3.5 text-xs">
             <div class="text-indigo-200">
-              <span class="font-extrabold text-amber-300">Gemini AI:</span> Ask any SSC 2028 question across any subject or attach a photo/PDF of a problem to solve step-by-step.
+              <span class="font-extrabold text-amber-300">Gemini AI (3.8 Flash):</span> Ask any SSC 2028 question, attach a photo/PDF to solve, or type a topic and click <strong>🎨 Draw Diagram</strong> to generate a visual diagram!
             </div>
           </div>
 
           <form onsubmit="handleGeminiAiSubmit(event)" class="flex gap-2">
-            <input id="geminiAiInput" type="text" placeholder="Ask Gemini AI anything (Physics, Chemistry, General/Higher Math, Biology, chapters)..."
+            <input id="geminiAiInput" type="text" placeholder="Ask Gemini AI anything or type a diagram prompt (e.g., 'Labeled plant cell diagram')..."
                    class="flex-1 bg-white/10 border border-white/20 focus:bg-white/15 focus:border-indigo-400 text-white placeholder-slate-400 rounded-xl px-3.5 py-2.5 text-xs outline-none transition" required />
             <button id="geminiSendBtn" type="submit" class="bg-gradient-to-r from-indigo-500 to-blue-500 hover:from-indigo-600 hover:to-blue-600 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-md transition shrink-0">
               Ask Gemini
@@ -284,26 +283,27 @@
           </form>
         </section>
 
-        <!-- AI Chat Box #2: Local AI (Browser-Only) -->
+        <!-- AI Chat Box #2: Local AI (Upgraded Browser-Only Engine) -->
         <section class="bg-gradient-to-br from-slate-900 via-teal-950 to-slate-900 text-white rounded-2xl p-5 shadow-xl border border-teal-500/30">
           <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
             <div>
               <div class="flex items-center gap-2 flex-wrap">
-                <h3 class="font-extrabold text-sm text-white">📐 2. Local Study Engine (Browser-Only)</h3>
+                <h3 class="font-extrabold text-sm text-white">🧠 2. Local Study Engine Pro (Offline / Browser-Only)</h3>
                 <span class="text-[10px] font-extrabold bg-emerald-500/20 text-emerald-200 border border-emerald-400/30 px-2 py-0.5 rounded-full">
-                  LOCAL &bull; NO API KEY
+                  OFFLINE &bull; THEORY + EXAMPLES + MATH + DIAGRAMS
                 </span>
               </div>
               <p class="text-[11px] text-slate-300 mt-0.5">
-                Runs locally in your browser: evaluate math/trig/log expressions (<code>sin(30) + cos(60)</code>, <code>log(16, 2)</code>, <code>2*x + 6 = 14</code>), view built-in formula cards, or scan files locally.
+                Full offline tutor: explains <strong>Theory + Formulas + Worked Examples</strong>, solves linear/quadratic equations &amp; physics numericals, scans images/PDFs via OCR, and draws interactive Canvas diagrams.
               </p>
             </div>
             <div class="flex gap-1.5 flex-wrap">
-              <button type="button" onclick="askLocalQuick('physics formulas')" class="text-[10px] font-bold bg-white/10 hover:bg-white/20 px-2.5 py-1 rounded-lg transition">Physics</button>
-              <button type="button" onclick="askLocalQuick('chemistry formulas')" class="text-[10px] font-bold bg-white/10 hover:bg-white/20 px-2.5 py-1 rounded-lg transition">Chemistry</button>
-              <button type="button" onclick="askLocalQuick('biology notes')" class="text-[10px] font-bold bg-white/10 hover:bg-white/20 px-2.5 py-1 rounded-lg transition">Biology</button>
-              <button type="button" onclick="askLocalQuick('trigonometry formulas')" class="text-[10px] font-bold bg-white/10 hover:bg-white/20 px-2.5 py-1 rounded-lg transition">Trig Formulas</button>
-              <button type="button" onclick="askLocalQuick('logarithm laws')" class="text-[10px] font-bold bg-white/10 hover:bg-white/20 px-2.5 py-1 rounded-lg transition">Log Laws</button>
+              <button type="button" onclick="askLocalQuick('motion')" class="text-[10px] font-bold bg-white/10 hover:bg-white/20 px-2.5 py-1 rounded-lg transition">Motion Theory</button>
+              <button type="button" onclick="askLocalQuick('newton force')" class="text-[10px] font-bold bg-white/10 hover:bg-white/20 px-2.5 py-1 rounded-lg transition">Force &amp; Laws</button>
+              <button type="button" onclick="askLocalQuick('chemistry mole')" class="text-[10px] font-bold bg-white/10 hover:bg-white/20 px-2.5 py-1 rounded-lg transition">Chemistry</button>
+              <button type="button" onclick="askLocalQuick('biology cell')" class="text-[10px] font-bold bg-white/10 hover:bg-white/20 px-2.5 py-1 rounded-lg transition">Biology</button>
+              <button type="button" onclick="askLocalQuick('draw triangle')" class="text-[10px] font-bold bg-teal-500/25 hover:bg-teal-500/40 text-teal-200 border border-teal-400/30 px-2.5 py-1 rounded-lg transition">📐 Draw Triangle</button>
+              <button type="button" onclick="askLocalQuick('graph sin(x)')" class="text-[10px] font-bold bg-teal-500/25 hover:bg-teal-500/40 text-teal-200 border border-teal-400/30 px-2.5 py-1 rounded-lg transition">📈 Graph sin(x)</button>
             </div>
           </div>
 
@@ -311,24 +311,29 @@
           <div class="flex flex-wrap items-center justify-between gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-2 mb-3 text-xs">
             <div class="flex items-center gap-2 flex-wrap">
               <label class="cursor-pointer bg-teal-500 hover:bg-teal-600 text-slate-950 font-extrabold text-[11px] px-3 py-1.5 rounded-lg transition">
-                📎 Add File to Scan Locally
+                📎 Attach Image / PDF / Text
                 <input id="localAiFileInput" type="file" accept=".txt,.md,.csv,.json,.pdf,image/*" onchange="handleLocalFileSelected(event)" class="hidden" />
               </label>
               <span id="localAiFileStatus" class="text-[11px] text-slate-300">No file attached</span>
             </div>
-            <button type="button" id="solveLocalFileBtn" onclick="solveLocalAttachedFile()" class="hidden bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-extrabold text-[11px] px-3 py-1.5 rounded-lg transition">
-              ⚡ Scan &amp; Solve Locally
-            </button>
+            <div class="flex items-center gap-1.5">
+              <button type="button" id="clearLocalFileBtn" onclick="clearLocalFile()" class="hidden bg-white/10 hover:bg-white/20 text-slate-200 font-bold text-[11px] px-2.5 py-1.5 rounded-lg transition">
+                ✕ Remove
+              </button>
+              <button type="button" id="solveLocalFileBtn" onclick="solveLocalAttachedFile()" class="hidden bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-extrabold text-[11px] px-3 py-1.5 rounded-lg transition">
+                ⚡ Scan &amp; Solve Locally
+              </button>
+            </div>
           </div>
 
-          <div id="localAiMessages" class="space-y-2.5 max-h-64 overflow-y-auto mb-3.5 bg-black/25 border border-white/10 rounded-xl p-3.5 text-xs">
+          <div id="localAiMessages" class="space-y-2.5 max-h-80 overflow-y-auto mb-3.5 bg-black/25 border border-white/10 rounded-xl p-3.5 text-xs">
             <div class="text-teal-200">
-              <span class="font-extrabold text-amber-300">Local AI:</span> Runs in your browser without an API key. Try <code>sin(30) + cos(60)</code>, <code>log(8, 2)</code>, <code>2*x + 4 = 12</code>, or ask for <strong>Physics</strong>, <strong>Chemistry</strong>, <strong>Biology</strong>, <strong>General Math</strong>, or <strong>Higher Math</strong> formulas.
+              <span class="font-extrabold text-amber-300">Local AI Pro:</span> Ask about <strong>motion</strong>, <strong>work &amp; energy</strong>, <strong>electricity</strong>, <strong>mole concept</strong>, <strong>photosynthesis</strong>, or <strong>trigonometry</strong> for full theory + worked examples. Solve math like <code>x^2 - 5*x + 6 = 0</code> or <code>u=0, a=4, t=5, find v</code>, attach an image/PDF to scan, or type <code>draw projectile</code> / <code>graph cos(x)</code> to generate diagrams!
             </div>
           </div>
 
           <form onsubmit="handleLocalAiSubmit(event)" class="flex gap-2">
-            <input id="localAiInput" type="text" placeholder="Enter math/trig/log expression, equation, or formula topic..."
+            <input id="localAiInput" type="text" placeholder="Ask theory (e.g., 'motion'), solve math ('x^2 - 5*x + 6 = 0'), or 'draw projectile'..."
                    class="flex-1 bg-white/10 border border-white/20 focus:bg-white/15 focus:border-teal-400 text-white placeholder-slate-400 rounded-xl px-3.5 py-2.5 text-xs outline-none transition" required />
             <button type="submit" class="bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 text-slate-950 font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-md transition shrink-0">
               Solve Local
@@ -375,7 +380,7 @@
     </div>
   </div>
 
-  <!-- Dedicated Activity Log Modal (Notifications + Save Logs) -->
+  <!-- Dedicated Activity Log Modal -->
   <div id="activityLogModal" class="hidden fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-40 flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-slate-100 max-h-[85vh] flex flex-col">
       <div class="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-100">
@@ -394,7 +399,6 @@
         </div>
       </div>
 
-      <!-- Recent Notifications Feed inside Activity Log -->
       <div class="mb-4">
         <div class="text-[11px] font-extrabold uppercase tracking-wider text-amber-700 mb-1.5">Recent Notification Alerts</div>
         <div id="activityNotificationsFeed" class="bg-amber-50/70 border border-amber-200/80 rounded-2xl p-3 max-h-32 overflow-y-auto text-xs space-y-1.5">
@@ -402,7 +406,6 @@
         </div>
       </div>
 
-      <!-- Full Activity Log Table -->
       <div class="text-[11px] font-extrabold uppercase tracking-wider text-slate-600 mb-1.5">Recorded Activity History</div>
       <div id="dedicatedActivityLogsList" class="divide-y divide-slate-100 border border-slate-200 rounded-2xl text-xs overflow-y-auto flex-1">
         <div class="p-4 text-slate-500">Loading activity logs...</div>
@@ -505,7 +508,6 @@
         <button onclick="closeAdminModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 font-bold text-xs">✕</button>
       </div>
 
-      <!-- Portal Privacy / Public Visibility Toggle -->
       <div class="bg-indigo-50/70 border border-indigo-200/80 rounded-2xl p-4 mb-6">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
@@ -525,11 +527,9 @@
         </div>
       </div>
 
-      <!-- Pending Content Approvals -->
       <h4 class="text-xs font-extrabold uppercase tracking-wider text-amber-600 mb-2.5">Pending Content Submissions</h4>
       <div id="adminPendingList" class="divide-y divide-slate-100 border border-amber-200/70 bg-amber-50/30 rounded-2xl mb-6 text-xs overflow-hidden"></div>
 
-      <!-- Manage Members -->
       <h4 class="text-xs font-extrabold uppercase tracking-wider text-indigo-900 mb-2.5">Registered Members &amp; Roles</h4>
       <div id="adminUsersList" class="divide-y divide-slate-100 border border-slate-200/90 rounded-2xl text-xs overflow-hidden"></div>
     </div>
@@ -540,9 +540,10 @@
     const SUPABASE_ANON_KEY = "sb_publishable_-4SxZGajx_1f2ZNjAvZnew_Jhl6039n";
     const WHATSAPP_INVITE_URL = "https://chat.whatsapp.com/IVS5nwQpGIiGOSqYg63vKR";
 
-    // Optional fallback key for the online Gemini AI chat box (avoid sharing a key publicly if you want quota isolation)
+    // Updated to current supported Gemini 3.8 Flash & Gemini 3.1 Flash Image models
     const DEFAULT_GEMINI_API_KEY = "";
-    const GEMINI_MODEL = "gemini-2.5-flash";
+    const GEMINI_MODEL = "gemini-3.8-flash";
+    const GEMINI_IMAGE_MODEL = "gemini-3.1-flash-image";
 
     if (window.pdfjsLib && pdfjsLib.GlobalWorkerOptions) {
       pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
@@ -565,6 +566,7 @@
 
     // Local AI state
     let localAttachedFile = null;
+    let localAttachedImageUrl = "";
     let localExtractedText = "";
 
     let resourceCommentsMap = {};
@@ -591,7 +593,6 @@
       });
     }
 
-    // Shared file helpers (Base64 for Gemini + Local text/PDF/OCR extraction)
     function fileToBase64(file) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -630,7 +631,7 @@
     }
 
     // =========================================================================
-    // 1. GEMINI AI (ONLINE)
+    // 1. GEMINI AI (ONLINE - GEMINI 3.8 FLASH + DIAGRAM GENERATION)
     // =========================================================================
     function getGeminiApiKey() {
       return (localStorage.getItem("sr_gemini_api_key") || DEFAULT_GEMINI_API_KEY || "").trim();
@@ -712,7 +713,7 @@
 
       const systemInstruction =
         "You are an expert tutor for NCTB SSC 2028 (Class 9-10) students. " +
-        "Solve and explain Physics, Chemistry, General Math, Higher Math, Biology, ICT, English, and textbook chapters step-by-step in the user's language (English or Bangla).";
+        "Solve and explain Physics, Chemistry, General Math, Higher Math, Biology, ICT, English, and textbook chapters with clear theory, formulas, and step-by-step worked examples in the user's language (English or Bangla).";
 
       const userParts = [{ text: userPrompt }];
       if (includeAttachment && geminiAttachedFile) {
@@ -759,6 +760,75 @@
       geminiChatHistory.push({ role: "model", parts: [{ text: replyText }] });
 
       return replyText;
+    }
+
+    async function callGeminiDiagramGenerator(promptText) {
+      const apiKey = getGeminiApiKey();
+      if (!apiKey) {
+        openAiKeyModal();
+        throw new Error("Please set your Gemini API key using ⚙️ AI Key.");
+      }
+
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_IMAGE_MODEL}:generateContent?key=${encodeURIComponent(apiKey)}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{
+              role: "user",
+              parts: [{ text: `Create a clean, well-labeled educational textbook diagram for Class 9-10 SSC students on a white background: ${promptText}` }]
+            }],
+            generationConfig: {
+              responseModalities: ["TEXT", "IMAGE"]
+            }
+          })
+        }
+      );
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data?.error?.message || "Image generation failed.");
+      }
+
+      const parts = data?.candidates?.[0]?.content?.parts || [];
+      let imageDataUrl = null;
+      let caption = "";
+
+      for (const p of parts) {
+        if (p.inlineData && p.inlineData.data) {
+          const mime = p.inlineData.mimeType || "image/png";
+          imageDataUrl = `data:${mime};base64,${p.inlineData.data}`;
+        } else if (p.text) {
+          caption += p.text;
+        }
+      }
+
+      if (!imageDataUrl) {
+        throw new Error("No diagram image was returned for that prompt.");
+      }
+
+      return { imageDataUrl, caption };
+    }
+
+    async function generateGeminiDiagramFromInput() {
+      const input = document.getElementById("geminiAiInput");
+      const promptText = input.value.trim() || "Labeled diagram of projectile motion showing initial velocity, angle theta, maximum height, and horizontal range";
+      input.value = "";
+      appendGeminiMessage("You", `🎨 Draw Diagram: ${promptText}`, true);
+      const loadingEl = appendGeminiMessage("Gemini Visual", `<span class="italic text-fuchsia-200">Generating educational diagram...</span>`, false);
+      try {
+        const { imageDataUrl, caption } = await callGeminiDiagramGenerator(promptText);
+        loadingEl.innerHTML = `
+          <div class="bg-white/10 border border-white/10 px-3.5 py-2.5 rounded-xl leading-relaxed space-y-2">
+            <div class="font-extrabold text-fuchsia-300">Gemini Visual Diagram:</div>
+            <img src="${imageDataUrl}" alt="Generated study diagram" class="rounded-xl max-h-72 w-auto border border-white/20 bg-white" />
+            ${caption ? `<div>${formatMarkdown(caption)}</div>` : ""}
+            <a href="${imageDataUrl}" download="ssc-diagram.png" class="inline-block text-[11px] font-bold bg-fuchsia-500/30 hover:bg-fuchsia-500/40 text-fuchsia-100 px-2.5 py-1 rounded-lg">⬇ Download Diagram</a>
+          </div>`;
+      } catch (err) {
+        loadingEl.innerHTML = `<div class="bg-rose-500/20 border border-rose-400/30 px-3.5 py-2.5 rounded-xl text-rose-200"><span class="font-extrabold">Diagram Error:</span> ${escapeHtml(err.message)}</div>`;
+      }
     }
 
     function formatMarkdown(rawText) {
@@ -818,64 +888,164 @@
       const text = input.value.trim();
       if (!text) return;
       input.value = "";
+      if (/^(draw|generate image|sketch|illustrate)\b/i.test(text)) {
+        input.value = text;
+        generateGeminiDiagramFromInput();
+        return;
+      }
       askGeminiQuick(text);
     }
 
     // =========================================================================
-    // 2. LOCAL AI (BROWSER-ONLY)
+    // 2. LOCAL STUDY ENGINE PRO (THEORY + EXAMPLES + SOLVER + OFFLINE DIAGRAMS)
     // =========================================================================
-    const SSC_STUDY_NOTES = [
+    const SSC_STUDY_KNOWLEDGE = [
       {
-        keys: ["trig", "trigonometry", "sin", "cos", "tan", "sec", "cosec", "cot"],
-        title: "SSC Class 9–10 Trigonometry Formulas & Ratios",
-        body: `&bull; <code>sin θ = Opposite / Hypotenuse</code>, <code>cosec θ = 1 / sin θ</code><br>
-               &bull; <code>cos θ = Adjacent / Hypotenuse</code>, <code>sec θ = 1 / cos θ</code><br>
-               &bull; <code>tan θ = Opposite / Adjacent = sin θ / cos θ</code>, <code>cot θ = 1 / tan θ</code><br>
-               &bull; Identities: <code>sin²θ + cos²θ = 1</code>, <code>sec²θ - tan²θ = 1</code>, <code>cosec²θ - cot²θ = 1</code><br>
-               &bull; Standard Angles: <code>sin 30° = 1/2</code>, <code>cos 60° = 1/2</code>, <code>sin 45° = cos 45° = 1/√2</code>, <code>tan 30° = 1/√3</code>, <code>tan 60° = √3</code>`
+        keys: ["motion", "kinematics", "velocity", "acceleration", "displacement", "speed", "distance", "গতি"],
+        title: "SSC Physics Ch. 2: Motion (Theory, Formulas & Worked Example)",
+        theory: "Motion occurs when an object changes its position with respect to time and a reference point. <strong>Distance</strong> is scalar (total path), while <strong>Displacement (s)</strong> is vector (shortest straight-line distance). <strong>Acceleration (a)</strong> is the rate of change of velocity over time.",
+        formulas: "<code>v = u + at</code> &bull; <code>s = ut + ½at²</code> &bull; <code>v² = u² + 2as</code> &bull; <code>s = ((u + v)/2) · t</code>",
+        example: "<strong>Worked Example:</strong> A car starts from rest (<code>u = 0 m/s</code>) and accelerates uniformly at <code>a = 3 m/s²</code> for <code>t = 6 s</code>. Find final velocity and distance.<br>1. <code>v = u + at = 0 + 3 × 6 = <strong>18 m/s</strong></code><br>2. <code>s = ut + ½at² = 0 + 0.5 × 3 × 6² = <strong>54 m</strong></code>",
+        diagram: "projectile"
       },
       {
-        keys: ["log", "logarithm", "exponent", "indices", "power"],
-        title: "SSC Class 9–10 Logarithm & Indices Laws",
-        body: `&bull; Product: <code>log_a(m · n) = log_a(m) + log_a(n)</code><br>
-               &bull; Quotient: <code>log_a(m / n) = log_a(m) - log_a(n)</code><br>
-               &bull; Power: <code>log_a(m^r) = r · log_a(m)</code><br>
-               &bull; Base Change: <code>log_a(m) = log_b(m) / log_b(a)</code>, <code>log_a(1) = 0</code>, <code>log_a(a) = 1</code>`
+        keys: ["force", "newton", "momentum", "inertia", "friction", "gravity", "বল"],
+        title: "SSC Physics Ch. 3: Force & Newton's Laws (Theory, Formulas & Example)",
+        theory: "<strong>1st Law (Inertia):</strong> A body remains at rest or uniform straight motion unless acted on by an external net force.<br><strong>2nd Law:</strong> Rate of change of momentum is proportional to applied force (<code>F = ma</code>).<br><strong>3rd Law:</strong> Every action has an equal and opposite reaction.",
+        formulas: "<code>F = ma</code> &bull; <code>p = mv</code> &bull; <code>m₁u₁ + m₂u₂ = m₁v₁ + m₂v₂</code> &bull; <code>W = mg</code>",
+        example: "<strong>Worked Example:</strong> A net force of <code>20 N</code> acts on a <code>4 kg</code> block initially at rest for <code>3 s</code>. Find acceleration and final momentum.<br>1. <code>a = F / m = 20 / 4 = <strong>5 m/s²</strong></code><br>2. <code>v = 0 + 5 × 3 = 15 m/s</code> &rArr; <code>p = mv = 4 × 15 = <strong>60 kg·m/s</strong></code>",
+        diagram: "force"
       },
       {
-        keys: ["physics", "motion", "velocity", "acceleration", "force", "newton", "work", "energy", "power", "ohm", "current", "voltage"],
-        title: "SSC Physics Core Formulas",
-        body: `&bull; Motion: <code>v = u + at</code>, <code>s = ut + ½at²</code>, <code>v² = u² + 2as</code><br>
-               &bull; Force &amp; Momentum: <code>F = ma</code>, <code>p = mv</code><br>
-               &bull; Work, Power &amp; Energy: <code>W = Fs cosθ</code>, <code>P = W/t</code>, <code>KE = ½mv²</code>, <code>PE = mgh</code><br>
-               &bull; Electricity: <code>V = IR</code>, <code>P = VI = I²R</code>`
+        keys: ["work", "energy", "power", "kinetic", "potential", "efficiency", "কাজ", "শক্তি"],
+        title: "SSC Physics Ch. 4: Work, Power & Energy (Theory, Formulas & Example)",
+        theory: "<strong>Work (W)</strong> is done when a force displaces an object in the direction of force. <strong>Kinetic Energy (KE)</strong> is energy due to motion, and <strong>Potential Energy (PE)</strong> is stored energy due to position/height. Total mechanical energy stays conserved without friction.",
+        formulas: "<code>W = Fs cosθ</code> &bull; <code>KE = ½mv²</code> &bull; <code>PE = mgh</code> &bull; <code>P = W / t</code> &bull; <code>η = (Output / Input) × 100%</code>",
+        example: "<strong>Worked Example:</strong> A <code>2 kg</code> stone is dropped from <code>h = 20 m</code> (<code>g = 9.8 m/s²</code>). Find its PE at the top and velocity just before hitting the ground.<br>1. <code>PE = mgh = 2 × 9.8 × 20 = <strong>392 J</strong></code><br>2. By conservation: <code>½mv² = 392</code> &rArr; <code>v = √(2 × 9.8 × 20) = <strong>19.8 m/s</strong></code>",
+        diagram: null
       },
       {
-        keys: ["chemistry", "mole", "molar", "atom", "periodic", "bond", "acid", "base", "redox"],
-        title: "SSC Chemistry Core Formulas",
-        body: `&bull; Mole &amp; Avogadro's Number: <code>n = m / M</code>, <code>N = n · N_A</code> (<code>N_A ≈ 6.022 × 10²³</code>)<br>
-               &bull; Gas Molar Volume (STP): <code>1 mole gas ≈ 22.4 L</code> at STP<br>
-               &bull; Molarity: <code>M = n / V(L)</code>`
+        keys: ["electricity", "ohm", "current", "voltage", "resistance", "circuit", "বিদ্যুৎ"],
+        title: "SSC Physics Ch. 11: Current Electricity (Theory, Formulas & Example)",
+        theory: "<strong>Ohm's Law:</strong> At constant temperature, electric current (<code>I</code>) through a conductor is directly proportional to the potential difference (<code>V</code>) across its ends. In <strong>series</strong>, resistances add (<code>R_s = R₁ + R₂</code>); in <strong>parallel</strong>, reciprocals add (<code>1/R_p = 1/R₁ + 1/R₂</code>).",
+        formulas: "<code>V = IR</code> &bull; <code>I = Q / t</code> &bull; <code>P = VI = I²R = V²/R</code> &bull; <code>H = I²Rt</code>",
+        example: "<strong>Worked Example:</strong> Two resistors <code>4 Ω</code> and <code>6 Ω</code> are connected in series across a <code>20 V</code> battery. Find total current.<br>1. <code>R_s = 4 + 6 = 10 Ω</code><br>2. <code>I = V / R_s = 20 / 10 = <strong>2 A</strong></code>",
+        diagram: "circuit"
       },
       {
-        keys: ["biology", "cell", "mitosis", "meiosis", "photosynthesis", "respiration", "tissue"],
-        title: "SSC Biology Key Summaries",
-        body: `&bull; Photosynthesis: <code>6CO₂ + 6H₂O --(Light & Chlorophyll)--> C₆H₁₂O₆ + 6O₂</code><br>
-               &bull; Aerobic Respiration: <code>C₆H₁₂O₆ + 6O₂ --> 6CO₂ + 6H₂O + ATP</code><br>
-               &bull; Cell Division: Mitosis = 2 identical diploid cells; Meiosis = 4 haploid cells`
+        keys: ["chemistry", "mole", "molar", "molarity", "avogadro", "atom", "মোল"],
+        title: "SSC Chemistry Ch. 6: Mole Concept & Chemical Calculations",
+        theory: "A <strong>mole</strong> is the amount of substance containing Avogadro's number (<code>6.022 × 10²³</code>) of particles. One mole of any substance has mass equal to its molecular weight in grams, and one mole of any ideal gas occupies <code>22.4 L</code> at STP.",
+        formulas: "<code>n = m / M</code> &bull; <code>n = N / N_A</code> &bull; <code>n = V(L) / 22.4</code> &bull; <code>S (Molarity) = (1000 × m) / (M × V_mL)</code>",
+        example: "<strong>Worked Example:</strong> Find the number of moles and molecules in <code>88 g</code> of <code>CO₂</code> (<code>M = 44 g/mol</code>).<br>1. <code>n = m / M = 88 / 44 = <strong>2 moles</strong></code><br>2. <code>N = 2 × 6.022 × 10²³ = <strong>1.2044 × 10²⁴ molecules</strong></code>",
+        diagram: null
       },
       {
-        keys: ["algebra", "general math", "higher math", "quadratic", "ap", "gp", "progression", "series", "mensuration"],
-        title: "SSC General & Higher Math Formulas",
-        body: `&bull; Identities: <code>(a + b)² = a² + 2ab + b²</code>, <code>(a - b)² = a² - 2ab + b²</code>, <code>a² - b² = (a + b)(a - b)</code><br>
-               &bull; Arithmetic Series: <code>a_n = a + (n - 1)d</code>, <code>S_n = (n/2)[2a + (n - 1)d]</code>`
+        keys: ["biology", "cell", "mitosis", "meiosis", "photosynthesis", "respiration", "কোষ"],
+        title: "SSC Biology: Cell Division & Bioenergetics (Theory & Comparison)",
+        theory: "<strong>Mitosis</strong> occurs in somatic cells for growth and repair, producing <strong>2 genetically identical diploid (2n)</strong> daughter cells. <strong>Meiosis</strong> occurs in reproductive cells to form gametes, producing <strong>4 genetically varied haploid (n)</strong> cells.<br><strong>Photosynthesis</strong> converts light energy into glucose in chloroplasts, while <strong>Respiration</strong> breaks down glucose in mitochondria to release ATP.",
+        formulas: "<code>6CO₂ + 6H₂O --(Light & Chlorophyll)--> C₆H₁₂O₆ + 6O₂</code><br><code>C₆H₁₂O₆ + 6O₂ --> 6CO₂ + 6H₂O + 38 ATP</code>",
+        example: "<strong>Exam Tip (CQ):</strong> Always distinguish Mitosis (equational division, 1 stage, no crossing over) vs. Meiosis (reductional division, 2 stages, crossing over in Pachytene creates genetic variation).",
+        diagram: "cell"
+      },
+      {
+        keys: ["trig", "trigonometry", "sin", "cos", "tan", "sec", "cosec", "cot", "ত্রিকোণমিতি"],
+        title: "SSC Math Ch. 9: Trigonometry (Theory, Ratios & Worked Example)",
+        theory: "In a right-angled triangle with acute angle <code>θ</code>, trigonometric ratios relate side lengths: <strong>Sine</strong> = Opposite/Hypotenuse, <strong>Cosine</strong> = Adjacent/Hypotenuse, <strong>Tangent</strong> = Opposite/Adjacent.",
+        formulas: "<code>sin²θ + cos²θ = 1</code> &bull; <code>sec²θ - tan²θ = 1</code> &bull; <code>cosec²θ - cot²θ = 1</code><br><code>sin 30° = ½</code>, <code>cos 60° = ½</code>, <code>sin 45° = 1/√2</code>, <code>tan 60° = √3</code>",
+        example: "<strong>Worked Example:</strong> If <code>tan θ = 3/4</code>, find <code>sin θ + cos θ</code>.<br>1. Opposite = 3, Adjacent = 4 &rArr; Hypotenuse = <code>√(3² + 4²) = 5</code><br>2. <code>sin θ + cos θ = 3/5 + 4/5 = <strong>7/5 = 1.4</strong></code>",
+        diagram: "triangle"
+      },
+      {
+        keys: ["log", "logarithm", "exponent", "indices", "সূচক", "লগারিদম"],
+        title: "SSC Math Ch. 4: Exponents & Logarithms (Theory, Laws & Example)",
+        theory: "A logarithm answers: <em>'To what power must base <code>a</code> be raised to get <code>N</code>?'</em> Specifically, <code>a^x = N &hArr; log_a(N) = x</code> (where <code>a > 0, a &ne; 1, N > 0</code>).",
+        formulas: "<code>log_a(MN) = log_a(M) + log_a(N)</code> &bull; <code>log_a(M/N) = log_a(M) - log_a(N)</code> &bull; <code>log_a(M^r) = r·log_a(M)</code> &bull; <code>log_a(a) = 1</code>, <code>log_a(1) = 0</code>",
+        example: "<strong>Worked Example:</strong> Evaluate <code>log₂(32) + log₃(9)</code>.<br>1. <code>32 = 2⁵</code> &rArr; <code>log₂(2⁵) = 5</code><br>2. <code>9 = 3²</code> &rArr; <code>log₃(3²) = 2</code> &rArr; Total = <code>5 + 2 = <strong>7</strong></code>",
+        diagram: null
+      },
+      {
+        keys: ["algebra", "quadratic", "series", "progression", "general math", "higher math"],
+        title: "SSC General & Higher Math: Algebra & Series",
+        theory: "A quadratic equation <code>ax² + bx + c = 0</code> has roots given by the quadratic formula, and its discriminant <code>D = b² - 4ac</code> determines whether roots are real and distinct (<code>D > 0</code>), equal (<code>D = 0</code>), or complex (<code>D < 0</code>).",
+        formulas: "<code>x = (-b ± √(b² - 4ac)) / 2a</code> &bull; <code>a_n = a + (n-1)d</code> &bull; <code>S_n = (n/2)[2a + (n-1)d]</code>",
+        example: "<strong>Worked Example:</strong> Solve <code>x² - 5x + 6 = 0</code>.<br>1. Factor: <code>(x - 2)(x - 3) = 0</code><br>2. Roots: <code><strong>x = 2, 3</strong></code>",
+        diagram: null
       }
     ];
+
+    function solvePhysicsNumerical(raw) {
+      // Supports prompts like "u=0, a=4, t=5, find v" or "m=5, a=3, find F"
+      const text = raw.toLowerCase();
+      const vars = {};
+      const assignRegex = /\b([a-zA-Z])\s*=\s*(-?\d+(?:\.\d+)?)/g;
+      let match;
+      while ((match = assignRegex.exec(text)) !== null) {
+        vars[match[1]] = parseFloat(match[2]);
+      }
+      if (Object.keys(vars).length < 2) return null;
+
+      const steps = [];
+      if ("m" in vars && "a" in vars && !("f" in vars)) {
+        const f = vars.m * vars.a;
+        steps.push(`Using Newton's 2nd Law: <code>F = m × a = ${vars.m} × ${vars.a} = <strong>${Number(f.toFixed(4))} N</strong></code>`);
+      }
+      if ("u" in vars && "a" in vars && "t" in vars) {
+        const v = vars.u + vars.a * vars.t;
+        const s = vars.u * vars.t + 0.5 * vars.a * vars.t * vars.t;
+        steps.push(`1. Final velocity: <code>v = u + at = ${vars.u} + (${vars.a})(${vars.t}) = <strong>${Number(v.toFixed(4))} m/s</strong></code>`);
+        steps.push(`2. Displacement: <code>s = ut + ½at² = ${vars.u}(${vars.t}) + 0.5(${vars.a})(${vars.t})² = <strong>${Number(s.toFixed(4))} m</strong></code>`);
+      }
+      if ("m" in vars && "v" in vars) {
+        const ke = 0.5 * vars.m * vars.v * vars.v;
+        const p = vars.m * vars.v;
+        steps.push(`Kinetic Energy: <code>KE = ½mv² = 0.5 × ${vars.m} × ${vars.v}² = <strong>${Number(ke.toFixed(4))} J</strong></code> | Momentum: <code>p = <strong>${Number(p.toFixed(4))} kg·m/s</strong></code>`);
+      }
+      if ("v" in vars && "r" in vars && !("i" in vars) && !("u" in vars)) {
+        const i = vars.v / vars.r;
+        steps.push(`Ohm's Law: <code>I = V / R = ${vars.v} / ${vars.r} = <strong>${Number(i.toFixed(4))} A</strong></code>`);
+      }
+      return steps.length ? steps.join("<br>") : null;
+    }
 
     function evaluateLocalMathExpression(rawExpr) {
       const expr = String(rawExpr || "").trim();
       if (!expr || !window.math) return null;
 
+      // 1. Check Physics/Chemistry variable numericals first
+      const physAns = solvePhysicsNumerical(expr);
+      if (physAns) return physAns;
+
+      // 2. Quadratic equation solver: a*x^2 + b*x + c = 0
+      if (expr.includes("=") && /x\^2|x²/i.test(expr)) {
+        try {
+          const normalized = expr.replace(/x²/g, "x^2");
+          const [lhs, rhs] = normalized.split("=");
+          const f = x => Number(math.evaluate(`(${lhs}) - (${rhs})`, { x }));
+          const c = f(0);
+          const f1 = f(1);
+          const fm1 = f(-1);
+          const a = (f1 + fm1 - 2 * c) / 2;
+          const b = (f1 - fm1) / 2;
+          if (Math.abs(a) > 1e-9) {
+            const disc = b * b - 4 * a * c;
+            if (disc > 0) {
+              const x1 = Number(((-b + Math.sqrt(disc)) / (2 * a)).toFixed(6));
+              const x2 = Number(((-b - Math.sqrt(disc)) / (2 * a)).toFixed(6));
+              return `Discriminant <code>D = ${Number(disc.toFixed(4))}</code> &rArr; Roots: <code>x₁ = <strong>${x1}</strong></code>, <code>x₂ = <strong>${x2}</strong></code>`;
+            } else if (Math.abs(disc) <= 1e-9) {
+              const x1 = Number((-b / (2 * a)).toFixed(6));
+              return `Discriminant <code>D = 0</code> &rArr; Equal root: <code>x = <strong>${x1}</strong></code>`;
+            } else {
+              const real = Number((-b / (2 * a)).toFixed(4));
+              const imag = Number((Math.sqrt(-disc) / (2 * a)).toFixed(4));
+              return `Complex roots: <code>x = <strong>${real} ± ${imag}i</strong></code>`;
+            }
+          }
+        } catch (_) {}
+      }
+
+      // 3. Linear equation solver: e.g., 2*x + 6 = 14
       if (/^[a-zA-Z0-9_().+\-*/^\s]+=[a-zA-Z0-9_().+\-*/^\s]+$/.test(expr) && /[a-zA-Z]/.test(expr)) {
         const [lhs, rhs] = expr.split("=");
         const varMatch = expr.match(/\b([a-zA-Z])\b/);
@@ -893,34 +1063,20 @@
         }
       }
 
+      // 4. General arithmetic, trig (degrees), and log evaluation
       const deg2rad = d => (d * Math.PI) / 180;
       const scope = {
-        sin: d => {
-          const v = Math.sin(deg2rad(d));
-          return Math.abs(v) < 1e-12 ? 0 : Number(v.toFixed(8));
-        },
-        cos: d => {
-          const v = Math.cos(deg2rad(d));
-          return Math.abs(v) < 1e-12 ? 0 : Number(v.toFixed(8));
-        },
+        sin: d => { const v = Math.sin(deg2rad(d)); return Math.abs(v) < 1e-12 ? 0 : Number(v.toFixed(8)); },
+        cos: d => { const v = Math.cos(deg2rad(d)); return Math.abs(v) < 1e-12 ? 0 : Number(v.toFixed(8)); },
         tan: d => {
           const mod180 = ((d % 180) + 180) % 180;
           if (Math.abs(mod180 - 90) < 1e-9) return Infinity;
           const v = Math.tan(deg2rad(d));
           return Math.abs(v) < 1e-12 ? 0 : Number(v.toFixed(8));
         },
-        cot: d => {
-          const t = scope.tan(d);
-          return t === 0 ? Infinity : Number((1 / t).toFixed(8));
-        },
-        sec: d => {
-          const c = scope.cos(d);
-          return c === 0 ? Infinity : Number((1 / c).toFixed(8));
-        },
-        csc: d => {
-          const s = scope.sin(d);
-          return s === 0 ? Infinity : Number((1 / s).toFixed(8));
-        },
+        cot: d => { const t = scope.tan(d); return t === 0 ? Infinity : Number((1 / t).toFixed(8)); },
+        sec: d => { const c = scope.cos(d); return c === 0 ? Infinity : Number((1 / c).toFixed(8)); },
+        csc: d => { const s = scope.sin(d); return s === 0 ? Infinity : Number((1 / s).toFixed(8)); },
         cosec: d => scope.csc(d),
         log10: x => Number(Math.log10(x).toFixed(8)),
         ln: x => Number(Math.log(x).toFixed(8)),
@@ -937,20 +1093,151 @@
       return null;
     }
 
+    // Offline HTML5 Canvas Diagram Generator
+    function createOfflineDiagramDataUrl(typeOrQuery) {
+      const q = String(typeOrQuery || "").toLowerCase();
+      const canvas = document.createElement("canvas");
+      canvas.width = 480;
+      canvas.height = 240;
+      const ctx = canvas.getContext("2d");
+
+      // Background
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.strokeStyle = "#e2e8f0";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(1, 1, canvas.width - 2, canvas.height - 2);
+
+      ctx.font = "bold 13px sans-serif";
+      ctx.fillStyle = "#0f172a";
+
+      if (q.includes("triangle") || q.includes("trig")) {
+        ctx.fillText("Right-Angled Triangle (Trigonometry Ratios)", 18, 24);
+        // Triangle vertices
+        const A = { x: 90, y: 195 }, B = { x: 330, y: 195 }, C = { x: 330, y: 65 };
+        ctx.beginPath();
+        ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.lineTo(C.x, C.y); ctx.closePath();
+        ctx.fillStyle = "#eef2ff"; ctx.fill();
+        ctx.strokeStyle = "#4f46e5"; ctx.lineWidth = 2.5; ctx.stroke();
+        // Right angle box
+        ctx.strokeRect(B.x - 16, B.y - 16, 16, 16);
+        // Angle arc
+        ctx.beginPath(); ctx.arc(A.x, A.y, 32, -0.5, 0); ctx.strokeStyle = "#e11d48"; ctx.stroke();
+        ctx.fillStyle = "#e11d48"; ctx.fillText("θ", A.x + 38, A.y - 8);
+        ctx.fillStyle = "#1e293b";
+        ctx.fillText("Adjacent (Base)", 165, 215);
+        ctx.fillText("Opposite", 340, 135);
+        ctx.fillText("Hypotenuse", 130, 118);
+      } else if (q.includes("projectile") || q.includes("motion") || q.includes("graph")) {
+        const isSin = q.includes("sin");
+        const isCos = q.includes("cos");
+        ctx.fillText(isSin ? "Graph: y = sin(x)" : isCos ? "Graph: y = cos(x)" : "Projectile Motion Trajectory", 18, 24);
+        // Axes
+        ctx.strokeStyle = "#64748b"; ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(40, isSin || isCos ? 130 : 200); ctx.lineTo(440, isSin || isCos ? 130 : 200);
+        ctx.moveTo(60, 40); ctx.lineTo(60, 215);
+        ctx.stroke();
+
+        ctx.strokeStyle = "#0d9488"; ctx.lineWidth = 3;
+        ctx.beginPath();
+        if (isSin || isCos) {
+          for (let px = 0; px <= 360; px++) {
+            const rad = (px / 360) * 2 * Math.PI;
+            const yVal = isSin ? Math.sin(rad) : Math.cos(rad);
+            const x = 60 + px;
+            const y = 130 - yVal * 70;
+            if (px === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+          }
+          ctx.stroke();
+          ctx.fillStyle = "#334155";
+          ctx.fillText("+1", 32, 65); ctx.fillText("0", 42, 134); ctx.fillText("-1", 32, 204);
+          ctx.fillText("90°", 145, 146); ctx.fillText("180°", 232, 146); ctx.fillText("270°", 322, 146); ctx.fillText("360°", 408, 146);
+        } else {
+          for (let t = 0; t <= 1; t += 0.02) {
+            const x = 60 + t * 350;
+            const y = 200 - 4 * 125 * t * (1 - t);
+            if (t === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+          }
+          ctx.stroke();
+          ctx.setLineDash([5, 5]); ctx.strokeStyle = "#f43f5e";
+          ctx.beginPath(); ctx.moveTo(235, 75); ctx.lineTo(235, 200); ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.fillStyle = "#f43f5e"; ctx.fillText("Max Height (H)", 242, 130);
+          ctx.fillStyle = "#0f172a"; ctx.fillText("Horizontal Range (R)", 180, 220);
+        }
+      } else if (q.includes("force")) {
+        ctx.fillText("Free-Body Force Diagram (F = ma)", 18, 24);
+        ctx.strokeStyle = "#94a3b8"; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(40, 175); ctx.lineTo(440, 175); ctx.stroke();
+        ctx.fillStyle = "#dbeafe"; ctx.strokeStyle = "#2563eb"; ctx.lineWidth = 2.5;
+        ctx.fillRect(190, 115, 90, 60); ctx.strokeRect(190, 115, 90, 60);
+        ctx.fillStyle = "#1e3a8a"; ctx.fillText("Mass (m)", 208, 150);
+        // Applied Force Arrow
+        ctx.strokeStyle = "#16a34a"; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(280, 145); ctx.lineTo(385, 145); ctx.stroke();
+        ctx.fillStyle = "#16a34a"; ctx.fillText("Applied Force (F)", 295, 135);
+        // Friction Arrow
+        ctx.strokeStyle = "#dc2626";
+        ctx.beginPath(); ctx.moveTo(190, 165); ctx.lineTo(105, 165); ctx.stroke();
+        ctx.fillStyle = "#dc2626"; ctx.fillText("Friction (f)", 110, 155);
+      } else if (q.includes("circuit")) {
+        ctx.fillText("Simple DC Series Circuit (V = IR)", 18, 24);
+        ctx.strokeStyle = "#0f172a"; ctx.lineWidth = 2.5;
+        ctx.strokeRect(110, 65, 260, 125);
+        // Battery
+        ctx.fillStyle = "#ffffff"; ctx.fillRect(95, 108, 30, 36);
+        ctx.beginPath(); ctx.moveTo(92, 118); ctx.lineTo(128, 118); ctx.moveTo(100, 134); ctx.lineTo(120, 134); ctx.stroke();
+        ctx.fillStyle = "#dc2626"; ctx.fillText("Battery (V)", 25, 130);
+        // Resistor
+        ctx.fillStyle = "#fef3c7"; ctx.fillRect(205, 52, 70, 26); ctx.strokeRect(205, 52, 70, 26);
+        ctx.fillStyle = "#92400e"; ctx.fillText("R (Ω)", 223, 70);
+        ctx.fillStyle = "#2563eb"; ctx.fillText("Current (I) →", 200, 210);
+      } else {
+        ctx.fillText("Eukaryotic Plant Cell Structure", 18, 24);
+        ctx.fillStyle = "#dcfce7"; ctx.strokeStyle = "#15803d"; ctx.lineWidth = 4;
+        ctx.fillRect(110, 50, 250, 155); ctx.strokeRect(110, 50, 250, 155);
+        // Vacuole
+        ctx.fillStyle = "#e0f2fe"; ctx.strokeStyle = "#0284c7"; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.ellipse(215, 130, 65, 42, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = "#0369a1"; ctx.fillText("Vacuole", 190, 134);
+        // Nucleus
+        ctx.fillStyle = "#fae8ff"; ctx.strokeStyle = "#9333ea";
+        ctx.beginPath(); ctx.arc(315, 95, 24, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = "#6b21a8"; ctx.fillText("Nucleus", 292, 132);
+        ctx.fillStyle = "#14532d"; ctx.fillText("Cell Wall", 372, 85);
+      }
+
+      return canvas.toDataURL("image/png");
+    }
+
+    function clearLocalFile() {
+      localAttachedFile = null;
+      localAttachedImageUrl = "";
+      localExtractedText = "";
+      document.getElementById("localAiFileInput").value = "";
+      document.getElementById("localAiFileStatus").textContent = "No file attached";
+      document.getElementById("solveLocalFileBtn").classList.add("hidden");
+      document.getElementById("clearLocalFileBtn").classList.add("hidden");
+    }
+
     async function handleLocalFileSelected(e) {
       const file = e.target.files?.[0];
       const statusEl = document.getElementById("localAiFileStatus");
       const solveBtn = document.getElementById("solveLocalFileBtn");
+      const clearBtn = document.getElementById("clearLocalFileBtn");
       if (!file) return;
 
       localAttachedFile = file;
       localExtractedText = "";
-      statusEl.textContent = `Scanning ${file.name} locally...`;
+      localAttachedImageUrl = file.type.startsWith("image/") ? URL.createObjectURL(file) : "";
+      statusEl.textContent = `Scanning ${file.name} locally (OCR/Text)...`;
       solveBtn.classList.add("hidden");
+      clearBtn.classList.remove("hidden");
 
       try {
         localExtractedText = await extractTextFromUploadedFile(file);
-        statusEl.textContent = `Attached: ${file.name} (${localExtractedText.trim().length} chars extracted)`;
+        statusEl.textContent = `Attached: ${file.name} (${localExtractedText.trim().length} chars scanned)`;
         solveBtn.classList.remove("hidden");
       } catch (err) {
         statusEl.textContent = `Error: ${err.message}`;
@@ -964,14 +1251,14 @@
         .filter(Boolean)
         .map(line => {
           const ans = evaluateLocalMathExpression(line);
-          return ans !== null ? `<code>${escapeHtml(line)}</code> = ${ans}` : null;
+          return ans !== null ? `<code>${escapeHtml(line)}</code> &rArr; ${ans}` : null;
         })
         .filter(Boolean);
     }
 
     async function solveLocalAttachedFile() {
       if (!localAttachedFile) {
-        alert("Attach a file first.");
+        alert("Attach an image, PDF, or text file first.");
         return;
       }
       appendLocalAiMessage("You", `Scan & solve locally: ${localAttachedFile.name}`, true);
@@ -979,51 +1266,86 @@
         if (!localExtractedText) {
           localExtractedText = await extractTextFromUploadedFile(localAttachedFile);
         }
+        const sections = [];
+        if (localAttachedImageUrl) {
+          sections.push(`<img src="${localAttachedImageUrl}" alt="Attached image" class="max-h-44 rounded-lg border border-white/20 mb-1" />`);
+        }
         const solutions = solveLocalExpressionsInText(localExtractedText);
         const note = findMatchingLocalNote(localExtractedText);
-        const sections = [];
+
         if (solutions.length) {
-          sections.push(`Solved <strong>${solutions.length}</strong> expression(s) from <strong>${escapeHtml(localAttachedFile.name)}</strong>:<br>` + solutions.slice(0, 20).join("<br>"));
+          sections.push(`<strong>Solved ${solutions.length} Math/Physics Expression(s):</strong><br>` + solutions.slice(0, 15).join("<br>"));
         }
         if (note) {
-          sections.push(`<strong>${escapeHtml(note.title)}:</strong><br>${note.body}`);
+          sections.push(formatLocalNoteCard(note));
         }
-        if (!sections.length) {
-          const preview = escapeHtml(localExtractedText.trim().slice(0, 500));
-          sections.push(`Extracted text from <strong>${escapeHtml(localAttachedFile.name)}</strong> locally:<br><pre class="mt-1 p-2 bg-black/30 rounded text-[11px] whitespace-pre-wrap">${preview || "(Empty text)"}</pre>`);
+        if (!solutions.length && !note) {
+          const preview = escapeHtml(localExtractedText.trim().slice(0, 600));
+          sections.push(`<strong>Extracted Text from ${escapeHtml(localAttachedFile.name)}:</strong><pre class="mt-1 p-2 bg-black/30 rounded text-[11px] whitespace-pre-wrap">${preview || "(No readable text detected)"}</pre>`);
         }
-        appendLocalAiMessage("Local AI", sections.join("<br><br>"), false);
+        appendLocalAiMessage("Local AI Pro", sections.join("<br><br>"), false);
       } catch (err) {
-        appendLocalAiMessage("Local AI", `Could not scan file: ${escapeHtml(err.message)}`, false);
+        appendLocalAiMessage("Local AI Pro", `Could not scan file: ${escapeHtml(err.message)}`, false);
       }
     }
 
     function findMatchingLocalNote(queryText) {
       const lower = String(queryText || "").toLowerCase();
-      return SSC_STUDY_NOTES.find(n => n.keys.some(k => lower.includes(k))) || null;
+      return SSC_STUDY_KNOWLEDGE.find(n => n.keys.some(k => lower.includes(k))) || null;
+    }
+
+    function formatLocalNoteCard(note) {
+      let html = `
+        <div class="space-y-1.5">
+          <div class="text-amber-300 font-extrabold text-xs">${escapeHtml(note.title)}</div>
+          <div><strong class="text-teal-300">📖 Core Theory:</strong> ${note.theory}</div>
+          <div><strong class="text-teal-300">📐 Key Formulas:</strong> ${note.formulas}</div>
+          <div class="bg-black/25 p-2 rounded-lg border border-white/10">${note.example}</div>
+        </div>`;
+      if (note.diagram) {
+        const imgUrl = createOfflineDiagramDataUrl(note.diagram);
+        html += `<div class="mt-2"><img src="${imgUrl}" alt="Diagram" class="rounded-lg border border-white/20 max-h-44 bg-white" /></div>`;
+      }
+      return html;
     }
 
     function generateLocalReply(rawQuestion) {
       const q = rawQuestion.trim();
+      const lower = q.toLowerCase();
+
+      // Offline diagram generation trigger
+      if (/^(draw|graph|diagram|sketch|plot)\b/.test(lower)) {
+        const imgUrl = createOfflineDiagramDataUrl(lower);
+        return `
+          <div class="space-y-1.5">
+            <div class="font-bold text-teal-300">Generated Offline Study Diagram:</div>
+            <img src="${imgUrl}" alt="Offline diagram" class="rounded-xl border border-white/20 max-h-52 bg-white" />
+            <a href="${imgUrl}" download="local-study-diagram.png" class="inline-block text-[10px] font-bold bg-teal-500/30 hover:bg-teal-500/40 text-teal-100 px-2.5 py-1 rounded-lg">⬇ Save Diagram</a>
+          </div>`;
+      }
+
       const mathAns = evaluateLocalMathExpression(q);
       const note = findMatchingLocalNote(q);
 
       if (mathAns !== null && note) {
-        return `<code>${escapeHtml(q)}</code> = ${mathAns}<br><br><strong>${escapeHtml(note.title)}:</strong><br>${note.body}`;
+        return `<div><strong>Calculated Answer:</strong> ${mathAns}</div><hr class="border-white/15 my-2">${formatLocalNoteCard(note)}`;
       }
       if (mathAns !== null) {
-        return `<code>${escapeHtml(q)}</code> = ${mathAns}`;
+        return `<code>${escapeHtml(q)}</code> &rArr; ${mathAns}`;
       }
       if (note) {
-        return `<strong>${escapeHtml(note.title)}:</strong><br>${note.body}`;
+        return formatLocalNoteCard(note);
       }
       if (localExtractedText) {
         const fileSol = solveLocalExpressionsInText(localExtractedText);
         if (fileSol.length) {
-          return `Solved from <strong>${escapeHtml(localAttachedFile?.name || "file")}</strong>:<br>` + fileSol.slice(0, 15).join("<br>");
+          return `Solved from <strong>${escapeHtml(localAttachedFile?.name || "attached file")}</strong>:<br>` + fileSol.slice(0, 15).join("<br>");
         }
       }
-      return `Local AI evaluates math/trig/log expressions &amp; linear equations (e.g., <code>sin(30) + cos(60)</code>, <code>log(16, 2)</code>, <code>2*x + 4 = 12</code>) and shows formula cards for <strong>Physics</strong>, <strong>Chemistry</strong>, <strong>Biology</strong>, <strong>General Math</strong>, <strong>Higher Math</strong>, <strong>Trig Formulas</strong>, and <strong>Log Laws</strong>.`;
+      return `Try asking:<br>
+        &bull; <strong>Theory + Examples:</strong> <code>motion</code>, <code>force</code>, <code>work and energy</code>, <code>electricity</code>, <code>chemistry mole</code>, <code>biology cell</code>, <code>trigonometry</code>, <code>logarithm</code><br>
+        &bull; <strong>Math &amp; Numericals:</strong> <code>x^2 - 5*x + 6 = 0</code>, <code>2*x + 6 = 14</code>, <code>sin(30) + cos(60)</code>, or <code>u=0, a=4, t=5</code><br>
+        &bull; <strong>Offline Diagrams:</strong> <code>draw triangle</code>, <code>draw projectile</code>, <code>graph sin(x)</code>, <code>draw circuit</code>, <code>draw cell</code>`;
     }
 
     function appendLocalAiMessage(sender, htmlBody, isUser) {
@@ -1032,14 +1354,14 @@
       div.className = isUser ? "text-right" : "text-left text-teal-100";
       div.innerHTML = isUser
         ? `<span class="inline-block bg-teal-600/80 text-white px-3 py-1.5 rounded-xl"><strong>You:</strong> ${escapeHtml(htmlBody)}</span>`
-        : `<div class="bg-white/10 border border-white/10 px-3 py-2 rounded-xl leading-relaxed"><span class="font-extrabold text-amber-300">${sender}:</span> ${htmlBody}</div>`;
+        : `<div class="bg-white/10 border border-white/10 px-3 py-2.5 rounded-xl leading-relaxed"><span class="font-extrabold text-amber-300">${sender}:</span> ${htmlBody}</div>`;
       box.appendChild(div);
       box.scrollTop = box.scrollHeight;
     }
 
     function askLocalQuick(promptText) {
       appendLocalAiMessage("You", promptText, true);
-      appendLocalAiMessage("Local AI", generateLocalReply(promptText), false);
+      appendLocalAiMessage("Local AI Pro", generateLocalReply(promptText), false);
     }
 
     function handleLocalAiSubmit(e) {
