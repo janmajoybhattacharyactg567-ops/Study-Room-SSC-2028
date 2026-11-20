@@ -196,8 +196,8 @@
 
           <form onsubmit="submitPortalChat(event)" class="mt-auto flex gap-2">
             <input id="portalChatInput" type="text" placeholder="Type a message to chat with classmates..."
-                   class="flex-1 bg-slate-50 border border-slate-200 focus:bg-white focus:border-emerald-500 rounded-xl px-3.5 py-2.5 text-xs outline-none transition" required />
-            <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-sm transition shrink-0">
+                   class="flex-1 min-w-0 bg-slate-50 border border-slate-200 focus:bg-white focus:border-emerald-500 rounded-xl px-3.5 py-2.5 text-xs outline-none transition" required />
+            <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-sm transition shrink-0 whitespace-nowrap">
               Send
             </button>
           </form>
@@ -219,8 +219,8 @@
 
           <form onsubmit="submitPortalComment(event)" class="mt-auto flex gap-2">
             <input id="portalCommentInput" type="text" placeholder="Write a comment for members..."
-                   class="flex-1 bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 rounded-xl px-3.5 py-2.5 text-xs outline-none transition" required />
-            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-sm transition shrink-0">
+                   class="flex-1 min-w-0 bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 rounded-xl px-3.5 py-2.5 text-xs outline-none transition" required />
+            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-sm transition shrink-0 whitespace-nowrap">
               Comment
             </button>
           </form>
@@ -239,43 +239,43 @@
     </div>
   </footer>
 
-  <!-- DEDICATED AI CHAT BOX HUB MODAL (Contains 1. Gemini, 2. ChatGPT, 3. Local AI) -->
-  <div id="aiChatHubModal" class="hidden fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-6">
-    <div class="bg-slate-900 rounded-3xl max-w-4xl w-full p-6 shadow-2xl border border-indigo-500/40 max-h-[92vh] flex flex-col">
-      <div class="flex items-center justify-between pb-4 border-b border-white/10 mb-4">
-        <div>
-          <h3 class="font-extrabold text-lg text-white">🤖 AI Chat Box Hub</h3>
-          <p class="text-xs text-slate-300">Switch between Gemini AI, ChatGPT, and Local AI Pro for PDF solutions, theory, math, and diagrams</p>
+  <!-- DEDICATED AI CHAT BOX HUB MODAL (1. Gemini with Failover & SVG Diagrams, 2. ChatGPT, 3. Local AI) -->
+  <div id="aiChatHubModal" class="hidden fixed inset-0 bg-slate-950/75 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-6">
+    <div class="bg-slate-900 rounded-3xl max-w-4xl w-full p-4 sm:p-6 shadow-2xl border border-indigo-500/40 max-h-[92vh] flex flex-col">
+      <div class="flex items-center justify-between pb-3.5 border-b border-white/10 mb-3.5 gap-2">
+        <div class="min-w-0">
+          <h3 class="font-extrabold text-base sm:text-lg text-white truncate">🤖 AI Chat Box Hub</h3>
+          <p class="text-[11px] sm:text-xs text-slate-300">Switch between Gemini AI, ChatGPT, and Local AI Pro for PDF solutions, theory, math &amp; diagrams</p>
         </div>
-        <button onclick="closeAiChatHubModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold text-xs">✕</button>
+        <button onclick="closeAiChatHubModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold text-xs shrink-0">✕</button>
       </div>
 
       <!-- Model Switcher Tabs inside Modal -->
       <div class="flex gap-2 mb-4 shrink-0 overflow-x-auto no-scrollbar">
-        <button type="button" onclick="switchAiHubTab('gemini')" id="hub-tab-gemini" class="ai-hub-tab bg-gradient-to-r from-indigo-600 to-blue-600 text-white px-4 py-2 rounded-xl text-xs font-extrabold shadow-md transition shrink-0">
+        <button type="button" onclick="switchAiHubTab('gemini')" id="hub-tab-gemini" class="ai-hub-tab bg-gradient-to-r from-indigo-600 to-blue-600 text-white px-3.5 py-2 rounded-xl text-xs font-extrabold shadow-md transition shrink-0 whitespace-nowrap">
           ✨ 1. Gemini AI (Online)
         </button>
-        <button type="button" onclick="switchAiHubTab('chatgpt')" id="hub-tab-chatgpt" class="ai-hub-tab bg-white/10 hover:bg-white/20 text-slate-300 px-4 py-2 rounded-xl text-xs font-extrabold transition shrink-0">
+        <button type="button" onclick="switchAiHubTab('chatgpt')" id="hub-tab-chatgpt" class="ai-hub-tab bg-white/10 hover:bg-white/20 text-slate-300 px-3.5 py-2 rounded-xl text-xs font-extrabold transition shrink-0 whitespace-nowrap">
           🤖 2. ChatGPT (Online)
         </button>
-        <button type="button" onclick="switchAiHubTab('local')" id="hub-tab-local" class="ai-hub-tab bg-white/10 hover:bg-white/20 text-slate-300 px-4 py-2 rounded-xl text-xs font-extrabold transition shrink-0">
-          🧠 3. Local Study Engine (Offline)
+        <button type="button" onclick="switchAiHubTab('local')" id="hub-tab-local" class="ai-hub-tab bg-white/10 hover:bg-white/20 text-slate-300 px-3.5 py-2 rounded-xl text-xs font-extrabold transition shrink-0 whitespace-nowrap">
+          🧠 3. Local AI (Offline)
         </button>
       </div>
 
       <!-- AI Modal Body Containers -->
-      <div class="overflow-y-auto flex-1 pr-1 space-y-4">
+      <div class="overflow-y-auto flex-1 pr-0.5 space-y-4">
 
-        <!-- 1. Gemini AI Panel -->
+        <!-- 1. Gemini AI Panel (Multi-Model Auto-Failover + Free SVG Textbook Diagrams) -->
         <div id="ai-panel-gemini" class="ai-hub-panel space-y-4">
-          <div class="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white rounded-2xl p-5 shadow-xl border border-indigo-500/30">
+          <div class="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white rounded-2xl p-4 sm:p-5 shadow-xl border border-indigo-500/30">
             <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
               <div>
                 <div class="flex items-center gap-2 flex-wrap">
-                  <h4 class="font-extrabold text-sm text-white">Gemini 3.8 Flash Tutor</h4>
-                  <span class="text-[10px] font-extrabold bg-indigo-500/30 text-indigo-200 px-2 py-0.5 rounded-full">STABLE &bull; TEXT, PDF &amp; DIAGRAMS</span>
+                  <h4 class="font-extrabold text-sm text-white">Gemini Multi-Model Tutor</h4>
+                  <span class="text-[10px] font-extrabold bg-indigo-500/30 text-indigo-200 px-2 py-0.5 rounded-full">AUTO-FAILOVER &bull; PDF &amp; SVG DIAGRAMS</span>
                 </div>
-                <p class="text-[11px] text-slate-300 mt-0.5">Cloud AI for Physics, Chemistry, Math, Biology, PDF/image solving, and AI diagram generation.</p>
+                <p class="text-[11px] text-slate-300 mt-0.5">Automatically switches across active free-tier Gemini models during traffic spikes so you never get stuck.</p>
               </div>
               <div class="flex gap-1.5 flex-wrap items-center">
                 <button type="button" onclick="askGeminiQuick('Explain Newton’s 2nd Law with theory and an SSC Physics numerical step-by-step')" class="text-[10px] font-bold bg-white/10 hover:bg-white/20 px-2.5 py-1 rounded-lg transition">Physics CQ</button>
@@ -300,19 +300,19 @@
             </div>
 
             <div id="geminiAiMessages" class="space-y-2.5 max-h-64 overflow-y-auto mb-3.5 bg-black/25 border border-white/10 rounded-xl p-3.5 text-xs">
-              <div class="text-indigo-200"><span class="font-extrabold text-amber-300">Gemini AI:</span> Ask any SSC 2028 question or attach a study PDF/image to solve step-by-step.</div>
+              <div class="text-indigo-200"><span class="font-extrabold text-amber-300">Gemini AI:</span> Ask any SSC 2028 question, attach a PDF/image to solve step-by-step, or type a topic and click <strong>🎨 Draw Diagram</strong>!</div>
             </div>
 
             <form onsubmit="handleGeminiAiSubmit(event)" class="flex gap-2 items-center">
-              <input id="geminiAiInput" type="text" placeholder="Ask Gemini AI anything..." class="flex-1 min-w-0 bg-white/10 border border-white/25 focus:border-indigo-400 text-white placeholder-slate-400 rounded-xl px-3.5 py-2.5 text-xs outline-none" required />
-              <button id="geminiSendBtn" type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-md transition shrink-0 whitespace-nowrap">Ask Gemini</button>
+              <input id="geminiAiInput" type="text" placeholder="Ask Gemini AI or enter diagram topic..." class="flex-1 min-w-0 bg-white/10 border border-white/25 focus:border-indigo-400 text-white placeholder-slate-400 rounded-xl px-3 py-2.5 text-xs outline-none" required />
+              <button id="geminiSendBtn" type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-3.5 py-2.5 rounded-xl shadow-md transition shrink-0 whitespace-nowrap">Ask Gemini</button>
             </form>
           </div>
         </div>
 
         <!-- 2. ChatGPT Panel -->
         <div id="ai-panel-chatgpt" class="ai-hub-panel hidden space-y-4">
-          <div class="bg-gradient-to-br from-slate-900 via-emerald-950 to-slate-900 text-white rounded-2xl p-5 shadow-xl border border-emerald-500/30">
+          <div class="bg-gradient-to-br from-slate-900 via-emerald-950 to-slate-900 text-white rounded-2xl p-4 sm:p-5 shadow-xl border border-emerald-500/30">
             <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
               <div>
                 <div class="flex items-center gap-2 flex-wrap">
@@ -343,29 +343,30 @@
             </div>
 
             <div id="chatgptMessages" class="space-y-2.5 max-h-64 overflow-y-auto mb-3.5 bg-black/25 border border-white/10 rounded-xl p-3.5 text-xs">
-              <div class="text-emerald-200"><span class="font-extrabold text-amber-300">ChatGPT:</span> Ask any question or attach a study file for deep reasoning solutions *(requires OpenAI API key with credit balance via ⚙️)*.</div>
+              <div class="text-emerald-200"><span class="font-extrabold text-amber-300">ChatGPT:</span> Ask any question or attach a study file for deep reasoning solutions *(requires an OpenAI API key with active billing credits via ⚙️)*.</div>
             </div>
 
             <form onsubmit="handleChatGptSubmit(event)" class="flex gap-2 items-center">
-              <input id="chatgptInput" type="text" placeholder="Ask ChatGPT anything..." class="flex-1 min-w-0 bg-white/10 border border-white/25 focus:border-emerald-400 text-white placeholder-slate-400 rounded-xl px-3.5 py-2.5 text-xs outline-none" required />
-              <button id="chatgptSendBtn" type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-md transition shrink-0 whitespace-nowrap">Ask ChatGPT</button>
+              <input id="chatgptInput" type="text" placeholder="Ask ChatGPT anything..." class="flex-1 min-w-0 bg-white/10 border border-white/25 focus:border-emerald-400 text-white placeholder-slate-400 rounded-xl px-3 py-2.5 text-xs outline-none" required />
+              <button id="chatgptSendBtn" type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-3.5 py-2.5 rounded-xl shadow-md transition shrink-0 whitespace-nowrap">Ask ChatGPT</button>
             </form>
           </div>
         </div>
 
         <!-- 3. Local AI Panel -->
         <div id="ai-panel-local" class="ai-hub-panel hidden space-y-4">
-          <div class="bg-gradient-to-br from-slate-900 via-teal-950 to-slate-900 text-white rounded-2xl p-5 shadow-xl border border-teal-500/30">
+          <div class="bg-gradient-to-br from-slate-900 via-teal-950 to-slate-900 text-white rounded-2xl p-4 sm:p-5 shadow-xl border border-teal-500/30">
             <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
               <div>
                 <div class="flex items-center gap-2 flex-wrap">
                   <h4 class="font-extrabold text-sm text-white">Local Study Engine Pro</h4>
-                  <span class="text-[10px] font-extrabold bg-teal-500/20 text-teal-200 px-2 py-0.5 rounded-full">OFFLINE &bull; NO API KEY</span>
+                  <span class="text-[10px] font-extrabold bg-teal-500/20 text-teal-200 px-2 py-0.5 rounded-full">100% OFFLINE &bull; NO API KEY</span>
                 </div>
-                <p class="text-[11px] text-slate-300 mt-0.5">Full offline tutor: explains theory, formulas, worked examples, solves equations, and draws diagrams.</p>
+                <p class="text-[11px] text-slate-300 mt-0.5">Full offline tutor: explains theory, formulas, worked examples, solves equations, scans files via OCR, and draws diagrams.</p>
               </div>
               <div class="flex gap-1.5 flex-wrap">
                 <button type="button" onclick="askLocalQuick('motion')" class="text-[10px] font-bold bg-white/10 hover:bg-white/20 px-2.5 py-1 rounded-lg transition">Motion Theory</button>
+                <button type="button" onclick="askLocalQuick('force')" class="text-[10px] font-bold bg-white/10 hover:bg-white/20 px-2.5 py-1 rounded-lg transition">Force</button>
                 <button type="button" onclick="askLocalQuick('draw triangle')" class="text-[10px] font-bold bg-teal-500/25 hover:bg-teal-500/40 text-teal-200 border border-teal-400/30 px-2.5 py-1 rounded-lg transition">📐 Draw Triangle</button>
               </div>
             </div>
@@ -385,12 +386,12 @@
             </div>
 
             <div id="localAiMessages" class="space-y-2.5 max-h-64 overflow-y-auto mb-3.5 bg-black/25 border border-white/10 rounded-xl p-3.5 text-xs">
-              <div class="text-teal-200"><span class="font-extrabold text-amber-300">Local AI Pro:</span> Ask theory (<code>motion</code>, <code>force</code>), solve math (<code>x^2 - 5*x + 6 = 0</code>), or draw diagrams (<code>draw triangle</code>).</div>
+              <div class="text-teal-200"><span class="font-extrabold text-amber-300">Local AI Pro:</span> Ask theory (<code>motion</code>, <code>force</code>, <code>mole</code>, <code>cell</code>, <code>trig</code>), solve math (<code>x^2 - 5*x + 6 = 0</code>), or draw diagrams (<code>draw triangle</code>).</div>
             </div>
 
             <form onsubmit="handleLocalAiSubmit(event)" class="flex gap-2 items-center">
-              <input id="localAiInput" type="text" placeholder="Ask theory, solve math, or draw diagrams..." class="flex-1 min-w-0 bg-white/10 border border-white/25 focus:border-teal-400 text-white placeholder-slate-400 rounded-xl px-3.5 py-2.5 text-xs outline-none" required />
-              <button type="submit" class="bg-teal-500 hover:bg-teal-600 text-slate-950 font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-md transition shrink-0 whitespace-nowrap">Solve Local</button>
+              <input id="localAiInput" type="text" placeholder="Ask theory, solve math, or draw diagrams..." class="flex-1 min-w-0 bg-white/10 border border-white/25 focus:border-teal-400 text-white placeholder-slate-400 rounded-xl px-3 py-2.5 text-xs outline-none" required />
+              <button type="submit" class="bg-teal-500 hover:bg-teal-600 text-slate-950 font-extrabold text-xs px-3.5 py-2.5 rounded-xl shadow-md transition shrink-0 whitespace-nowrap">Solve Local</button>
             </form>
           </div>
         </div>
@@ -572,8 +573,13 @@
     const WHATSAPP_INVITE_URL = "https://chat.whatsapp.com/IVS5nwQpGIiGOSqYg63vKR";
 
     const DEFAULT_GEMINI_API_KEY = "";
-    const GEMINI_MODEL = "gemini-3.8-flash";
-    const GEMINI_IMAGE_MODEL = "gemini-3.8-flash";
+    // Active free-tier Gemini models ordered from strongest to fastest fallback
+    const GEMINI_FALLBACK_MODELS = [
+      "gemini-3.8-flash",
+      "gemini-3.6-flash",
+      "gemini-3.5-flash-lite",
+      "gemini-3.1-flash-lite"
+    ];
 
     const DEFAULT_OPENAI_API_KEY = "";
     const OPENAI_MODEL = "gpt-4o-mini";
@@ -642,11 +648,11 @@
 
     function switchAiHubTab(tab) {
       document.querySelectorAll(".ai-hub-tab").forEach(b => {
-        b.className = "ai-hub-tab bg-white/10 hover:bg-white/20 text-slate-300 px-4 py-2 rounded-xl text-xs font-extrabold transition shrink-0";
+        b.className = "ai-hub-tab bg-white/10 hover:bg-white/20 text-slate-300 px-3.5 py-2 rounded-xl text-xs font-extrabold transition shrink-0 whitespace-nowrap";
       });
       document.querySelectorAll(".ai-hub-panel").forEach(p => p.classList.add("hidden"));
 
-      document.getElementById("hub-tab-" + tab).className = "ai-hub-tab bg-gradient-to-r from-indigo-600 to-blue-600 text-white px-4 py-2 rounded-xl text-xs font-extrabold shadow-md transition shrink-0";
+      document.getElementById("hub-tab-" + tab).className = "ai-hub-tab bg-gradient-to-r from-indigo-600 to-blue-600 text-white px-3.5 py-2 rounded-xl text-xs font-extrabold shadow-md transition shrink-0 whitespace-nowrap";
       document.getElementById("ai-panel-" + tab).classList.remove("hidden");
     }
 
@@ -656,7 +662,7 @@
       const titleEl = document.getElementById("aiModalTitle"), descEl = document.getElementById("aiModalDesc"), labelEl = document.getElementById("aiModalLabel"), inputEl = document.getElementById("aiApiKeyInput");
       if (type === "gemini") {
         titleEl.textContent = "⚙️ Configure Gemini API Key";
-        descEl.innerHTML = 'Get key in <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-indigo-600 font-bold underline">Google AI Studio</a>.';
+        descEl.innerHTML = 'Get a free key in <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-indigo-600 font-bold underline">Google AI Studio</a>.';
         labelEl.textContent = "Gemini API Key"; inputEl.value = localStorage.getItem("sr_gemini_api_key") || "";
       } else {
         titleEl.textContent = "⚙️ Configure OpenAI API Key";
@@ -678,7 +684,7 @@
       closeAiKeyModal();
     }
 
-    // 1. Gemini AI (with built-in high-demand auto-retry safety block)
+    // 1. Gemini AI (Multi-Model Automatic Failover + Free SVG Diagrams)
     function getGeminiApiKey() { return (localStorage.getItem("sr_gemini_api_key") || DEFAULT_GEMINI_API_KEY || "").trim(); }
     function clearGeminiChat() { geminiChatHistory = []; document.getElementById("geminiAiMessages").innerHTML = `<div class="text-indigo-200">Chat cleared!</div>`; }
     function clearGeminiFile() {
@@ -690,82 +696,115 @@
     }
     async function handleGeminiFileSelected(e) {
       const file = e.target.files?.[0]; if (!file) return;
-      geminiAttachedFile = file; geminiAttachedMime = file.type || "application/pdf";
+      geminiAttachedFile = file; geminiAttachedMime = file.type || (file.name.toLowerCase().endsWith(".pdf") ? "application/pdf" : "text/plain");
+      geminiExtractedText = "";
       document.getElementById("geminiFileStatus").textContent = `Preparing ${file.name}...`;
       document.getElementById("clearGeminiFileBtn").classList.remove("hidden");
       try {
         if (file.size <= 15 * 1024 * 1024 && (geminiAttachedMime.startsWith("image/") || geminiAttachedMime === "application/pdf")) {
           geminiAttachedBase64 = await fileToBase64(file);
         } else {
+          geminiAttachedBase64 = null;
           geminiExtractedText = await extractTextFromUploadedFile(file);
         }
         document.getElementById("geminiFileStatus").textContent = `Attached: ${file.name}`;
         document.getElementById("solveGeminiFileBtn").classList.remove("hidden");
       } catch (err) { document.getElementById("geminiFileStatus").textContent = `Error: ${err.message}`; }
     }
-    async function callGeminiApi(userPrompt, includeAttachment = false, retryCount = 0) {
-      const apiKey = getGeminiApiKey(); if (!apiKey) { openAiKeyModal("gemini"); throw new Error("Please set your Gemini API key."); }
-      const userParts = [{ text: userPrompt }];
-      if (includeAttachment && geminiAttachedFile) {
-        if (geminiAttachedBase64) userParts.push({ inline_data: { mime_type: geminiAttachedMime, data: geminiAttachedBase64 } });
-        else if (geminiExtractedText) userParts[0].text += `\n\n--- File ---\n${geminiExtractedText.slice(0, 20000)}`;
-      }
-      const contents = [...geminiChatHistory.slice(-10), { role: "user", parts: userParts }];
-      
-      try {
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${encodeURIComponent(apiKey)}`, {
-          method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ system_instruction: { parts: [{ text: "Expert NCTB SSC 2028 tutor." }] }, contents, generationConfig: { temperature: 0.35, maxOutputTokens: 2048 } })
-        });
-        const data = await res.json();
-        
-        if (!res.ok) {
-          const errMessage = data?.error?.message || "Gemini API request failed.";
-          if ((res.status === 503 || errMessage.toLowerCase().includes("high demand") || errMessage.toLowerCase().includes("resource exhausted")) && retryCount < 2) {
-            await new Promise(resolve => setTimeout(resolve, 2500));
-            return callGeminiApi(userPrompt, includeAttachment, retryCount + 1);
-          }
-          throw new Error(errMessage);
-        }
 
-        const reply = data?.candidates?.[0]?.content?.parts?.map(p => p.text || "").join("") || "No response.";
-        geminiChatHistory.push({ role: "user", parts: [{ text: userPrompt }] }, { role: "model", parts: [{ text: reply }] });
-        return reply;
-      } catch (err) {
-        if (retryCount < 2 && (err.message.includes("503") || err.message.includes("high demand"))) {
-          await new Promise(resolve => setTimeout(resolve, 2500));
-          return callGeminiApi(userPrompt, includeAttachment, retryCount + 1);
+    async function callGeminiApi(userPrompt, includeAttachment = false) {
+      const apiKey = getGeminiApiKey();
+      if (!apiKey) {
+        openAiKeyModal("gemini");
+        throw new Error("Please set your Gemini API key.");
+      }
+
+      const systemInstruction = "You are an expert NCTB SSC 2028 tutor. Solve Physics, Chemistry, Math, and Biology with theory, formulas, and step-by-step worked examples.";
+      const userParts = [{ text: userPrompt }];
+
+      if (includeAttachment && geminiAttachedFile) {
+        if (geminiAttachedBase64 && (geminiAttachedMime.startsWith("image/") || geminiAttachedMime === "application/pdf")) {
+          userParts.push({ inline_data: { mime_type: geminiAttachedMime, data: geminiAttachedBase64 } });
+        } else if (geminiExtractedText) {
+          userParts[0].text += `\n\n--- File (${geminiAttachedFile.name}) ---\n${geminiExtractedText.slice(0, 25000)}`;
         }
-        throw err;
+      }
+
+      const contents = [...geminiChatHistory.slice(-10), { role: "user", parts: userParts }];
+      let lastError = "All Gemini free-tier models are currently busy.";
+
+      // Automatically cycle through free-tier models if one hits high demand (503) or rate limits (429)
+      for (const modelName of GEMINI_FALLBACK_MODELS) {
+        try {
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(apiKey)}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              system_instruction: { parts: [{ text: systemInstruction }] },
+              contents,
+              generationConfig: { temperature: 0.35, maxOutputTokens: 2048 }
+            })
+          });
+
+          const data = await res.json();
+
+          if (!res.ok) {
+            const errMsg = data?.error?.message || `HTTP ${res.status}`;
+            lastError = `${modelName}: ${errMsg}`;
+            if (res.status === 403 || errMsg.toLowerCase().includes("api key not valid")) {
+              throw new Error("Invalid Gemini API Key. Please check your key in ⚙️ Gemini Key.");
+            }
+            continue;
+          }
+
+          const replyText = data?.candidates?.[0]?.content?.parts?.map(p => p.text || "").join("") || "No response returned.";
+          geminiChatHistory.push({ role: "user", parts: [{ text: userPrompt }] });
+          geminiChatHistory.push({ role: "model", parts: [{ text: replyText }] });
+          return replyText;
+
+        } catch (err) {
+          if (err.message.includes("Invalid Gemini API Key")) throw err;
+          lastError = err.message;
+        }
+      }
+
+      throw new Error(`Gemini servers are temporarily overloaded. Details: ${lastError}`);
+    }
+
+    async function generateGeminiDiagramFromInput() {
+      const input = document.getElementById("geminiAiInput");
+      const promptText = input.value.trim() || "Projectile motion trajectory diagram with labels";
+      input.value = "";
+      appendGeminiMessage("You", `🎨 Draw Diagram: ${promptText}`, true);
+      const loading = appendGeminiMessage("Gemini Visual", `<span class="italic text-fuchsia-200">Drawing textbook diagram...</span>`, false);
+
+      try {
+        const svgPrompt = `Create a clean, well-labeled educational SVG diagram (width="460" height="260" viewBox="0 0 460 260") on a white background (#ffffff) for Class 9-10 SSC students illustrating: "${promptText}". Return ONLY valid <svg>...</svg> code with clear dark text labels and distinct colors. Do not include markdown backticks or extra explanation.`;
+        const reply = await callGeminiApi(svgPrompt, false);
+        const svgMatch = reply.match(/<svg[\s\S]*?<\/svg>/i);
+
+        if (svgMatch) {
+          loading.innerHTML = `<div class="space-y-2"><div class="font-extrabold text-fuchsia-300">Gemini Textbook Diagram:</div><div class="bg-white p-2 rounded-xl overflow-x-auto border border-white/20">${svgMatch[0]}</div></div>`;
+        } else {
+          loading.innerHTML = `<div class="bg-white/10 p-3 rounded-xl"><span class="font-bold text-amber-300">Gemini:</span> ${formatMarkdown(reply)}</div>`;
+        }
+      } catch (err) {
+        loading.innerHTML = `<div class="bg-rose-500/25 p-2.5 rounded-xl text-rose-200">Error: ${escapeHtml(err.message)}</div>`;
       }
     }
-    async function generateGeminiDiagramFromInput() {
-      const input = document.getElementById("geminiAiInput"); const promptText = input.value.trim() || "Projectile motion diagram";
-      input.value = ""; appendGeminiMessage("You", `🎨 Draw Diagram: ${promptText}`, true);
-      const loading = appendGeminiMessage("Gemini Visual", `<span class="italic">Generating...</span>`, false);
-      try {
-        const apiKey = getGeminiApiKey(); if (!apiKey) { openAiKeyModal("gemini"); throw new Error("Set Gemini key."); }
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_IMAGE_MODEL}:generateContent?key=${encodeURIComponent(apiKey)}`, {
-          method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: `Educational textbook diagram for SSC: ${promptText}` }] }] })
-        });
-        const data = await res.json(); if (!res.ok) throw new Error(data?.error?.message || "Image generation error.");
-        const cap = data?.candidates?.[0]?.content?.parts?.map(p => p.text || "").join("") || "Diagram generated.";
-        loading.innerHTML = `<span class="font-bold text-amber-300">Gemini:</span> ${formatMarkdown(cap)}`;
-      } catch (err) { loading.innerHTML = `<span class="text-rose-300">Error: ${escapeHtml(err.message)}</span>`; }
-    }
-    function formatMarkdown(raw) { return window.marked ? marked.parse(raw) : escapeHtml(raw).replace(/\n/g, "<br>"); }
+
+    function formatMarkdown(raw) { return window.marked ? `<div class="ai-markdown">${marked.parse(raw)}</div>` : escapeHtml(raw).replace(/\n/g, "<br>"); }
     function appendGeminiMessage(sender, html, isUser) {
       const box = document.getElementById("geminiAiMessages");
       const d = document.createElement("div"); d.className = isUser ? "text-right" : "text-left text-indigo-100";
-      d.innerHTML = isUser ? `<span class="inline-block bg-indigo-600 text-white px-3 py-1.5 rounded-xl"><strong>You:</strong> ${escapeHtml(html)}</span>` : `<div class="bg-white/10 p-3 rounded-xl"><span class="font-bold text-amber-300">${sender}:</span> ${html}</div>`;
+      d.innerHTML = isUser ? `<span class="inline-block bg-indigo-600 text-white px-3 py-1.5 rounded-xl text-left max-w-[85%]"><strong>You:</strong> ${escapeHtml(html)}</span>` : `<div class="bg-white/10 p-3 rounded-xl leading-relaxed"><span class="font-bold text-amber-300">${sender}:</span> ${html}</div>`;
       box.appendChild(d); box.scrollTop = box.scrollHeight; return d;
     }
     async function solveGeminiAttachedFile() {
       if (!geminiAttachedFile) return;
       appendGeminiMessage("You", `Solve file: ${geminiAttachedFile.name}`, true);
       const l = appendGeminiMessage("Gemini AI", "Solving...", false);
-      try { const r = await callGeminiApi(`Solve file contents`, true); l.innerHTML = `<span class="font-bold text-amber-300">Gemini:</span> ${formatMarkdown(r)}`; }
+      try { const r = await callGeminiApi(`Solve all questions and problems in ${geminiAttachedFile.name} step-by-step.`, true); l.innerHTML = `<span class="font-bold text-amber-300">Gemini:</span> ${formatMarkdown(r)}`; }
       catch (err) { l.innerHTML = `<span class="text-rose-300">Error: ${escapeHtml(err.message)}</span>`; }
     }
     async function askGeminiQuick(txt) {
@@ -773,7 +812,17 @@
       try { const r = await callGeminiApi(txt, Boolean(geminiAttachedFile)); l.innerHTML = `<span class="font-bold text-amber-300">Gemini:</span> ${formatMarkdown(r)}`; }
       catch (err) { l.innerHTML = `<span class="text-rose-300">Error: ${escapeHtml(err.message)}</span>`; }
     }
-    function handleGeminiAiSubmit(e) { e.preventDefault(); const i = document.getElementById("geminiAiInput"), v = i.value.trim(); if (!v) return; i.value = ""; askGeminiQuick(v); }
+    function handleGeminiAiSubmit(e) {
+      e.preventDefault();
+      const i = document.getElementById("geminiAiInput"), v = i.value.trim();
+      if (!v) return;
+      if (/^(draw|generate image|sketch|illustrate)\b/i.test(v)) {
+        generateGeminiDiagramFromInput();
+        return;
+      }
+      i.value = "";
+      askGeminiQuick(v);
+    }
 
     // 2. ChatGPT
     function getOpenAiApiKey() { return (localStorage.getItem("sr_openai_api_key") || DEFAULT_OPENAI_API_KEY || "").trim(); }
@@ -813,7 +862,7 @@
     function appendChatGptMessage(sender, html, isUser) {
       const box = document.getElementById("chatgptMessages");
       const d = document.createElement("div"); d.className = isUser ? "text-right" : "text-left text-emerald-100";
-      d.innerHTML = isUser ? `<span class="inline-block bg-emerald-600 text-white px-3 py-1.5 rounded-xl"><strong>You:</strong> ${escapeHtml(html)}</span>` : `<div class="bg-white/10 p-3 rounded-xl"><span class="font-bold text-amber-300">${sender}:</span> ${html}</div>`;
+      d.innerHTML = isUser ? `<span class="inline-block bg-emerald-600 text-white px-3 py-1.5 rounded-xl text-left max-w-[85%]"><strong>You:</strong> ${escapeHtml(html)}</span>` : `<div class="bg-white/10 p-3 rounded-xl leading-relaxed"><span class="font-bold text-amber-300">${sender}:</span> ${html}</div>`;
       box.appendChild(d); box.scrollTop = box.scrollHeight; return d;
     }
     async function solveChatGptAttachedFile() {
@@ -832,7 +881,7 @@
 
     // 3. Local Study Engine Pro
     const SSC_STUDY_KNOWLEDGE = [
-      { keys: ["motion", "velocity", "acceleration", "displacement"], title: "SSC Physics Ch. 2: Motion", theory: "Motion is change in position over time. Acceleration is rate of change of velocity.", formulas: "<code>v = u + at</code> &bull; <code>s = ut + ½at²</code>", example: "<code>u=0, a=3, t=6</code> &rArr; <code>v=18 m/s, s=54 m</code>", diagram: "projectile" },
+      { keys: ["motion", "velocity", "acceleration", "displacement"], title: "SSC Physics Ch. 2: Motion", theory: "Motion is change in position over time. Acceleration is rate of change of velocity.", formulas: "<code>v = u + at</code> &bull; <code>s = ut + ½at²</code> &bull; <code>v² = u² + 2as</code>", example: "<code>u=0, a=3, t=6</code> &rArr; <code>v=18 m/s, s=54 m</code>", diagram: "projectile" },
       { keys: ["force", "newton", "momentum"], title: "SSC Physics Ch. 3: Force", theory: "Newton's 2nd Law: <code>F = ma</code>.", formulas: "<code>F = ma</code> &bull; <code>p = mv</code>", example: "<code>F=20N, m=4kg</code> &rArr; <code>a=5 m/s²</code>", diagram: "force" },
       { keys: ["mole", "chemistry"], title: "SSC Chemistry: Mole Concept", theory: "One mole contains <code>6.022 × 10²³</code> particles.", formulas: "<code>n = m / M</code>", example: "<code>88g CO₂</code> &rArr; <code>2 moles</code>", diagram: null },
       { keys: ["cell", "biology", "mitosis"], title: "SSC Biology: Cell Division", theory: "Mitosis produces 2 identical cells; Meiosis produces 4 gametes.", formulas: "Cell division for growth & reproduction.", example: "Mitosis maintains chromosome count.", diagram: "cell" },
@@ -840,6 +889,23 @@
     ];
     function evaluateLocalMathExpression(raw) {
       const expr = String(raw || "").trim(); if (!expr || !window.math) return null;
+      if (expr.includes("=") && /x\^2|x²/i.test(expr)) {
+        try {
+          const norm = expr.replace(/x²/g, "x^2");
+          const [lhs, rhs] = norm.split("=");
+          const f = x => Number(math.evaluate(`(${lhs}) - (${rhs})`, { x }));
+          const c = f(0), f1 = f(1), fm1 = f(-1);
+          const a = (f1 + fm1 - 2 * c) / 2, b = (f1 - fm1) / 2;
+          if (Math.abs(a) > 1e-9) {
+            const disc = b * b - 4 * a * c;
+            if (disc >= 0) {
+              const x1 = Number(((-b + Math.sqrt(disc)) / (2 * a)).toFixed(4));
+              const x2 = Number(((-b - Math.sqrt(disc)) / (2 * a)).toFixed(4));
+              return `Roots: <code>x₁ = ${x1}</code>, <code>x₂ = ${x2}</code>`;
+            }
+          }
+        } catch (_) {}
+      }
       try {
         const val = math.evaluate(expr, { sin: d => Math.sin(d*Math.PI/180), cos: d => Math.cos(d*Math.PI/180), tan: d => Math.tan(d*Math.PI/180) });
         return `<strong>${typeof val === "number" ? Number(val.toFixed(6)) : val}</strong>`;
@@ -853,6 +919,7 @@
         ctx.fillText("Right-Angled Triangle", 18, 24);
         ctx.beginPath(); ctx.moveTo(90, 160); ctx.lineTo(330, 160); ctx.lineTo(330, 60); ctx.closePath();
         ctx.fillStyle = "#eef2ff"; ctx.fill(); ctx.strokeStyle = "#4f46e5"; ctx.lineWidth = 2.5; ctx.stroke();
+        ctx.strokeRect(314, 144, 16, 16);
       } else {
         ctx.fillText("Educational Diagram", 18, 24);
         ctx.fillStyle = "#dcfce7"; ctx.strokeStyle = "#15803d"; ctx.lineWidth = 3;
@@ -879,7 +946,7 @@
       if (!localAttachedFile) return;
       appendLocalAiMessage("You", `Scan local file: ${localAttachedFile.name}`, true);
       const note = SSC_STUDY_KNOWLEDGE.find(n => n.keys.some(k => localAttachedFile.name.toLowerCase().includes(k) || localExtractedText.toLowerCase().includes(k)));
-      const html = note ? `<div class="space-y-1"><strong class="text-amber-300">${note.title}</strong><div>${note.theory}</div></div>` : `Scanned text: <pre class="bg-black/30 p-2 text-[11px]">${escapeHtml(localExtractedText.slice(0, 300))}</pre>`;
+      const html = note ? `<div class="space-y-1"><strong class="text-amber-300">${note.title}</strong><div>${note.theory}</div><div>Formulas: ${note.formulas}</div></div>` : `Scanned text: <pre class="bg-black/30 p-2 text-[11px] overflow-x-auto">${escapeHtml(localExtractedText.slice(0, 400))}</pre>`;
       appendLocalAiMessage("Local AI", html, false);
     }
     function generateLocalReply(raw) {
@@ -890,13 +957,13 @@
       const math = evaluateLocalMathExpression(q);
       const note = SSC_STUDY_KNOWLEDGE.find(n => n.keys.some(k => q.includes(k)));
       if (math !== null) return `Result: ${math}`;
-      if (note) return `<div class="space-y-1"><strong class="text-amber-300">${note.title}</strong><div>${note.theory}</div><div class="bg-black/25 p-1.5 rounded">${note.example}</div></div>`;
-      return `Try asking: <code>motion</code>, <code>force</code>, <code>5+5</code>, or <code>draw triangle</code>.`;
+      if (note) return `<div class="space-y-1"><strong class="text-amber-300">${note.title}</strong><div>${note.theory}</div><div>Formulas: ${note.formulas}</div><div class="bg-black/25 p-1.5 rounded">${note.example}</div></div>`;
+      return `Try asking: <code>motion</code>, <code>force</code>, <code>mole</code>, <code>x^2 - 5*x + 6 = 0</code>, or <code>draw triangle</code>.`;
     }
     function appendLocalAiMessage(sender, html, isUser) {
       const box = document.getElementById("localAiMessages");
       const d = document.createElement("div"); d.className = isUser ? "text-right" : "text-left text-teal-100";
-      d.innerHTML = isUser ? `<span class="inline-block bg-teal-600 text-white px-3 py-1.5 rounded-xl"><strong>You:</strong> ${escapeHtml(html)}</span>` : `<div class="bg-white/10 p-3 rounded-xl"><span class="font-bold text-amber-300">${sender}:</span> ${html}</div>`;
+      d.innerHTML = isUser ? `<span class="inline-block bg-teal-600 text-white px-3 py-1.5 rounded-xl text-left max-w-[85%]"><strong>You:</strong> ${escapeHtml(html)}</span>` : `<div class="bg-white/10 p-3 rounded-xl leading-relaxed"><span class="font-bold text-amber-300">${sender}:</span> ${html}</div>`;
       box.appendChild(d); box.scrollTop = box.scrollHeight;
     }
     function askLocalQuick(txt) { appendLocalAiMessage("You", txt, true); appendLocalAiMessage("Local AI", generateLocalReply(txt), false); }
