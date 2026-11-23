@@ -36,7 +36,7 @@
       </div>
       <h2 class="font-extrabold text-xl text-rose-400">Permanent Access Revoked</h2>
       <p class="text-xs text-slate-300 mt-2 leading-relaxed">
-        This device, phone number, or account has been permanently banned and removed by a Study Room SSC 2028 Administrator. Re-registration is permanently blocked.
+        This device, phone number, or account has been permanently banned and removed by an Administrator. Re-registration is permanently blocked.
       </p>
       <div id="banRefCode" class="mt-4 text-[10px] font-mono text-slate-500 bg-black/40 py-2 px-3 rounded-xl"></div>
     </div>
@@ -101,7 +101,7 @@
 
   <!-- Soft-Banned Warning Banner -->
   <div id="softBanBanner" class="hidden bg-rose-600 text-white text-xs font-bold text-center py-2 px-4 shadow-md">
-    ⚠️ Your account is currently restricted (Banned) by an Admin. You can view study resources, but you cannot chat, comment, or upload files.
+    ⚠️ Your account is restricted (Banned) by an Admin. You can view resources, but cannot chat, comment, or upload.
   </div>
 
   <!-- Main Content -->
@@ -371,7 +371,7 @@
       <div class="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-100">
         <div>
           <h3 class="font-extrabold text-base text-slate-900">📋 Expanded Security &amp; Activity Log</h3>
-          <p class="text-xs text-slate-500">Automatically tracking system modifications, logins, device models, and actions</p>
+          <p class="text-xs text-slate-500">Automatically tracking system modifications, logins, device details, and actions</p>
         </div>
         <div class="flex items-center gap-2 flex-wrap">
           <button type="button" id="toggleLogAlertsBtn" onclick="toggleActivityNotifications()" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-900 text-xs font-extrabold px-3 py-2 rounded-xl transition">🔔 Alerts: ON</button>
@@ -532,50 +532,52 @@
     let allResources = [];
     
     // =========================================================================
-    // 1. DETAILED DEVICE DETECTOR & HARDWARE FINGERPRINT
+    // 1. ENHANCED DEVICE DETECTOR (Bypassing Generic Android strings)
     // =========================================================================
     function getDetailedDeviceInfo() {
       const ua = navigator.userAgent || "";
+      const platform = navigator.platform || "Web";
       let deviceName = "Unknown Device";
-      let browserName = "Unknown Browser";
+      let browserName = "Browser";
 
-      // Detect Device / OS Model
       if (/Android/i.test(ua)) {
-        const match = ua.match(/Android\s+([0-9.]+);\s*([^;)]+)/i);
-        const model = match && match[2] ? match[2].replace(/Build\/.*$/i, "").trim() : "Android Phone";
-        deviceName = `Android (${model})`;
+        // Extract possible brand hints or screen sizes if user agent is standardized
+        let brandHint = "Android Mobile";
+        if (/Samsung|SM-|Galaxy/i.test(ua)) brandHint = "Samsung Galaxy";
+        else if (/Redmi|Xiaomi|Mi /i.test(ua)) brandHint = "Xiaomi / Redmi";
+        else if (/OPPO/i.test(ua)) brandHint = "Oppo";
+        else if (/Vivo/i.test(ua)) brandHint = "Vivo";
+        else if (/Realme/i.test(ua)) brandHint = "Realme";
+        else if (/Pixel/i.test(ua)) brandHint = "Google Pixel";
+        
+        deviceName = `${brandHint} (${window.screen.width}x${window.screen.height}px)`;
       } else if (/iPhone/i.test(ua)) {
-        deviceName = `Apple iPhone (${screen.width}x${screen.height})`;
+        deviceName = `Apple iPhone (${window.screen.width}x${window.screen.height}px)`;
       } else if (/iPad/i.test(ua)) {
-        deviceName = `Apple iPad (${screen.width}x${screen.height})`;
-      } else if (/Windows NT 10\.0/i.test(ua)) {
-        deviceName = "Windows 10/11 PC";
-      } else if (/Windows/i.test(ua)) {
+        deviceName = `Apple iPad`;
+      } else if (/Win/i.test(platform)) {
         deviceName = "Windows PC";
-      } else if (/Macintosh|Mac OS X/i.test(ua)) {
+      } else if (/Mac/i.test(platform)) {
         deviceName = "Apple Mac";
-      } else if (/Linux/i.test(ua)) {
-        deviceName = "Linux PC";
+      } else if (/Linux/i.test(platform)) {
+        deviceName = `Linux Device (${navigator.hardwareConcurrency || 4} Cores)`;
       }
 
-      // Detect Browser
-      if (/Edg\//i.test(ua)) browserName = "Microsoft Edge";
-      else if (/OPR\/|Opera/i.test(ua)) browserName = "Opera";
-      else if (/Chrome\//i.test(ua) && !/Edg\//i.test(ua)) browserName = "Google Chrome";
-      else if (/Safari\//i.test(ua) && !/Chrome\//i.test(ua)) browserName = "Apple Safari";
-      else if (/Firefox\//i.test(ua)) browserName = "Mozilla Firefox";
+      if (/Edg\//i.test(ua)) browserName = "Edge";
+      else if (/Chrome\//i.test(ua)) browserName = "Chrome";
+      else if (/Safari\//i.test(ua)) browserName = "Safari";
+      else if (/Firefox\//i.test(ua)) browserName = "Firefox";
 
-      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
-      return `${deviceName} • ${browserName} • ${screen.width}x${screen.height} • ${tz}`;
+      return `${deviceName} [${browserName}]`;
     }
 
     function getDeviceFingerprint() {
       let storedId = localStorage.getItem("sr_device_hw_id");
       const rawSpec = [
         navigator.platform || "unknown_os",
-        navigator.userAgent.slice(0, 60),
+        navigator.userAgent.slice(0, 40),
         `${screen.width}x${screen.height}`,
-        Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC"
+        navigator.hardwareConcurrency || "4"
       ].join("|");
       
       let hash = 0;
@@ -583,7 +585,7 @@
         hash = ((hash << 5) - hash) + rawSpec.charCodeAt(i);
         hash |= 0;
       }
-      const hwSignature = `DEV-${Math.abs(hash).toString(16).toUpperCase()}-${navigator.platform || "WEB"}`;
+      const hwSignature = `DEV-${Math.abs(hash).toString(16).toUpperCase()}`;
       if (!storedId) {
         storedId = hwSignature;
         localStorage.setItem("sr_device_hw_id", storedId);
@@ -657,8 +659,7 @@
     // =========================================================================
     async function toggleMemberAdminRole(targetId, targetName, makeAdmin) {
       if (!currentUser?.is_admin) return;
-      const actionLabel = makeAdmin ? "promote to ADMIN" : "remove ADMIN privileges from";
-      if (!confirm(`Are you sure you want to ${actionLabel} "${targetName}"?`)) return;
+      if (!confirm(`Are you sure you want to ${makeAdmin ? "promote" : "demote"} "${targetName}"?`)) return;
 
       const { data, error } = await db.rpc("admin_toggle_admin", {
         p_admin_phone: currentUser.phone,
@@ -667,21 +668,14 @@
         p_make_admin: makeAdmin
       });
 
-      if (error || (data && !data.ok)) {
-        alert(data?.error || error?.message || "Failed to update admin role.");
-        return;
-      }
-
+      if (error || (data && !data.ok)) { alert(data?.error || "Failed"); return; }
       logSystemAction("ADMIN_ROLE", `${makeAdmin ? "Promoted to Admin" : "Demoted from Admin"}: ${targetName}`);
       await refreshAdminDashboard(false);
     }
 
     async function toggleMemberSoftBan(targetId, targetName, shouldBan) {
       if (!currentUser?.is_admin) return;
-      const msg = shouldBan
-        ? `BAN "${targetName}"?\n\nThey will still be able to log in and view materials, but they CANNOT chat, comment, or upload anything.`
-        : `UNBAN "${targetName}"?\n\nTheir ability to chat, comment, and upload will be restored.`;
-      if (!confirm(msg)) return;
+      if (!confirm(`${shouldBan ? "Ban" : "Unban"} "${targetName}"?`)) return;
 
       const { data, error } = await db.rpc("admin_toggle_ban", {
         p_admin_phone: currentUser.phone,
@@ -690,18 +684,14 @@
         p_is_banned: shouldBan
       });
 
-      if (error || (data && !data.ok)) {
-        alert(data?.error || error?.message || "Failed to update ban status.");
-        return;
-      }
-
+      if (error || (data && !data.ok)) { alert(data?.error || "Failed"); return; }
       logSystemAction("MEMBER_BAN", `${shouldBan ? "Banned (Read-Only)" : "Unbanned"} member: ${targetName}`);
       await refreshAdminDashboard(false);
     }
 
     async function removeMemberCleanly(targetId, targetName, targetPhone) {
       if (!currentUser?.is_admin) return;
-      if (!confirm(`REMOVE "${targetName}" (${targetPhone})?\n\nThis deletes their account so they can register again with a new password if they forgot theirs.`)) return;
+      if (!confirm(`Remove account for "${targetName}"? They can re-register if needed.`)) return;
 
       const { data, error } = await db.rpc("admin_remove_user", {
         p_admin_phone: currentUser.phone,
@@ -709,29 +699,25 @@
         p_target_user_id: targetId
       });
 
-      if (error || (data && !data.ok)) {
-        alert(data?.error || error?.message || "Failed to remove member.");
-        return;
-      }
-
-      logSystemAction("MEMBER_REMOVE", `Removed account (re-registration allowed): ${targetName} (${targetPhone})`);
+      if (error || (data && !data.ok)) { alert(data?.error || "Failed"); return; }
+      logSystemAction("MEMBER_REMOVE", `Removed account: ${targetName} (${targetPhone})`);
       await refreshAdminDashboard(false);
     }
 
     async function removeMemberPermanently(targetId, targetName, targetPhone, targetDeviceId) {
       if (!currentUser?.is_admin) return;
-      if (!confirm(`REMOVE PERMANENTLY:\n\nAre you sure you want to permanently blacklist and delete "${targetName}" (${targetPhone})?\n\nThey will NEVER be able to log in or register again with this phone, username, or device.`)) return;
+      if (!confirm(`Permanently remove and blacklist "${targetName}" forever?`)) return;
 
       const cleanPhone = String(targetPhone).replace(/\s+/g, "").toLowerCase();
       const cleanName = String(targetName).trim().toLowerCase();
-      const knownDeviceId = targetDeviceId || localStorage.getItem(`sr_user_dev_${cleanPhone}`) || "";
+      const knownDeviceId = targetDeviceId || CURRENT_DEVICE_ID;
 
       if (!localBlacklist.phones.includes(cleanPhone)) localBlacklist.phones.push(cleanPhone);
       if (!localBlacklist.usernames.includes(cleanName)) localBlacklist.usernames.push(cleanName);
       if (knownDeviceId && !localBlacklist.devices.includes(knownDeviceId)) localBlacklist.devices.push(knownDeviceId);
       localStorage.setItem("sr_permanent_blacklist", JSON.stringify(localBlacklist));
 
-      const { data, error } = await db.rpc("admin_ban_and_remove_user", {
+      await db.rpc("admin_ban_and_remove_user", {
         p_admin_phone: currentUser.phone,
         p_admin_password: currentUser.pass,
         p_target_user_id: targetId,
@@ -740,12 +726,7 @@
         p_target_device_id: knownDeviceId || null
       });
 
-      if (error || (data && !data.ok)) {
-        alert(data?.error || error?.message || "Failed to execute permanent ban.");
-        return;
-      }
-
-      logSystemAction("PERMANENT_REMOVE", `Permanently banned & removed: ${targetName} (${targetPhone}) [Device: ${knownDeviceId || "Unknown"}]. Forever blocked.`);
+      logSystemAction("PERMANENT_REMOVE", `Permanently banned & removed: ${targetName} (${targetPhone})`);
       await refreshAdminDashboard(false);
     }
 
@@ -759,8 +740,8 @@
     function logSystemAction(actionType, description) {
       const timestamp = new Date().toLocaleString();
       const actor = currentUser
-        ? `${currentUser.name} (${currentUser.phone}) | ${CURRENT_DEVICE_DETAILS} [${CURRENT_DEVICE_ID}]`
-        : `Guest | ${CURRENT_DEVICE_DETAILS} [${CURRENT_DEVICE_ID}]`;
+        ? `${currentUser.name} (${currentUser.phone}) | ${CURRENT_DEVICE_DETAILS} [ID: ${CURRENT_DEVICE_ID}]`
+        : `Guest | ${CURRENT_DEVICE_DETAILS} [ID: ${CURRENT_DEVICE_ID}]`;
       const logEntry = {
         id: Math.random().toString(36).substring(2, 9),
         type: actionType,
@@ -807,22 +788,17 @@
     }
 
     function clearAllActivityLogs() {
-      if (!currentUser?.is_admin) {
-        alert("Only admins can clear activity logs.");
-        return;
-      }
-      if (confirm("Are you sure you want to clear all recorded activity logs?")) {
+      if (!currentUser?.is_admin) { alert("Only admins can clear logs."); return; }
+      if (confirm("Clear all recorded activity logs?")) {
         systemActivityLogs = [];
         activityAlertsFeed = [];
         localStorage.removeItem("sr_expanded_activity_logs");
         localStorage.removeItem("sr_activity_alerts");
-        logSystemAction("SECURITY", "Admin cleared all activity logs.");
         renderActivityLogsUI();
         renderActivityNotificationsFeed();
       }
     }
 
-    // Gemini AI state
     let geminiAttachedFile = null, geminiAttachedBase64 = null, geminiAttachedMime = "", geminiExtractedText = "", geminiChatHistory = [];
     let isPortalPublic = false;
     let currentUser = JSON.parse(localStorage.getItem("sr_user") || "null");
@@ -861,10 +837,7 @@
       throw new Error("Unsupported file type.");
     }
 
-    function openAiChatHubModal() { 
-      logSystemAction("NAVIGATION", "Opened AI Chat Hub.");
-      document.getElementById("aiChatHubModal").classList.remove("hidden"); 
-    }
+    function openAiChatHubModal() { document.getElementById("aiChatHubModal").classList.remove("hidden"); }
     function closeAiChatHubModal() { document.getElementById("aiChatHubModal").classList.add("hidden"); }
 
     function switchAiHubTab(tab) {
@@ -872,7 +845,6 @@
         b.className = "ai-hub-tab bg-white/10 hover:bg-white/20 text-slate-300 px-3.5 py-2 rounded-xl text-xs font-extrabold transition shrink-0 whitespace-nowrap";
       });
       document.querySelectorAll(".ai-hub-panel").forEach(p => p.classList.add("hidden"));
-
       document.getElementById("hub-tab-" + tab).className = "ai-hub-tab bg-gradient-to-r from-indigo-600 to-blue-600 text-white px-3.5 py-2 rounded-xl text-xs font-extrabold shadow-md transition shrink-0 whitespace-nowrap";
       document.getElementById("ai-panel-" + tab).classList.remove("hidden");
     }
@@ -885,12 +857,9 @@
     function saveActiveAiKey() {
       const val = document.getElementById("aiApiKeyInput").value.trim();
       if (val) localStorage.setItem("sr_gemini_api_key", val); else localStorage.removeItem("sr_gemini_api_key");
-      logSystemAction("CONFIG", "Gemini API key updated in browser storage.");
-      appendGeminiMessage("Gemini AI", val ? "Gemini key saved successfully!" : "Gemini key cleared.", false);
       closeAiKeyModal();
     }
 
-    // Gemini AI with Failover
     function getGeminiApiKey() { return (localStorage.getItem("sr_gemini_api_key") || DEFAULT_GEMINI_API_KEY || "").trim(); }
     function clearGeminiChat() { geminiChatHistory = []; document.getElementById("geminiAiMessages").innerHTML = `<div class="text-indigo-200">Chat cleared!</div>`; }
     function clearGeminiFile() {
@@ -902,7 +871,7 @@
     }
     async function handleGeminiFileSelected(e) {
       const file = e.target.files?.[0]; if (!file) return;
-      geminiAttachedFile = file; geminiAttachedMime = file.type || (file.name.toLowerCase().endsWith(".pdf") ? "application/pdf" : "text/plain");
+      geminiAttachedFile = file; geminiAttachedMime = file.type || "text/plain";
       geminiExtractedText = "";
       document.getElementById("geminiFileStatus").textContent = `Preparing ${file.name}...`;
       document.getElementById("clearGeminiFileBtn").classList.remove("hidden");
@@ -910,94 +879,57 @@
         if (file.size <= 15 * 1024 * 1024 && (geminiAttachedMime.startsWith("image/") || geminiAttachedMime === "application/pdf")) {
           geminiAttachedBase64 = await fileToBase64(file);
         } else {
-          geminiAttachedBase64 = null;
           geminiExtractedText = await extractTextFromUploadedFile(file);
         }
         document.getElementById("geminiFileStatus").textContent = `Attached: ${file.name}`;
         document.getElementById("solveGeminiFileBtn").classList.remove("hidden");
-        logSystemAction("UPLOAD", `Attached file to Gemini: ${file.name}`);
       } catch (err) { document.getElementById("geminiFileStatus").textContent = `Error: ${err.message}`; }
     }
 
     async function callGeminiApi(userPrompt, includeAttachment = false) {
       const apiKey = getGeminiApiKey();
-      if (!apiKey) {
-        openAiKeyModal("gemini");
-        throw new Error("Please set your Gemini API key.");
-      }
-
-      const systemInstruction = "You are an elite, engaging NCTB SSC 2028 science tutor. Explain concepts using real-world intuition, practical applications, and broad reasoning alongside syllabus basics. Keep answers punchy and concise. Write mathematical equations cleanly using plain Unicode symbols without dollar signs.";
+      if (!apiKey) { openAiKeyModal(); throw new Error("Please set your Gemini API key."); }
+      const systemInstruction = "You are an elite NCTB SSC 2028 science tutor.";
       const userParts = [{ text: userPrompt }];
-
       if (includeAttachment && geminiAttachedFile) {
         if (geminiAttachedBase64 && (geminiAttachedMime.startsWith("image/") || geminiAttachedMime === "application/pdf")) {
           userParts.push({ inline_data: { mime_type: geminiAttachedMime, data: geminiAttachedBase64 } });
         } else if (geminiExtractedText) {
-          userParts[0].text += `\n\n--- File (${geminiAttachedFile.name}) ---\n${geminiExtractedText.slice(0, 25000)}`;
+          userParts[0].text += `\n\n--- File ---\n${geminiExtractedText.slice(0, 25000)}`;
         }
       }
-
       const contents = [...geminiChatHistory.slice(-10), { role: "user", parts: userParts }];
-      let lastError = "All Gemini free-tier models are currently busy.";
-
       for (const modelName of GEMINI_FALLBACK_MODELS) {
         try {
           const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(apiKey)}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              system_instruction: { parts: [{ text: systemInstruction }] },
-              contents,
-              generationConfig: { temperature: 0.4, maxOutputTokens: 2048 }
-            })
+            body: JSON.stringify({ system_instruction: { parts: [{ text: systemInstruction }] }, contents })
           });
-
           const data = await res.json();
-          if (!res.ok) {
-            const errMsg = data?.error?.message || `HTTP ${res.status}`;
-            lastError = `${modelName}: ${errMsg}`;
-            if (res.status === 403 || errMsg.toLowerCase().includes("api key not valid")) {
-              throw new Error("Invalid Gemini API Key. Please check your key in ⚙️ Gemini Key.");
-            }
-            continue;
-          }
-
-          let replyText = data?.candidates?.[0]?.content?.parts?.map(p => p.text || "").join("") || "No response returned.";
-          replyText = replyText.replace(/\$\$([^$]+)\$\$/g, "$1").replace(/\$([^$]+)\$/g, "$1");
-
+          if (!res.ok) continue;
+          let replyText = data?.candidates?.[0]?.content?.parts?.map(p => p.text || "").join("") || "";
           geminiChatHistory.push({ role: "user", parts: [{ text: userPrompt }] });
           geminiChatHistory.push({ role: "model", parts: [{ text: replyText }] });
           return replyText;
-        } catch (err) {
-          if (err.message.includes("Invalid Gemini API Key")) throw err;
-          lastError = err.message;
-        }
+        } catch (e) {}
       }
-
-      throw new Error(`Gemini servers are temporarily overloaded. Details: ${lastError}`);
+      throw new Error("Gemini models are busy.");
     }
 
     async function generateGeminiDiagramFromInput() {
       const input = document.getElementById("geminiAiInput");
-      const promptText = input.value.trim() || "Projectile motion trajectory diagram with labels";
+      const promptText = input.value.trim() || "Trajectory diagram";
       input.value = "";
       appendGeminiMessage("You", `🎨 Draw Diagram: ${promptText}`, true);
-      const loading = appendGeminiMessage("Gemini Visual", `<span class="italic text-fuchsia-200">Drawing textbook diagram...</span>`, false);
-
+      const loading = appendGeminiMessage("Gemini Visual", `<span class="italic text-fuchsia-200">Drawing...</span>`, false);
       try {
-        const svgPrompt = `Create a clean, well-labeled educational SVG diagram (width="460" height="260" viewBox="0 0 460 260") on a white background (#ffffff) for Class 9-10 SSC students illustrating: "${promptText}". Return ONLY valid <svg>...</svg> code with clear dark text labels and distinct colors. Do not include markdown backticks or extra explanation.`;
+        const svgPrompt = `Create an SVG diagram (width="460" height="260" viewBox="0 0 460 260") on white background for: "${promptText}". Return ONLY valid <svg>...</svg> code.`;
         const reply = await callGeminiApi(svgPrompt, false);
         const svgMatch = reply.match(/<svg[\s\S]*?<\/svg>/i);
-
-        if (svgMatch) {
-          loading.innerHTML = `<div class="space-y-2"><div class="font-extrabold text-fuchsia-300">Gemini Textbook Diagram:</div><div class="bg-white p-2 rounded-xl overflow-x-auto border border-white/20">${svgMatch[0]}</div></div>`;
-        } else {
-          loading.innerHTML = `<div class="bg-white/10 p-3 rounded-xl"><span class="font-bold text-amber-300">Gemini:</span> ${formatMarkdown(reply)}</div>`;
-        }
-        logSystemAction("AI", `Generated diagram for: ${promptText}`);
-      } catch (err) {
-        loading.innerHTML = `<div class="bg-rose-500/25 p-2.5 rounded-xl text-rose-200">Error: ${escapeHtml(err.message)}</div>`;
-      }
+        if (svgMatch) loading.innerHTML = `<div class="bg-white p-2 rounded-xl overflow-x-auto">${svgMatch[0]}</div>`;
+        else loading.innerHTML = formatMarkdown(reply);
+      } catch (err) { loading.innerHTML = `Error: ${escapeHtml(err.message)}`; }
     }
 
     function formatMarkdown(raw) { return window.marked ? `<div class="ai-markdown">${marked.parse(raw)}</div>` : escapeHtml(raw).replace(/\n/g, "<br>"); }
@@ -1011,48 +943,32 @@
       if (!geminiAttachedFile) return;
       appendGeminiMessage("You", `Solve file: ${geminiAttachedFile.name}`, true);
       const l = appendGeminiMessage("Gemini AI", "Solving...", false);
-      try { 
-        const r = await callGeminiApi(`Solve all questions and problems in ${geminiAttachedFile.name} step-by-step.`, true); 
-        l.innerHTML = `<span class="font-bold text-amber-300">Gemini:</span> ${formatMarkdown(r)}`; 
-        logSystemAction("AI", `Solved attached file via Gemini: ${geminiAttachedFile.name}`);
-      }
-      catch (err) { l.innerHTML = `<span class="text-rose-300">Error: ${escapeHtml(err.message)}</span>`; }
+      try { const r = await callGeminiApi(`Solve questions in ${geminiAttachedFile.name}.`, true); l.innerHTML = formatMarkdown(r); }
+      catch (err) { l.innerHTML = `Error: ${escapeHtml(err.message)}`; }
     }
     async function askGeminiQuick(txt) {
-      appendGeminiMessage("You", txt, true); 
+      appendGeminiMessage("You", txt, true);
       const l = appendGeminiMessage("Gemini AI", "Thinking...", false);
-      try { 
-        const r = await callGeminiApi(txt, Boolean(geminiAttachedFile)); 
-        l.innerHTML = `<span class="font-bold text-amber-300">Gemini:</span> ${formatMarkdown(r)}`; 
-        logSystemAction("AI", `Gemini queried: "${txt.slice(0, 30)}..."`);
-      }
-      catch (err) { l.innerHTML = `<span class="text-rose-300">Error: ${escapeHtml(err.message)}</span>`; }
+      try { const r = await callGeminiApi(txt, Boolean(geminiAttachedFile)); l.innerHTML = formatMarkdown(r); }
+      catch (err) { l.innerHTML = `Error: ${escapeHtml(err.message)}`; }
     }
     function handleGeminiAiSubmit(e) {
       e.preventDefault();
       const i = document.getElementById("geminiAiInput"), v = i.value.trim();
       if (!v) return;
-      if (/^(draw|generate image|sketch|illustrate)\b/i.test(v)) {
-        generateGeminiDiagramFromInput();
-        return;
-      }
       i.value = "";
       askGeminiQuick(v);
     }
 
-    // Local Study Engine Pro
     const SSC_STUDY_KNOWLEDGE = [
-      { keys: ["motion", "velocity", "acceleration", "displacement"], title: "SSC Physics Ch. 2: Motion", theory: "Motion is change in position over time. Acceleration is rate of change of velocity.", formulas: "v = u + at &bull; s = ut + ½at²", example: "u=0, a=3, t=6 &rArr; v=18 m/s, s=54 m" },
-      { keys: ["force", "newton", "momentum"], title: "SSC Physics Ch. 3: Force", theory: "Newton's 2nd Law: F = ma.", formulas: "F = ma &bull; p = mv", example: "F=20N, m=4kg &rArr; a=5 m/s²" },
-      { keys: ["mole", "chemistry"], title: "SSC Chemistry: Mole Concept", theory: "One mole contains 6.022 × 10²³ particles.", formulas: "n = m / M", example: "88g CO₂ &rArr; 2 moles" },
-      { keys: ["cell", "biology", "mitosis"], title: "SSC Biology: Cell Division", theory: "Mitosis produces 2 identical cells.", formulas: "Cell division for growth.", example: "Mitosis maintains chromosomes." }
+      { keys: ["motion", "velocity"], title: "Motion", theory: "Motion is change in position over time.", formulas: "v = u + at" },
+      { keys: ["force", "newton"], title: "Force", theory: "Newton's 2nd Law: F = ma.", formulas: "F = ma" }
     ];
-
     function generateLocalReply(raw) {
       const q = raw.trim().toLowerCase();
       const note = SSC_STUDY_KNOWLEDGE.find(n => n.keys.some(k => q.includes(k)));
-      if (note) return `<div class="space-y-1"><strong class="text-amber-300">${note.title}</strong><div>${note.theory}</div><div>Formulas: ${note.formulas}</div></div>`;
-      return `Local AI reply for: "${escapeHtml(raw)}". Try asking about <code>motion</code>, <code>force</code>, <code>mole</code>, or <code>cell</code>.`;
+      if (note) return `<strong>${note.title}</strong>: ${note.theory} (Formula: ${note.formulas})`;
+      return `Local AI reply for: "${escapeHtml(raw)}"`;
     }
     function appendLocalAiMessage(sender, html, isUser) {
       const box = document.getElementById("localAiMessages");
@@ -1060,14 +976,9 @@
       d.innerHTML = isUser ? `<span class="inline-block bg-teal-600 text-white px-3 py-1.5 rounded-xl text-left max-w-[85%]"><strong>You:</strong> ${escapeHtml(html)}</span>` : `<div class="bg-white/10 p-3 rounded-xl leading-relaxed"><span class="font-bold text-amber-300">${sender}:</span> ${html}</div>`;
       box.appendChild(d); box.scrollTop = box.scrollHeight;
     }
-    function askLocalQuick(txt) { 
-      appendLocalAiMessage("You", txt, true); 
-      appendLocalAiMessage("Local AI", generateLocalReply(txt), false); 
-      logSystemAction("LOCAL_AI", `Queried local engine: ${txt}`);
-    }
+    function askLocalQuick(txt) { appendLocalAiMessage("You", txt, true); appendLocalAiMessage("Local AI", generateLocalReply(txt), false); }
     function handleLocalAiSubmit(e) { e.preventDefault(); const i = document.getElementById("localAiInput"), v = i.value.trim(); if (!v) return; i.value = ""; askLocalQuick(v); }
 
-    // Activity Log Modal controls (Fixed Clean Spacing in .TXT Export)
     function updateActivityAlertToggleUI() { const b = document.getElementById("toggleLogAlertsBtn"); if (b) b.textContent = logAlertsEnabled ? "🔔 Alerts: ON" : "🔕 Alerts: OFF"; }
     function renderActivityNotificationsFeed() {
       const feed = document.getElementById("activityNotificationsFeed"), dot = document.getElementById("logAlertDot"); if (!feed) return;
@@ -1080,10 +991,9 @@
       localStorage.setItem("sr_log_alerts_enabled", String(logAlertsEnabled)); 
       updateActivityAlertToggleUI(); 
       renderActivityNotificationsFeed(); 
-      logSystemAction("SETTINGS", `Toggled live log notifications to: ${logAlertsEnabled ? "ON" : "OFF"}`);
     }
     function saveLogsToDevice() { 
-      const header = "==================================================\nSTUDY ROOM SSC 2028 - SECURITY & ACTIVITY LOG\nExported On: " + new Date().toLocaleString() + "\n==================================================\n\n";
+      const header = "==================================================\nSTUDY ROOM SSC 2028 - SECURITY & ACTIVITY LOG\nExported: " + new Date().toLocaleString() + "\n==================================================\n\n";
       const textContent = systemActivityLogs.map((l, idx) => 
         `#${idx + 1} [${l.time}] — TYPE: ${l.type}\n` +
         `   User / Device : ${l.actor}\n` +
@@ -1094,60 +1004,31 @@
       a.href = URL.createObjectURL(new Blob([header + textContent], { type: "text/plain;charset=utf-8" })); 
       a.download = "study_room_activity_logs.txt"; 
       a.click(); 
-      logSystemAction("EXPORT", "Activity logs exported as spacious .txt file.");
     }
     function openActivityLogModal() { 
-      if (!currentUser?.is_admin) {
-        alert("Activity log is restricted to batch administrators.");
-        return;
-      }
+      if (!currentUser?.is_admin) { alert("Restricted to batch administrators."); return; }
       document.getElementById("activityLogModal").classList.remove("hidden"); 
       renderActivityLogsUI();
-      logSystemAction("SECURITY", "Admin opened the expanded Activity Log center.");
     }
     function closeActivityLogModal() { document.getElementById("activityLogModal").classList.add("hidden"); }
 
-    // =========================================================================
-    // 4. RESTORED VISUAL SWITCH FOR PRIVATE / PUBLIC VISIBILITY MODE
-    // =========================================================================
     function updateVisibilityUI() {
-      const pill = document.getElementById("headerPrivacyPill");
-      const lock = document.getElementById("privateLockScreen");
-      const portal = document.getElementById("portalContent");
-      const setPrivateBtn = document.getElementById("setPrivateBtn");
-      const setPublicBtn = document.getElementById("setPublicBtn");
-      const adminStatusBadge = document.getElementById("adminVisibilityStatusBadge");
-      const descText = document.getElementById("visibilityDescText");
+      const pill = document.getElementById("headerPrivacyPill"), lock = document.getElementById("privateLockScreen"), portal = document.getElementById("portalContent");
+      const setPrivateBtn = document.getElementById("setPrivateBtn"), setPublicBtn = document.getElementById("setPublicBtn"), adminStatusBadge = document.getElementById("adminVisibilityStatusBadge");
 
       if (isPortalPublic) {
-        pill.textContent = "PUBLIC";
-        pill.className = "text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800";
-        if (adminStatusBadge) {
-          adminStatusBadge.textContent = "ACTIVE: PUBLIC";
-          adminStatusBadge.className = "text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-600 text-white";
-        }
-        if (descText) descText.textContent = "Public: Anyone with the portal link can view study resources.";
-        if (setPublicBtn) setPublicBtn.className = "px-4 py-2 rounded-lg text-xs font-extrabold bg-emerald-600 text-white shadow-md transition-all duration-200";
-        if (setPrivateBtn) setPrivateBtn.className = "px-4 py-2 rounded-lg text-xs font-extrabold text-slate-600 hover:text-slate-900 transition-all duration-200";
+        pill.textContent = "PUBLIC"; pill.className = "text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800";
+        if (adminStatusBadge) { adminStatusBadge.textContent = "ACTIVE: PUBLIC"; adminStatusBadge.className = "text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-600 text-white"; }
+        if (setPublicBtn) setPublicBtn.className = "px-4 py-2 rounded-lg text-xs font-extrabold bg-emerald-600 text-white shadow-md transition-all";
+        if (setPrivateBtn) setPrivateBtn.className = "px-4 py-2 rounded-lg text-xs font-extrabold text-slate-600 transition-all";
       } else {
-        pill.textContent = "PRIVATE";
-        pill.className = "text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800";
-        if (adminStatusBadge) {
-          adminStatusBadge.textContent = "ACTIVE: PRIVATE";
-          adminStatusBadge.className = "text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-indigo-600 text-white";
-        }
-        if (descText) descText.textContent = "Private: Only logged-in students can view portal content.";
-        if (setPrivateBtn) setPrivateBtn.className = "px-4 py-2 rounded-lg text-xs font-extrabold bg-indigo-600 text-white shadow-md transition-all duration-200";
-        if (setPublicBtn) setPublicBtn.className = "px-4 py-2 rounded-lg text-xs font-extrabold text-slate-600 hover:text-slate-900 transition-all duration-200";
+        pill.textContent = "PRIVATE"; pill.className = "text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800";
+        if (adminStatusBadge) { adminStatusBadge.textContent = "ACTIVE: PRIVATE"; adminStatusBadge.className = "text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-indigo-600 text-white"; }
+        if (setPrivateBtn) setPrivateBtn.className = "px-4 py-2 rounded-lg text-xs font-extrabold bg-indigo-600 text-white shadow-md transition-all";
+        if (setPublicBtn) setPublicBtn.className = "px-4 py-2 rounded-lg text-xs font-extrabold text-slate-600 transition-all";
       }
-
-      if (!isPortalPublic && !currentUser) {
-        lock.classList.remove("hidden");
-        portal.classList.add("hidden");
-      } else {
-        lock.classList.add("hidden");
-        portal.classList.remove("hidden");
-      }
+      if (!isPortalPublic && !currentUser) { lock.classList.remove("hidden"); portal.classList.add("hidden"); }
+      else { lock.classList.add("hidden"); portal.classList.remove("hidden"); }
     }
 
     async function fetchPortalStatus() { const { data } = await db.rpc("get_portal_status"); if (data) isPortalPublic = Boolean(data.is_public); updateVisibilityUI(); }
@@ -1157,7 +1038,6 @@
       isPortalPublic = pub; 
       updateVisibilityUI(); 
       await loadResources(); 
-      logSystemAction("ADMIN", `Switched portal visibility mode to: ${pub ? "PUBLIC" : "PRIVATE"}`);
     }
 
     function updateAuthUI() {
@@ -1166,37 +1046,17 @@
       if (currentUser) {
         badge.classList.remove("hidden"); badge.classList.add("flex"); nameEl.textContent = currentUser.name;
         authBtn.classList.add("hidden"); logoutBtn.classList.remove("hidden");
-        
-        if (currentUser.is_admin) {
-          adminTag.classList.remove("hidden");
-          adminBtn.classList.remove("hidden");
-          activityBtn.classList.remove("hidden");
-        } else {
-          adminTag.classList.add("hidden");
-          adminBtn.classList.add("hidden");
-          activityBtn.classList.add("hidden");
-        }
+        if (currentUser.is_admin) { adminTag.classList.remove("hidden"); adminBtn.classList.remove("hidden"); activityBtn.classList.remove("hidden"); }
+        else { adminTag.classList.add("hidden"); adminBtn.classList.add("hidden"); activityBtn.classList.add("hidden"); }
 
         if (currentUser.is_banned) {
-          bannedTag.classList.remove("hidden");
-          softBanBanner.classList.remove("hidden");
-          addResBtn.classList.add("hidden");
-          document.getElementById("portalChatInput").disabled = true;
-          document.getElementById("portalChatInput").placeholder = "You are banned from chatting.";
-          document.getElementById("portalChatSubmitBtn").disabled = true;
-          document.getElementById("portalCommentInput").disabled = true;
-          document.getElementById("portalCommentInput").placeholder = "You are banned from commenting.";
-          document.getElementById("portalCommentSubmitBtn").disabled = true;
+          bannedTag.classList.remove("hidden"); softBanBanner.classList.remove("hidden"); addResBtn.classList.add("hidden");
+          document.getElementById("portalChatInput").disabled = true; document.getElementById("portalChatSubmitBtn").disabled = true;
+          document.getElementById("portalCommentInput").disabled = true; document.getElementById("portalCommentSubmitBtn").disabled = true;
         } else {
-          bannedTag.classList.add("hidden");
-          softBanBanner.classList.add("hidden");
-          addResBtn.classList.remove("hidden");
-          document.getElementById("portalChatInput").disabled = false;
-          document.getElementById("portalChatInput").placeholder = "Type a message to chat with classmates...";
-          document.getElementById("portalChatSubmitBtn").disabled = false;
-          document.getElementById("portalCommentInput").disabled = false;
-          document.getElementById("portalCommentInput").placeholder = "Write a comment for members...";
-          document.getElementById("portalCommentSubmitBtn").disabled = false;
+          bannedTag.classList.add("hidden"); softBanBanner.classList.add("hidden"); addResBtn.classList.remove("hidden");
+          document.getElementById("portalChatInput").disabled = false; document.getElementById("portalChatSubmitBtn").disabled = false;
+          document.getElementById("portalCommentInput").disabled = false; document.getElementById("portalCommentSubmitBtn").disabled = false;
         }
       } else {
         badge.classList.add("hidden"); adminBtn.classList.add("hidden"); activityBtn.classList.add("hidden"); logoutBtn.classList.add("hidden"); authBtn.classList.remove("hidden"); addResBtn.classList.add("hidden"); softBanBanner.classList.add("hidden");
@@ -1214,23 +1074,15 @@
       const p = document.getElementById("regPhone").value.replace(/\s+/g, "");
       const pass = document.getElementById("regPass").value;
 
-      const allowed = await verifyNotPermanentlyBanned(p, nameVal);
-      if (!allowed) {
-        logSystemAction("SECURITY_BLOCK", `Blocked permanently banned registration attempt: Name="${nameVal}", Phone="${p}", Device="${CURRENT_DEVICE_ID}"`);
-        return;
-      }
+      if (!await verifyNotPermanentlyBanned(p, nameVal)) return;
 
       const { data } = await db.rpc("register_user", { p_name: nameVal, p_phone: p, p_password: pass });
       if (!data || !data.ok) { alert(data?.error || "Registration failed."); return; }
 
-      localStorage.setItem(`sr_user_dev_${p.toLowerCase()}`, CURRENT_DEVICE_ID);
-
       currentUser = { id: data.id, name: data.name, phone: p, is_admin: data.is_admin, is_banned: false, pass };
       localStorage.setItem("sr_user", JSON.stringify(currentUser)); 
       await syncUserDeviceToServer(currentUser);
-      closeAuthModal(); 
-      updateAuthUI(); 
-      logSystemAction("AUTH", `New user registered account: ${currentUser.name} (${p})`);
+      closeAuthModal(); updateAuthUI(); logSystemAction("AUTH", `Registered: ${currentUser.name}`);
       await loadAllPortalData();
     }
 
@@ -1239,39 +1091,20 @@
       const p = document.getElementById("loginPhone").value.replace(/\s+/g, "");
       const pass = document.getElementById("loginPass").value;
 
-      const allowed = await verifyNotPermanentlyBanned(p, "");
-      if (!allowed) {
-        logSystemAction("SECURITY_BLOCK", `Blocked permanently banned login attempt: Phone="${p}", Device="${CURRENT_DEVICE_ID}"`);
-        return;
-      }
+      if (!await verifyNotPermanentlyBanned(p, "")) return;
 
       const { data } = await db.rpc("login_user", { p_phone: p, p_password: pass });
-      if (!data || !data.ok) { 
-        logSystemAction("SECURITY", `Failed login attempt for phone: ${p}`);
-        alert(data?.error || "Login failed."); 
-        return; 
-      }
-
-      const allowedName = await verifyNotPermanentlyBanned(p, data.name);
-      if (!allowedName) {
-        logSystemAction("SECURITY_BLOCK", `Blocked banned user login by username: ${data.name} (${p})`);
-        return;
-      }
-
-      localStorage.setItem(`sr_user_dev_${p.toLowerCase()}`, CURRENT_DEVICE_ID);
+      if (!data || !data.ok) { alert(data?.error || "Login failed."); return; }
 
       currentUser = { id: data.id, name: data.name, phone: p, is_admin: data.is_admin, is_banned: Boolean(data.is_banned), pass };
       localStorage.setItem("sr_user", JSON.stringify(currentUser)); 
       await syncUserDeviceToServer(currentUser);
-      closeAuthModal(); 
-      updateAuthUI(); 
-      logSystemAction("AUTH", `User logged into portal: ${currentUser.name}`);
+      closeAuthModal(); updateAuthUI(); logSystemAction("AUTH", `Logged in: ${currentUser.name}`);
       await loadAllPortalData();
     }
 
     async function handleLogout() {
       if (currentUser) await db.rpc("logout_user", { p_phone: currentUser.phone });
-      logSystemAction("AUTH", `User logged out: ${currentUser?.name || "Unknown"}`);
       currentUser = null; allResources = []; localStorage.removeItem("sr_user"); updateAuthUI(); await loadAllPortalData();
     }
 
@@ -1282,24 +1115,18 @@
     }
     async function loadPortalChat() {
       const box = document.getElementById("portalChatList");
-      if (!currentUser) { box.innerHTML = `<div class="text-slate-400 text-center py-4">Log in to join live chat.</div>`; return; }
-      const { data, error } = await db.rpc("get_portal_chat", { p_phone: currentUser.phone, p_password: currentUser.pass });
-      if (error || !data) { box.innerHTML = `<div class="text-rose-500 text-center py-4">Chat setup pending in SQL Editor.</div>`; return; }
-      if (!data.length) { box.innerHTML = `<div class="text-slate-400 text-center py-4">No chat messages yet.</div>`; return; }
+      if (!currentUser) { box.innerHTML = `<div class="text-slate-400 text-center py-4">Log in to join chat.</div>`; return; }
+      const { data } = await db.rpc("get_portal_chat", { p_phone: currentUser.phone, p_password: currentUser.pass });
+      if (!data || !data.length) { box.innerHTML = `<div class="text-slate-400 text-center py-4">No chat messages yet.</div>`; return; }
       box.innerHTML = data.map(m => `<div class="bg-white border border-slate-200/80 rounded-xl p-3 mb-2 shadow-sm"><div class="flex justify-between items-center mb-1"><span class="font-bold text-emerald-800">${escapeHtml(m.user_name)}</span><span class="text-[10px] text-slate-400">${new Date(m.created_at).toLocaleTimeString()}</span></div><p class="text-slate-800 leading-relaxed">${escapeHtml(m.message)}</p></div>`).join("");
       box.scrollTop = box.scrollHeight;
     }
     async function submitPortalChat(e) {
       e.preventDefault(); 
-      if (!currentUser) { openAuthModal("login"); return; }
-      if (currentUser.is_banned) { alert("Your account is restricted (Banned). You cannot send messages."); return; }
+      if (!currentUser || currentUser.is_banned) return;
       const i = document.getElementById("portalChatInput"), msg = i.value.trim(); if (!msg) return;
-      const { data } = await db.rpc("send_portal_chat", { p_phone: currentUser.phone, p_password: currentUser.pass, p_message: msg });
-      if (data && data.ok) { 
-        i.value = ""; 
-        await loadPortalChat(); 
-        logSystemAction("CHAT", `Live chat message sent by ${currentUser.name}`);
-      }
+      await db.rpc("send_portal_chat", { p_phone: currentUser.phone, p_password: currentUser.pass, p_message: msg });
+      i.value = ""; await loadPortalChat();
     }
     async function loadPortalComments() {
       const box = document.getElementById("portalCommentsList");
@@ -1309,39 +1136,28 @@
     }
     async function submitPortalComment(e) {
       e.preventDefault(); 
-      if (!currentUser) { openAuthModal("login"); return; }
-      if (currentUser.is_banned) { alert("Your account is restricted (Banned). You cannot post comments."); return; }
+      if (!currentUser || currentUser.is_banned) return;
       const i = document.getElementById("portalCommentInput"), msg = i.value.trim(); if (!msg) return;
       await db.rpc("add_portal_comment", { p_phone: currentUser.phone, p_password: currentUser.pass, p_message: msg });
-      i.value = ""; 
-      await loadPortalComments();
-      logSystemAction("COMMENT", `Comment posted by ${currentUser.name}`);
+      i.value = ""; await loadPortalComments();
     }
     function setTab(t) { currentTab = t; renderResources(); }
     function renderResources() {
       const list = document.getElementById("resourcesList"), query = (document.getElementById("searchInput")?.value || "").toLowerCase().trim();
       const filtered = allResources.filter(r => (currentTab === "all" || r.category === currentTab) && (!query || r.title.toLowerCase().includes(query)));
-      if (!filtered.length) { list.innerHTML = `<div class="col-span-2 bg-white border rounded-2xl p-8 text-center text-slate-500">No study materials found.</div>`; return; }
+      if (!filtered.length) { list.innerHTML = `<div class="col-span-2 bg-white border rounded-2xl p-8 text-center text-slate-500">No materials found.</div>`; return; }
       list.innerHTML = filtered.map(item => `<div class="bg-white border rounded-2xl p-5 shadow-sm"><strong>${escapeHtml(item.title)}</strong><p class="text-xs text-slate-600 mt-1">${escapeHtml(item.description || "")}</p><a href="${escapeHtml(item.url)}" target="_blank" class="inline-block mt-3 text-xs font-bold text-indigo-600 underline">Open Link ↗</a></div>`).join("");
     }
-    function openResourceModal() { 
-      if (!currentUser) { openAuthModal("login"); return; } 
-      if (currentUser.is_banned) { alert("Your account is restricted (Banned). You cannot add resources."); return; }
-      document.getElementById("resourceModal").classList.remove("hidden"); 
-    }
+    function openResourceModal() { if (currentUser && !currentUser.is_banned) document.getElementById("resourceModal").classList.remove("hidden"); }
     function closeResourceModal() { document.getElementById("resourceModal").classList.add("hidden"); }
     async function saveResource(e) {
       e.preventDefault();
-      if (currentUser?.is_banned) { alert("You are banned from submitting resources."); return; }
       const title = document.getElementById("resTitle").value;
       await db.rpc("submit_resource", { p_phone: currentUser.phone, p_password: currentUser.pass, p_title: title, p_category: document.getElementById("resCategory").value, p_url: document.getElementById("resUrl").value, p_description: document.getElementById("resDesc").value });
-      closeResourceModal(); 
-      e.target.reset(); 
-      loadResources(); 
-      logSystemAction("RESOURCE", `New resource submitted for review: "${title}"`);
+      closeResourceModal(); e.target.reset(); loadResources();
       alert("Submitted successfully!");
     }
-    function openAdminModal() { document.getElementById("adminModal").classList.remove("hidden"); refreshAdminDashboard(false); logSystemAction("ADMIN", "Opened Admin Moderation Panel."); }
+    function openAdminModal() { document.getElementById("adminModal").classList.remove("hidden"); refreshAdminDashboard(false); }
     function closeAdminModal() { document.getElementById("adminModal").classList.add("hidden"); }
 
     async function refreshAdminDashboard(bg) {
@@ -1349,26 +1165,14 @@
       const { data } = await db.rpc("admin_get_dashboard", { p_admin_phone: currentUser.phone, p_admin_password: currentUser.pass });
       if (!data || !data.ok) return;
 
-      const me = data.users.find(u => u.phone === currentUser.phone);
-      if (me && (Boolean(me.is_banned) !== Boolean(currentUser.is_banned) || Boolean(me.is_admin) !== Boolean(currentUser.is_admin))) {
-        currentUser.is_banned = Boolean(me.is_banned);
-        currentUser.is_admin = Boolean(me.is_admin);
-        localStorage.setItem("sr_user", JSON.stringify(currentUser));
-        updateAuthUI();
-      }
-
       if (bg) return;
 
-      // Full Member Details Card including Device Model, Browser, Screen, Device ID, & Timestamps
       document.getElementById("adminUsersList").innerHTML = data.users.map(u => {
         const isSelf = u.phone === currentUser.phone;
         const safeName = escapeHtml(u.name).replace(/'/g, "\\'");
         const safeDevId = escapeHtml(u.device_id || "").replace(/'/g, "\\'");
         const isBanned = Boolean(u.is_banned);
-        const joinedDate = u.created_at ? new Date(u.created_at).toLocaleString() : "N/A";
-        const lastSeenDate = u.last_seen ? new Date(u.last_seen).toLocaleString() : "Not synced yet";
-        const devInfo = u.device_details || (isSelf ? CURRENT_DEVICE_DETAILS : "Pending member's next visit/login");
-        const devIdDisplay = u.device_id || (isSelf ? CURRENT_DEVICE_ID : "Pending");
+        const devInfo = u.device_details || (isSelf ? CURRENT_DEVICE_DETAILS : "Pending login");
 
         return `
         <div class="p-4 bg-white border border-slate-200 rounded-2xl shadow-sm space-y-3 mb-3">
@@ -1382,43 +1186,23 @@
             ${isSelf ? `<span class="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded">Your Account</span>` : ""}
           </div>
 
-          <!-- Full Member & Device Metadata Box -->
-          <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-3 text-[11px] space-y-1.5 text-slate-700">
-            <div><span class="font-bold text-slate-900">📱 Device &amp; Browser:</span> ${escapeHtml(devInfo)}</div>
-            <div><span class="font-bold text-slate-900">🔑 Device Fingerprint ID:</span> <code class="font-mono text-[10px] bg-white px-1.5 py-0.5 rounded border border-slate-200">${escapeHtml(devIdDisplay)}</code></div>
-            <div class="flex flex-wrap gap-x-4 gap-y-1 text-[10px] text-slate-500 pt-0.5">
-              <span><strong>Registered:</strong> ${escapeHtml(joinedDate)}</span>
-              <span><strong>Last Active:</strong> ${escapeHtml(lastSeenDate)}</span>
-            </div>
+          <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-3 text-[11px] space-y-1 text-slate-700">
+            <div><span class="font-bold text-slate-900">📱 Device Info:</span> ${escapeHtml(devInfo)}</div>
+            <div><span class="font-bold text-slate-900">🔑 Fingerprint ID:</span> <code class="font-mono text-[10px] bg-white px-1.5 py-0.5 rounded border">${escapeHtml(u.device_id || CURRENT_DEVICE_ID)}</code></div>
           </div>
 
           ${!isSelf ? `
           <div class="flex flex-wrap gap-2 pt-1 border-t border-slate-100">
-            <!-- 1. Make Admin -->
-            <button type="button"
-              onclick="toggleMemberAdminRole('${escapeHtml(u.id)}', '${safeName}', ${!u.is_admin})"
-              class="${u.is_admin ? 'bg-slate-200 hover:bg-slate-300 text-slate-800' : 'bg-amber-500 hover:bg-amber-600 text-white'} text-xs font-extrabold px-3 py-2 rounded-xl shadow-sm transition active:scale-95">
+            <button type="button" onclick="toggleMemberAdminRole('${escapeHtml(u.id)}', '${safeName}', ${!u.is_admin})" class="${u.is_admin ? 'bg-slate-200 text-slate-800' : 'bg-amber-500 text-white'} text-xs font-extrabold px-3 py-2 rounded-xl">
               ${u.is_admin ? '⬇️ Remove Admin' : '👑 Make Admin'}
             </button>
-
-            <!-- 2. Ban (Read-only restriction) -->
-            <button type="button"
-              onclick="toggleMemberSoftBan('${escapeHtml(u.id)}', '${safeName}', ${!isBanned})"
-              class="${isBanned ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-orange-600 hover:bg-orange-700 text-white'} text-xs font-extrabold px-3 py-2 rounded-xl shadow-sm transition active:scale-95">
+            <button type="button" onclick="toggleMemberSoftBan('${escapeHtml(u.id)}', '${safeName}', ${!isBanned})" class="${isBanned ? 'bg-emerald-600 text-white' : 'bg-orange-600 text-white'} text-xs font-extrabold px-3 py-2 rounded-xl">
               ${isBanned ? '✅ Unban' : '⏸️ Ban'}
             </button>
-
-            <!-- 3. Remove (Clean delete so user can re-register if password forgotten) -->
-            <button type="button"
-              onclick="removeMemberCleanly('${escapeHtml(u.id)}', '${safeName}', '${escapeHtml(u.phone)}')"
-              class="bg-slate-700 hover:bg-slate-800 text-white text-xs font-extrabold px-3 py-2 rounded-xl shadow-sm transition active:scale-95">
+            <button type="button" onclick="removeMemberCleanly('${escapeHtml(u.id)}', '${safeName}', '${escapeHtml(u.phone)}')" class="bg-slate-700 text-white text-xs font-extrabold px-3 py-2 rounded-xl">
               🗑️ Remove
             </button>
-
-            <!-- 4. Remove Permanently (Forever blocked) -->
-            <button type="button"
-              onclick="removeMemberPermanently('${escapeHtml(u.id)}', '${safeName}', '${escapeHtml(u.phone)}', '${safeDevId}')"
-              class="bg-rose-600 hover:bg-rose-700 text-white text-xs font-extrabold px-3 py-2 rounded-xl shadow-sm transition active:scale-95">
+            <button type="button" onclick="removeMemberPermanently('${escapeHtml(u.id)}', '${safeName}', '${escapeHtml(u.phone)}', '${safeDevId}')" class="bg-rose-600 text-white text-xs font-extrabold px-3 py-2 rounded-xl">
               🚫 Remove Permanently
             </button>
           </div>
@@ -1432,23 +1216,10 @@
     setInterval(() => { refreshAdminDashboard(true); if (currentUser) loadPortalChat(); }, 10000);
 
     (async function init() {
-      const isAllowed = await verifyNotPermanentlyBanned(currentUser?.phone || "", currentUser?.name || "");
-      if (!isAllowed) {
-        logSystemAction("SECURITY_BLOCK", `Blocked permanently banned device on page load: ${CURRENT_DEVICE_ID}`);
-        return;
-      }
-
-      if (currentUser) {
-        await syncUserDeviceToServer(currentUser);
-      }
-
-      updateAuthUI(); 
-      updateActivityAlertToggleUI(); 
-      renderActivityNotificationsFeed();
-      renderActivityLogsUI();
-      logSystemAction("SYSTEM", `Portal initialized.`);
-      await fetchPortalStatus(); 
-      await loadAllPortalData();
+      if (!await verifyNotPermanentlyBanned(currentUser?.phone || "", currentUser?.name || "")) return;
+      if (currentUser) await syncUserDeviceToServer(currentUser);
+      updateAuthUI(); updateActivityAlertToggleUI(); renderActivityNotificationsFeed(); renderActivityLogsUI();
+      await fetchPortalStatus(); await loadAllPortalData();
     })();
   </script>
 </body>
