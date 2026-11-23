@@ -28,6 +28,20 @@
 </head>
 <body class="bg-gradient-to-br from-slate-50 via-indigo-50/40 to-sky-50/50 text-slate-800 min-h-screen flex flex-col selection:bg-indigo-600 selection:text-white">
 
+  <!-- Permanent Ban Lockout Screen -->
+  <div id="permanentBanOverlay" class="hidden fixed inset-0 bg-slate-950 z-50 flex items-center justify-center p-6 text-center">
+    <div class="max-w-md bg-slate-900 border-2 border-rose-500/60 rounded-3xl p-8 shadow-2xl text-white">
+      <div class="w-16 h-16 mx-auto rounded-2xl bg-rose-600/20 border border-rose-500 text-rose-400 flex items-center justify-center text-3xl mb-4">
+        🚫
+      </div>
+      <h2 class="font-extrabold text-xl text-rose-400">Permanent Access Revoked</h2>
+      <p class="text-xs text-slate-300 mt-2 leading-relaxed">
+        This device, phone number, or account has been permanently banned and removed by a Study Room SSC 2028 Administrator. Re-registration is permanently blocked.
+      </p>
+      <div id="banRefCode" class="mt-4 text-[10px] font-mono text-slate-500 bg-black/40 py-2 px-3 rounded-xl"></div>
+    </div>
+  </div>
+
   <!-- Top Navigation -->
   <header class="bg-white/85 backdrop-blur-lg border-b border-indigo-100/80 sticky top-0 z-30 shadow-sm">
     <div class="max-w-5xl mx-auto px-4 py-3.5 flex flex-wrap items-center justify-between gap-3">
@@ -58,7 +72,6 @@
 
         <button id="adminPanelBtn" onclick="openAdminModal()" class="hidden bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-md transition active:scale-95 relative">
           Admin Panel
-          <span id="pendingBadge" class="hidden absolute -top-2 -right-2 bg-rose-600 text-white text-[10px] px-1.5 py-0.5 rounded-full font-extrabold ring-2 ring-white">0</span>
         </button>
 
         <button id="authOpenBtn" onclick="openAuthModal('login')" class="bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-md transition active:scale-95">
@@ -74,7 +87,6 @@
           <span id="logAlertDot" class="hidden absolute -top-1.5 -right-1.5 w-3 h-3 rounded-full bg-rose-500 ring-2 ring-white"></span>
         </button>
 
-        <!-- Dedicated AI Chat Box Button Right Next to Add Resource -->
         <button id="aiChatHubHeaderBtn" onclick="openAiChatHubModal()" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-md transition active:scale-95 flex items-center gap-1.5">
           <span>🤖 AI Chat Box</span>
         </button>
@@ -122,7 +134,7 @@
             </span>
             <h2 class="font-extrabold text-base sm:text-lg tracking-tight">SSC 2028 Study Discussion Group</h2>
             <p class="text-xs text-emerald-50/90 mt-0.5 max-w-md">
-              Join classmates on WhatsApp for instant class notes, exam routines, and daily Q&amp;A.
+              Join classmates for instant class notes, exam routines, and daily Q&amp;A.
             </p>
           </div>
           <div class="flex flex-col items-stretch sm:items-end gap-2 shrink-0">
@@ -131,14 +143,6 @@
               <span>Join WhatsApp Group</span>
               <span>↗</span>
             </a>
-            <div class="flex items-center justify-between sm:justify-end gap-1.5 bg-emerald-950/30 border border-white/15 px-2.5 py-1 rounded-lg text-[11px] text-emerald-50">
-              <a href="https://chat.whatsapp.com/IVS5nwQpGIiGOSqYg63vKR" target="_blank" rel="noopener" class="underline truncate max-w-[200px] sm:max-w-[230px]">
-                chat.whatsapp.com/IVS5nwQpGIiGOSqYg63vKR
-              </a>
-              <button type="button" onclick="copyWhatsAppLink()" id="copyWaBtn" class="bg-white/20 hover:bg-white/30 text-white font-bold px-2 py-0.5 rounded text-[10px] transition shrink-0">
-                Copy
-              </button>
-            </div>
           </div>
         </div>
       </div>
@@ -179,8 +183,6 @@
 
       <!-- Dedicated Member Live Chat & Comment Board -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-
-        <!-- 1. Dedicated Member Live Chat -->
         <section class="bg-white border-2 border-emerald-200/80 rounded-2xl p-5 shadow-sm flex flex-col">
           <div class="flex items-center justify-between mb-3">
             <div>
@@ -203,7 +205,6 @@
           </form>
         </section>
 
-        <!-- 2. Dedicated Member Comment Board -->
         <section class="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm flex flex-col">
           <div class="flex items-center justify-between mb-3">
             <div>
@@ -225,7 +226,6 @@
             </button>
           </form>
         </section>
-
       </div>
 
     </div>
@@ -239,43 +239,37 @@
     </div>
   </footer>
 
-  <!-- DEDICATED AI CHAT BOX HUB MODAL (1. Gemini with Failover & SVG Diagrams, 2. ChatGPT, 3. Local AI) -->
+  <!-- AI CHAT BOX HUB MODAL -->
   <div id="aiChatHubModal" class="hidden fixed inset-0 bg-slate-950/75 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-6">
     <div class="bg-slate-900 rounded-3xl max-w-4xl w-full p-4 sm:p-6 shadow-2xl border border-indigo-500/40 max-h-[92vh] flex flex-col">
       <div class="flex items-center justify-between pb-3.5 border-b border-white/10 mb-3.5 gap-2">
         <div class="min-w-0">
           <h3 class="font-extrabold text-base sm:text-lg text-white truncate">🤖 AI Chat Box Hub</h3>
-          <p class="text-[11px] sm:text-xs text-slate-300">Switch between Gemini AI, ChatGPT, and Local AI Pro for PDF solutions, theory, math &amp; diagrams</p>
+          <p class="text-[11px] sm:text-xs text-slate-300">Switch between Gemini AI and Local AI Pro</p>
         </div>
         <button onclick="closeAiChatHubModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold text-xs shrink-0">✕</button>
       </div>
 
-      <!-- Model Switcher Tabs inside Modal -->
       <div class="flex gap-2 mb-4 shrink-0 overflow-x-auto no-scrollbar">
         <button type="button" onclick="switchAiHubTab('gemini')" id="hub-tab-gemini" class="ai-hub-tab bg-gradient-to-r from-indigo-600 to-blue-600 text-white px-3.5 py-2 rounded-xl text-xs font-extrabold shadow-md transition shrink-0 whitespace-nowrap">
           ✨ 1. Gemini AI (Online)
         </button>
-        <button type="button" onclick="switchAiHubTab('chatgpt')" id="hub-tab-chatgpt" class="ai-hub-tab bg-white/10 hover:bg-white/20 text-slate-300 px-3.5 py-2 rounded-xl text-xs font-extrabold transition shrink-0 whitespace-nowrap">
-          🤖 2. ChatGPT (Online)
-        </button>
         <button type="button" onclick="switchAiHubTab('local')" id="hub-tab-local" class="ai-hub-tab bg-white/10 hover:bg-white/20 text-slate-300 px-3.5 py-2 rounded-xl text-xs font-extrabold transition shrink-0 whitespace-nowrap">
-          🧠 3. Local AI (Offline)
+          🧠 2. Local AI (Offline)
         </button>
       </div>
 
-      <!-- AI Modal Body Containers -->
       <div class="overflow-y-auto flex-1 pr-0.5 space-y-4">
-
-        <!-- 1. Gemini AI Panel (Multi-Model Auto-Failover + Free SVG Textbook Diagrams) -->
+        <!-- 1. Gemini AI Panel -->
         <div id="ai-panel-gemini" class="ai-hub-panel space-y-4">
           <div class="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white rounded-2xl p-4 sm:p-5 shadow-xl border border-indigo-500/30">
             <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
               <div>
                 <div class="flex items-center gap-2 flex-wrap">
                   <h4 class="font-extrabold text-sm text-white">Gemini Multi-Model Tutor</h4>
-                  <span class="text-[10px] font-extrabold bg-indigo-500/30 text-indigo-200 px-2 py-0.5 rounded-full">AUTO-FAILOVER &bull; PDF &amp; SVG DIAGRAMS</span>
+                  <span class="text-[10px] font-extrabold bg-indigo-500/30 text-indigo-200 px-2 py-0.5 rounded-full">AUTO-FAILOVER &bull; PDF &amp; DIAGRAMS</span>
                 </div>
-                <p class="text-[11px] text-slate-300 mt-0.5">Automatically switches across active free-tier Gemini models during traffic spikes so you never get stuck.</p>
+                <p class="text-[11px] text-slate-300 mt-0.5">Real-world explanations &amp; automatic free model fallback during high demand.</p>
               </div>
               <div class="flex gap-1.5 flex-wrap items-center">
                 <button type="button" onclick="askGeminiQuick('Explain Newton’s 2nd Law with theory and an SSC Physics numerical step-by-step')" class="text-[10px] font-bold bg-white/10 hover:bg-white/20 px-2.5 py-1 rounded-lg transition">Physics CQ</button>
@@ -300,7 +294,7 @@
             </div>
 
             <div id="geminiAiMessages" class="space-y-2.5 max-h-64 overflow-y-auto mb-3.5 bg-black/25 border border-white/10 rounded-xl p-3.5 text-xs">
-              <div class="text-indigo-200"><span class="font-extrabold text-amber-300">Gemini AI:</span> Ask any SSC 2028 question, attach a PDF/image to solve step-by-step, or type a topic and click <strong>🎨 Draw Diagram</strong>!</div>
+              <div class="text-indigo-200"><span class="font-extrabold text-amber-300">Gemini AI:</span> Ask any SSC 2028 question or attach a file to solve step-by-step!</div>
             </div>
 
             <form onsubmit="handleGeminiAiSubmit(event)" class="flex gap-2 items-center">
@@ -310,50 +304,7 @@
           </div>
         </div>
 
-        <!-- 2. ChatGPT Panel -->
-        <div id="ai-panel-chatgpt" class="ai-hub-panel hidden space-y-4">
-          <div class="bg-gradient-to-br from-slate-900 via-emerald-950 to-slate-900 text-white rounded-2xl p-4 sm:p-5 shadow-xl border border-emerald-500/30">
-            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-              <div>
-                <div class="flex items-center gap-2 flex-wrap">
-                  <h4 class="font-extrabold text-sm text-white">OpenAI ChatGPT Assistant</h4>
-                  <span class="text-[10px] font-extrabold bg-emerald-500/20 text-emerald-200 px-2 py-0.5 rounded-full">GPT-4O-MINI REASONING</span>
-                </div>
-                <p class="text-[11px] text-slate-300 mt-0.5">Cloud AI powered by OpenAI for advanced reasoning, analytical problem solving, and detailed curriculum explanations.</p>
-              </div>
-              <div class="flex gap-1.5 flex-wrap items-center">
-                <button type="button" onclick="askChatGptQuick('Explain trigonometrical identities and give a practice proof problem')" class="text-[10px] font-bold bg-white/10 hover:bg-white/20 px-2.5 py-1 rounded-lg transition">Trig Proof</button>
-                <button type="button" onclick="clearChatGptChat()" class="text-[10px] font-bold bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 px-2.5 py-1 rounded-lg transition">Clear</button>
-                <button type="button" onclick="openAiKeyModal('openai')" class="text-[10px] font-bold bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-400/30 px-2.5 py-1 rounded-lg transition">⚙️ OpenAI Key</button>
-              </div>
-            </div>
-
-            <div class="flex flex-wrap items-center justify-between gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-2 mb-3 text-xs">
-              <div class="flex items-center gap-2 flex-wrap">
-                <label class="cursor-pointer bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-extrabold text-[11px] px-3 py-1.5 rounded-lg transition">
-                  📎 Attach File for ChatGPT
-                  <input id="chatgptFileInput" type="file" accept=".txt,.md,.csv,.json,.pdf,image/*" onchange="handleChatGptFileSelected(event)" class="hidden" />
-                </label>
-                <span id="chatgptFileStatus" class="text-[11px] text-slate-300">No file attached</span>
-              </div>
-              <div class="flex items-center gap-1.5">
-                <button type="button" id="clearChatgptFileBtn" onclick="clearChatGptFile()" class="hidden bg-white/10 text-slate-200 font-bold text-[11px] px-2.5 py-1.5 rounded-lg">✕ Remove</button>
-                <button type="button" id="solveChatgptFileBtn" onclick="solveChatGptAttachedFile()" class="hidden bg-emerald-500 text-slate-950 font-extrabold text-[11px] px-3 py-1.5 rounded-lg">⚡ Solve with ChatGPT</button>
-              </div>
-            </div>
-
-            <div id="chatgptMessages" class="space-y-2.5 max-h-64 overflow-y-auto mb-3.5 bg-black/25 border border-white/10 rounded-xl p-3.5 text-xs">
-              <div class="text-emerald-200"><span class="font-extrabold text-amber-300">ChatGPT:</span> Ask any question or attach a study file for deep reasoning solutions *(requires an OpenAI API key with active billing credits via ⚙️)*.</div>
-            </div>
-
-            <form onsubmit="handleChatGptSubmit(event)" class="flex gap-2 items-center">
-              <input id="chatgptInput" type="text" placeholder="Ask ChatGPT anything..." class="flex-1 min-w-0 bg-white/10 border border-white/25 focus:border-emerald-400 text-white placeholder-slate-400 rounded-xl px-3 py-2.5 text-xs outline-none" required />
-              <button id="chatgptSendBtn" type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-3.5 py-2.5 rounded-xl shadow-md transition shrink-0 whitespace-nowrap">Ask ChatGPT</button>
-            </form>
-          </div>
-        </div>
-
-        <!-- 3. Local AI Panel -->
+        <!-- 2. Local AI Panel -->
         <div id="ai-panel-local" class="ai-hub-panel hidden space-y-4">
           <div class="bg-gradient-to-br from-slate-900 via-teal-950 to-slate-900 text-white rounded-2xl p-4 sm:p-5 shadow-xl border border-teal-500/30">
             <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
@@ -362,40 +313,24 @@
                   <h4 class="font-extrabold text-sm text-white">Local Study Engine Pro</h4>
                   <span class="text-[10px] font-extrabold bg-teal-500/20 text-teal-200 px-2 py-0.5 rounded-full">100% OFFLINE &bull; NO API KEY</span>
                 </div>
-                <p class="text-[11px] text-slate-300 mt-0.5">Full offline tutor: explains theory, formulas, worked examples, solves equations, scans files via OCR, and draws diagrams.</p>
+                <p class="text-[11px] text-slate-300 mt-0.5">Full offline tutor: explains theory, formulas, worked examples, solves equations, and scans files.</p>
               </div>
               <div class="flex gap-1.5 flex-wrap">
                 <button type="button" onclick="askLocalQuick('motion')" class="text-[10px] font-bold bg-white/10 hover:bg-white/20 px-2.5 py-1 rounded-lg transition">Motion Theory</button>
                 <button type="button" onclick="askLocalQuick('force')" class="text-[10px] font-bold bg-white/10 hover:bg-white/20 px-2.5 py-1 rounded-lg transition">Force</button>
-                <button type="button" onclick="askLocalQuick('draw triangle')" class="text-[10px] font-bold bg-teal-500/25 hover:bg-teal-500/40 text-teal-200 border border-teal-400/30 px-2.5 py-1 rounded-lg transition">📐 Draw Triangle</button>
-              </div>
-            </div>
-
-            <div class="flex flex-wrap items-center justify-between gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-2 mb-3 text-xs">
-              <div class="flex items-center gap-2 flex-wrap">
-                <label class="cursor-pointer bg-teal-500 hover:bg-teal-600 text-slate-950 font-extrabold text-[11px] px-3 py-1.5 rounded-lg transition">
-                  📎 Attach File / OCR Scan
-                  <input id="localAiFileInput" type="file" accept=".txt,.md,.csv,.json,.pdf,image/*" onchange="handleLocalFileSelected(event)" class="hidden" />
-                </label>
-                <span id="localAiFileStatus" class="text-[11px] text-slate-300">No file attached</span>
-              </div>
-              <div class="flex items-center gap-1.5">
-                <button type="button" id="clearLocalFileBtn" onclick="clearLocalFile()" class="hidden bg-white/10 text-slate-200 font-bold text-[11px] px-2.5 py-1.5 rounded-lg">✕ Remove</button>
-                <button type="button" id="solveLocalFileBtn" onclick="solveLocalAttachedFile()" class="hidden bg-emerald-500 text-slate-950 font-extrabold text-[11px] px-3 py-1.5 rounded-lg">⚡ Scan &amp; Solve</button>
               </div>
             </div>
 
             <div id="localAiMessages" class="space-y-2.5 max-h-64 overflow-y-auto mb-3.5 bg-black/25 border border-white/10 rounded-xl p-3.5 text-xs">
-              <div class="text-teal-200"><span class="font-extrabold text-amber-300">Local AI Pro:</span> Ask theory (<code>motion</code>, <code>force</code>, <code>mole</code>, <code>cell</code>, <code>trig</code>), solve math (<code>x^2 - 5*x + 6 = 0</code>), or draw diagrams (<code>draw triangle</code>).</div>
+              <div class="text-teal-200"><span class="font-extrabold text-amber-300">Local AI Pro:</span> Ask theory (<code>motion</code>, <code>force</code>, <code>mole</code>, <code>cell</code>) or solve math equations.</div>
             </div>
 
             <form onsubmit="handleLocalAiSubmit(event)" class="flex gap-2 items-center">
-              <input id="localAiInput" type="text" placeholder="Ask theory, solve math, or draw diagrams..." class="flex-1 min-w-0 bg-white/10 border border-white/25 focus:border-teal-400 text-white placeholder-slate-400 rounded-xl px-3 py-2.5 text-xs outline-none" required />
+              <input id="localAiInput" type="text" placeholder="Ask theory or solve math..." class="flex-1 min-w-0 bg-white/10 border border-white/25 focus:border-teal-400 text-white placeholder-slate-400 rounded-xl px-3 py-2.5 text-xs outline-none" required />
               <button type="submit" class="bg-teal-500 hover:bg-teal-600 text-slate-950 font-extrabold text-xs px-3.5 py-2.5 rounded-xl shadow-md transition shrink-0 whitespace-nowrap">Solve Local</button>
             </form>
           </div>
         </div>
-
       </div>
     </div>
   </div>
@@ -405,16 +340,16 @@
     <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100">
       <div class="flex items-center justify-between mb-4">
         <div>
-          <h3 id="aiModalTitle" class="font-extrabold text-base text-slate-900">⚙️ Configure AI API Key</h3>
-          <p class="text-xs text-slate-500 mt-0.5">Used by online cloud AI chat boxes</p>
+          <h3 class="font-extrabold text-base text-slate-900">⚙️ Configure Gemini API Key</h3>
+          <p class="text-xs text-slate-500 mt-0.5">Used by online cloud AI chat box</p>
         </div>
         <button onclick="closeAiKeyModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 font-bold text-xs">✕</button>
       </div>
       <div class="space-y-3 text-xs text-slate-600">
-        <p id="aiModalDesc">Enter your API key below. It stays securely in your browser's local storage.</p>
+        <p>Enter your free Gemini API key below. It stays securely in your browser's local storage.</p>
         <div>
-          <label id="aiModalLabel" class="block text-xs font-bold text-slate-700 mb-1">API Key</label>
-          <input id="aiApiKeyInput" type="password" placeholder="AIzaSy... or sk-..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm outline-none" />
+          <label class="block text-xs font-bold text-slate-700 mb-1">Gemini API Key</label>
+          <input id="aiApiKeyInput" type="password" placeholder="AIzaSy..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm outline-none" />
         </div>
         <div class="flex justify-end gap-2 pt-2">
           <button type="button" onclick="closeAiKeyModal()" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100">Cancel</button>
@@ -424,29 +359,30 @@
     </div>
   </div>
 
-  <!-- Dedicated Activity Log Modal -->
+  <!-- Dedicated Activity Log Modal (Expanded & Comprehensive) -->
   <div id="activityLogModal" class="hidden fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-40 flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-slate-100 max-h-[85vh] flex flex-col">
+    <div class="bg-white rounded-3xl max-w-3xl w-full p-6 shadow-2xl border border-slate-100 max-h-[85vh] flex flex-col">
       <div class="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-100">
         <div>
-          <h3 class="font-extrabold text-base text-slate-900">📋 Activity Log &amp; Alerts</h3>
-          <p class="text-xs text-slate-500">Member adds, removals/bans, uploads, website changes &amp; live notifications</p>
+          <h3 class="font-extrabold text-base text-slate-900">📋 Expanded Security &amp; Activity Log</h3>
+          <p class="text-xs text-slate-500">Automatically tracking all system modifications, bans, logins, uploads, and changes</p>
         </div>
         <div class="flex items-center gap-2 flex-wrap">
           <button type="button" id="toggleLogAlertsBtn" onclick="toggleActivityNotifications()" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-900 text-xs font-extrabold px-3 py-2 rounded-xl transition">🔔 Alerts: ON</button>
-          <button type="button" onclick="saveLogsToDevice()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold px-3.5 py-2 rounded-xl shadow-sm transition active:scale-95">💾 Save Logs</button>
+          <button type="button" onclick="saveLogsToDevice()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold px-3.5 py-2 rounded-xl shadow-sm transition active:scale-95">💾 Export Logs (.txt)</button>
+          <button type="button" onclick="clearAllActivityLogs()" class="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold px-3 py-2 rounded-xl transition">Clear Logs</button>
           <button type="button" onclick="closeActivityLogModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 font-bold text-xs">✕</button>
         </div>
       </div>
       <div class="mb-4">
-        <div class="text-[11px] font-extrabold uppercase tracking-wider text-amber-700 mb-1.5">Recent Notification Alerts</div>
+        <div class="text-[11px] font-extrabold uppercase tracking-wider text-amber-700 mb-1.5">Live Modification Alerts</div>
         <div id="activityNotificationsFeed" class="bg-amber-50/70 border border-amber-200/80 rounded-2xl p-3 max-h-32 overflow-y-auto text-xs space-y-1.5">
           <div class="text-slate-500">No new alerts yet.</div>
         </div>
       </div>
-      <div class="text-[11px] font-extrabold uppercase tracking-wider text-slate-600 mb-1.5">Recorded Activity History</div>
-      <div id="dedicatedActivityLogsList" class="divide-y divide-slate-100 border border-slate-200 rounded-2xl text-xs overflow-y-auto flex-1">
-        <div class="p-4 text-slate-500">Loading activity logs...</div>
+      <div class="text-[11px] font-extrabold uppercase tracking-wider text-slate-600 mb-1.5">Full System Action History</div>
+      <div id="dedicatedActivityLogsList" class="divide-y divide-slate-100 border border-slate-200 rounded-2xl text-xs overflow-y-auto flex-1 bg-slate-50 p-2">
+        <div class="p-4 text-slate-500 text-center">Loading activity logs...</div>
       </div>
     </div>
   </div>
@@ -465,26 +401,23 @@
         <div>
           <label class="block text-xs font-bold text-slate-700 mb-1">Category *</label>
           <select id="resCategory" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm outline-none" required>
-            <option value="Documents">Documents (PDFs, Notes, Drive/MEGA)</option>
-            <option value="Images">Images (Diagrams, Board Photos)</option>
-            <option value="Videos">Videos (YouTube, Recorded Classes)</option>
-            <option value="Links">Links (Websites, Quizzes)</option>
+            <option value="Documents">Documents (PDFs, Notes)</option>
+            <option value="Images">Images (Diagrams)</option>
+            <option value="Videos">Videos (YouTube)</option>
+            <option value="Links">Links (Websites)</option>
           </select>
         </div>
         <div>
           <label class="block text-xs font-bold text-slate-700 mb-1">Title *</label>
-          <input id="resTitle" type="text" placeholder="e.g., Physics Chapter 3 Notes PDF" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm outline-none" required />
+          <input id="resTitle" type="text" placeholder="e.g., Physics Chapter Notes" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm outline-none" required />
         </div>
         <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">Link (Drive / MEGA / YouTube) *</label>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Link URL *</label>
           <input id="resUrl" type="url" placeholder="https://..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm outline-none" required />
         </div>
         <div>
           <label class="block text-xs font-bold text-slate-700 mb-1">Short Description</label>
-          <textarea id="resDesc" rows="2" placeholder="Important formulas and creative questions included..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm outline-none"></textarea>
-        </div>
-        <div class="text-[11px] text-amber-800 bg-amber-50 border border-amber-200/80 p-3 rounded-xl font-medium">
-          Non-admin uploads are reviewed by an admin before appearing publicly.
+          <textarea id="resDesc" rows="2" placeholder="Important details..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm outline-none"></textarea>
         </div>
         <div class="flex justify-end gap-2 pt-2">
           <button type="button" onclick="closeResourceModal()" class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100">Cancel</button>
@@ -519,7 +452,7 @@
 
       <form id="registerForm" onsubmit="handleRegister(event)" class="hidden space-y-3.5">
         <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">Full Name *</label>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Full Name (Username) *</label>
           <input id="regName" type="text" placeholder="Your Full Name" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm outline-none" required />
         </div>
         <div>
@@ -541,7 +474,7 @@
       <div class="flex items-center justify-between mb-5 pb-3 border-b border-slate-100">
         <div>
           <h3 class="font-extrabold text-base text-slate-900">Admin Control &amp; Moderation Center</h3>
-          <p class="text-xs text-slate-500">Portal visibility, pending submissions &amp; member roles</p>
+          <p class="text-xs text-slate-500">Portal visibility, permanent bans &amp; member management</p>
         </div>
         <button onclick="closeAdminModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 font-bold text-xs">✕</button>
       </div>
@@ -550,7 +483,7 @@
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h4 class="text-xs font-extrabold uppercase tracking-wider text-indigo-950">Portal Visibility Mode</h4>
-            <p id="visibilityDescText" class="text-xs text-slate-600 mt-0.5">Private: Only logged-in students can see notes &amp; links.</p>
+            <p id="visibilityDescText" class="text-xs text-slate-600 mt-0.5">Private: Only logged-in students can view portal content.</p>
           </div>
           <div class="flex gap-1.5 bg-white p-1 rounded-xl border border-indigo-200/70 shrink-0">
             <button type="button" id="setPrivateBtn" onclick="changePortalVisibility(false)" class="px-3.5 py-1.5 rounded-lg text-xs font-extrabold transition">🔒 Private</button>
@@ -562,7 +495,7 @@
       <h4 class="text-xs font-extrabold uppercase tracking-wider text-amber-600 mb-2.5">Pending Content Submissions</h4>
       <div id="adminPendingList" class="divide-y divide-slate-100 border border-amber-200/70 bg-amber-50/30 rounded-2xl mb-6 text-xs overflow-hidden"></div>
 
-      <h4 class="text-xs font-extrabold uppercase tracking-wider text-indigo-900 mb-2.5">Registered Members &amp; Roles</h4>
+      <h4 class="text-xs font-extrabold uppercase tracking-wider text-indigo-900 mb-2.5">Registered Members (Ban &amp; Remove Permanently)</h4>
       <div id="adminUsersList" class="divide-y divide-slate-100 border border-slate-200/90 rounded-2xl text-xs overflow-hidden"></div>
     </div>
   </div>
@@ -570,19 +503,14 @@
   <script>
     const SUPABASE_URL = "https://grcnhjirkcolqekdoeoj.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_-4SxZGajx_1f2ZNjAvZnew_Jhl6039n";
-    const WHATSAPP_INVITE_URL = "https://chat.whatsapp.com/IVS5nwQpGIiGOSqYg63vKR";
 
     const DEFAULT_GEMINI_API_KEY = "";
-    // Active free-tier Gemini models ordered from strongest to fastest fallback
     const GEMINI_FALLBACK_MODELS = [
       "gemini-3.8-flash",
       "gemini-3.6-flash",
       "gemini-3.5-flash-lite",
       "gemini-3.1-flash-lite"
     ];
-
-    const DEFAULT_OPENAI_API_KEY = "";
-    const OPENAI_MODEL = "gpt-4o-mini";
 
     if (window.pdfjsLib && pdfjsLib.GlobalWorkerOptions) {
       pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
@@ -592,23 +520,199 @@
 
     let currentTab = "all";
     let allResources = [];
-    let allActivityLogs = [];
+    
+    // =========================================================================
+    // 1. DEVICE FINGERPRINT & PERMANENT BAN SYSTEM
+    // =========================================================================
+    function getDeviceFingerprint() {
+      let storedId = localStorage.getItem("sr_device_hw_id");
+      const rawSpec = [
+        navigator.platform || "unknown_os",
+        navigator.userAgent.slice(0, 60),
+        `${screen.width}x${screen.height}`,
+        Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC"
+      ].join("|");
+      
+      // Simple deterministic hash of hardware/browser signature
+      let hash = 0;
+      for (let i = 0; i < rawSpec.length; i++) {
+        hash = ((hash << 5) - hash) + rawSpec.charCodeAt(i);
+        hash |= 0;
+      }
+      const hwSignature = `DEV-${Math.abs(hash).toString(16).toUpperCase()}-${navigator.platform || "WEB"}`;
+      if (!storedId) {
+        storedId = hwSignature;
+        localStorage.setItem("sr_device_hw_id", storedId);
+      }
+      return storedId;
+    }
+
+    const CURRENT_DEVICE_ID = getDeviceFingerprint();
+    let localBlacklist = JSON.parse(localStorage.getItem("sr_permanent_blacklist") || "{\"phones\":[],\"usernames\":[],\"devices\":[]}");
+
+    function enforcePermanentBanLockout(reasonText) {
+      localStorage.setItem("sr_device_permanently_banned", "true");
+      localStorage.removeItem("sr_user");
+      currentUser = null;
+      const overlay = document.getElementById("permanentBanOverlay");
+      const refCode = document.getElementById("banRefCode");
+      if (overlay) overlay.classList.remove("hidden");
+      if (refCode) refCode.textContent = `Device ID: ${CURRENT_DEVICE_ID} | Status: ${reasonText}`;
+    }
+
+    async function verifyNotPermanentlyBanned(phone = "", username = "") {
+      const cleanPhone = String(phone || "").replace(/\s+/g, "").toLowerCase();
+      const cleanName = String(username || "").trim().toLowerCase();
+
+      // Layer 1: Check immediate local browser/device ban flag
+      if (localStorage.getItem("sr_device_permanently_banned") === "true" || localBlacklist.devices.includes(CURRENT_DEVICE_ID)) {
+        enforcePermanentBanLockout("DEVICE_BLACKLISTED");
+        return false;
+      }
+      if (cleanPhone && localBlacklist.phones.includes(cleanPhone)) {
+        enforcePermanentBanLockout("PHONE_BLACKLISTED");
+        return false;
+      }
+      if (cleanName && localBlacklist.usernames.includes(cleanName)) {
+        enforcePermanentBanLockout("USERNAME_BLACKLISTED");
+        return false;
+      }
+
+      // Layer 2: Check Supabase permanent blacklist table
+      try {
+        const { data } = await db.rpc("check_is_banned", {
+          p_phone: cleanPhone || null,
+          p_username: cleanName || null,
+          p_device_id: CURRENT_DEVICE_ID
+        });
+        if (data && data.banned) {
+          if (!localBlacklist.devices.includes(CURRENT_DEVICE_ID)) localBlacklist.devices.push(CURRENT_DEVICE_ID);
+          if (cleanPhone && !localBlacklist.phones.includes(cleanPhone)) localBlacklist.phones.push(cleanPhone);
+          if (cleanName && !localBlacklist.usernames.includes(cleanName)) localBlacklist.usernames.push(cleanName);
+          localStorage.setItem("sr_permanent_blacklist", JSON.stringify(localBlacklist));
+          enforcePermanentBanLockout("SERVER_BLACKLIST_MATCH");
+          return false;
+        }
+      } catch (e) {
+        // Fallback if RPC not yet deployed
+      }
+      return true;
+    }
+
+    async function banAndRemoveMember(targetId, targetName, targetPhone) {
+      if (!currentUser?.is_admin) return;
+      if (targetPhone === currentUser.phone) {
+        alert("You cannot ban your own admin account.");
+        return;
+      }
+
+      const confirmed = confirm(
+        `PERMANENT BAN WARNING:\n\nAre you sure you want to FIRST BAN and THEN REMOVE "${targetName}" (${targetPhone})?\n\nOnce banned and removed, they will NEVER be able to register again with this phone number, username, or device.`
+      );
+      if (!confirmed) return;
+
+      const cleanPhone = String(targetPhone).replace(/\s+/g, "").toLowerCase();
+      const cleanName = String(targetName).trim().toLowerCase();
+      const knownDeviceId = localStorage.getItem(`sr_user_dev_${cleanPhone}`) || CURRENT_DEVICE_ID;
+
+      // Save locally to blacklist immediately
+      if (!localBlacklist.phones.includes(cleanPhone)) localBlacklist.phones.push(cleanPhone);
+      if (!localBlacklist.usernames.includes(cleanName)) localBlacklist.usernames.push(cleanName);
+      localStorage.setItem("sr_permanent_blacklist", JSON.stringify(localBlacklist));
+
+      // Execute permanent ban + deletion on Supabase
+      const { data, error } = await db.rpc("admin_ban_and_remove_user", {
+        p_admin_phone: currentUser.phone,
+        p_admin_password: currentUser.pass,
+        p_target_user_id: targetId,
+        p_target_phone: targetPhone,
+        p_target_name: targetName,
+        p_target_device_id: knownDeviceId
+      });
+
+      if (error || (data && !data.ok)) {
+        alert(data?.error || error?.message || "Could not complete server ban. Make sure the SQL blacklist functions are added.");
+        return;
+      }
+
+      logSystemAction("BAN_PERMANENT", `Admin permanently BANNED & REMOVED member: ${targetName} (${targetPhone}). Re-registration blocked.`);
+      alert(`Member "${targetName}" has been permanently banned and removed. They can never register again.`);
+      await refreshAdminDashboard(false);
+    }
+
+    // =========================================================================
+    // 2. EXPANDED ACTIVITY LOG ENGINE (.TXT Export Enabled)
+    // =========================================================================
+    let systemActivityLogs = JSON.parse(localStorage.getItem("sr_expanded_activity_logs") || "[]");
     let activityAlertsFeed = JSON.parse(localStorage.getItem("sr_activity_alerts") || "[]");
     let logAlertsEnabled = localStorage.getItem("sr_log_alerts_enabled") !== "false";
 
+    function logSystemAction(actionType, description) {
+      const timestamp = new Date().toLocaleString();
+      const actor = currentUser ? `${currentUser.name} (${currentUser.phone})` : `Guest [${CURRENT_DEVICE_ID}]`;
+      const logEntry = {
+        id: Math.random().toString(36).substring(2, 9),
+        type: actionType,
+        actor: actor,
+        action: description,
+        time: timestamp
+      };
+
+      systemActivityLogs.unshift(logEntry);
+      if (systemActivityLogs.length > 250) systemActivityLogs.pop();
+      localStorage.setItem("sr_expanded_activity_logs", JSON.stringify(systemActivityLogs));
+
+      if (logAlertsEnabled) {
+        activityAlertsFeed.unshift({ text: `[${actionType}] ${description}`, time: timestamp });
+        if (activityAlertsFeed.length > 50) activityAlertsFeed.pop();
+        localStorage.setItem("sr_activity_alerts", JSON.stringify(activityAlertsFeed));
+      }
+
+      renderActivityLogsUI();
+      renderActivityNotificationsFeed();
+    }
+
+    function renderActivityLogsUI() {
+      const listEl = document.getElementById("dedicatedActivityLogsList");
+      if (!listEl) return;
+      if (!systemActivityLogs.length) {
+        listEl.innerHTML = `<div class="p-4 text-slate-500 text-center">No system activity logged yet.</div>`;
+        return;
+      }
+      listEl.innerHTML = systemActivityLogs.map(log => `
+        <div class="p-3 bg-white hover:bg-slate-50 flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-slate-100">
+          <div>
+            <span class="font-extrabold text-indigo-700 uppercase text-[10px] bg-indigo-50 px-2 py-0.5 rounded mr-1.5">${escapeHtml(log.type)}</span>
+            <span class="text-slate-800 font-medium">${escapeHtml(log.action)}</span>
+            <div class="text-[10px] text-slate-400 mt-0.5">Actor: ${escapeHtml(log.actor)}</div>
+          </div>
+          <span class="text-[10px] text-slate-400 shrink-0">${escapeHtml(log.time)}</span>
+        </div>
+      `).join("");
+    }
+
+    function clearAllActivityLogs() {
+      if (!currentUser?.is_admin) {
+        alert("Only admins can clear activity logs.");
+        return;
+      }
+      if (confirm("Are you sure you want to clear all recorded activity logs?")) {
+        systemActivityLogs = [];
+        activityAlertsFeed = [];
+        localStorage.removeItem("sr_expanded_activity_logs");
+        localStorage.removeItem("sr_activity_alerts");
+        logSystemAction("SECURITY", "Admin cleared all activity logs.");
+        renderActivityLogsUI();
+        renderActivityNotificationsFeed();
+      }
+    }
+
     // Gemini AI state
     let geminiAttachedFile = null, geminiAttachedBase64 = null, geminiAttachedMime = "", geminiExtractedText = "", geminiChatHistory = [];
-    // ChatGPT state
-    let chatgptAttachedFile = null, chatgptAttachedBase64 = null, chatgptAttachedMime = "", chatgptExtractedText = "", chatgptChatHistory = [];
-    // Local AI state
-    let localAttachedFile = null, localAttachedImageUrl = "", localExtractedText = "";
-
     let isPortalPublic = false;
     let currentUser = JSON.parse(localStorage.getItem("sr_user") || "null");
-    let activeApiKeyType = "gemini";
 
     function escapeHtml(str) { return String(str || "").replace(/[&<>"']/g, m => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m])); }
-    function copyWhatsAppLink() { navigator.clipboard.writeText(WHATSAPP_INVITE_URL).then(() => { const b = document.getElementById("copyWaBtn"); b.textContent = "Copied!"; setTimeout(() => b.textContent = "Copy", 2000); }); }
 
     function fileToBase64(file) {
       return new Promise((resolve, reject) => {
@@ -642,8 +746,10 @@
       throw new Error("Unsupported file type.");
     }
 
-    // AI Chat Hub Modal controls
-    function openAiChatHubModal() { document.getElementById("aiChatHubModal").classList.remove("hidden"); }
+    function openAiChatHubModal() { 
+      logSystemAction("NAVIGATION", "Opened AI Chat Hub.");
+      document.getElementById("aiChatHubModal").classList.remove("hidden"); 
+    }
     function closeAiChatHubModal() { document.getElementById("aiChatHubModal").classList.add("hidden"); }
 
     function switchAiHubTab(tab) {
@@ -656,35 +762,20 @@
       document.getElementById("ai-panel-" + tab).classList.remove("hidden");
     }
 
-    // API Key Modal
-    function openAiKeyModal(type) {
-      activeApiKeyType = type;
-      const titleEl = document.getElementById("aiModalTitle"), descEl = document.getElementById("aiModalDesc"), labelEl = document.getElementById("aiModalLabel"), inputEl = document.getElementById("aiApiKeyInput");
-      if (type === "gemini") {
-        titleEl.textContent = "⚙️ Configure Gemini API Key";
-        descEl.innerHTML = 'Get a free key in <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-indigo-600 font-bold underline">Google AI Studio</a>.';
-        labelEl.textContent = "Gemini API Key"; inputEl.value = localStorage.getItem("sr_gemini_api_key") || "";
-      } else {
-        titleEl.textContent = "⚙️ Configure OpenAI API Key";
-        descEl.innerHTML = 'Get key in <a href="https://platform.openai.com/api-keys" target="_blank" class="text-emerald-600 font-bold underline">OpenAI Dashboard</a>.';
-        labelEl.textContent = "OpenAI API Key (sk-...)"; inputEl.value = localStorage.getItem("sr_openai_api_key") || "";
-      }
+    function openAiKeyModal() {
+      document.getElementById("aiApiKeyInput").value = localStorage.getItem("sr_gemini_api_key") || "";
       document.getElementById("aiKeyModal").classList.remove("hidden");
     }
     function closeAiKeyModal() { document.getElementById("aiKeyModal").classList.add("hidden"); }
     function saveActiveAiKey() {
       const val = document.getElementById("aiApiKeyInput").value.trim();
-      if (activeApiKeyType === "gemini") {
-        if (val) localStorage.setItem("sr_gemini_api_key", val); else localStorage.removeItem("sr_gemini_api_key");
-        appendGeminiMessage("Gemini AI", val ? "Gemini key saved!" : "Gemini key cleared.", false);
-      } else {
-        if (val) localStorage.setItem("sr_openai_api_key", val); else localStorage.removeItem("sr_openai_api_key");
-        appendChatGptMessage("ChatGPT", val ? "OpenAI key saved!" : "OpenAI key cleared.", false);
-      }
+      if (val) localStorage.setItem("sr_gemini_api_key", val); else localStorage.removeItem("sr_gemini_api_key");
+      logSystemAction("CONFIG", "Gemini API key updated in browser storage.");
+      appendGeminiMessage("Gemini AI", val ? "Gemini key saved successfully!" : "Gemini key cleared.", false);
       closeAiKeyModal();
     }
 
-    // 1. Gemini AI (Multi-Model Automatic Failover + Free SVG Diagrams)
+    // Gemini AI with Failover
     function getGeminiApiKey() { return (localStorage.getItem("sr_gemini_api_key") || DEFAULT_GEMINI_API_KEY || "").trim(); }
     function clearGeminiChat() { geminiChatHistory = []; document.getElementById("geminiAiMessages").innerHTML = `<div class="text-indigo-200">Chat cleared!</div>`; }
     function clearGeminiFile() {
@@ -709,6 +800,7 @@
         }
         document.getElementById("geminiFileStatus").textContent = `Attached: ${file.name}`;
         document.getElementById("solveGeminiFileBtn").classList.remove("hidden");
+        logSystemAction("UPLOAD", `Attached file to Gemini: ${file.name}`);
       } catch (err) { document.getElementById("geminiFileStatus").textContent = `Error: ${err.message}`; }
     }
 
@@ -719,7 +811,7 @@
         throw new Error("Please set your Gemini API key.");
       }
 
-      const systemInstruction = "You are an expert NCTB SSC 2028 tutor. Solve Physics, Chemistry, Math, and Biology with theory, formulas, and step-by-step worked examples.";
+      const systemInstruction = "You are an elite, engaging NCTB SSC 2028 science tutor. Explain concepts using real-world intuition, practical applications, and broad reasoning alongside syllabus basics. Keep answers punchy and concise. Write mathematical equations cleanly using plain Unicode symbols without dollar signs.";
       const userParts = [{ text: userPrompt }];
 
       if (includeAttachment && geminiAttachedFile) {
@@ -733,7 +825,6 @@
       const contents = [...geminiChatHistory.slice(-10), { role: "user", parts: userParts }];
       let lastError = "All Gemini free-tier models are currently busy.";
 
-      // Automatically cycle through free-tier models if one hits high demand (503) or rate limits (429)
       for (const modelName of GEMINI_FALLBACK_MODELS) {
         try {
           const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(apiKey)}`, {
@@ -742,12 +833,11 @@
             body: JSON.stringify({
               system_instruction: { parts: [{ text: systemInstruction }] },
               contents,
-              generationConfig: { temperature: 0.35, maxOutputTokens: 2048 }
+              generationConfig: { temperature: 0.4, maxOutputTokens: 2048 }
             })
           });
 
           const data = await res.json();
-
           if (!res.ok) {
             const errMsg = data?.error?.message || `HTTP ${res.status}`;
             lastError = `${modelName}: ${errMsg}`;
@@ -757,11 +847,12 @@
             continue;
           }
 
-          const replyText = data?.candidates?.[0]?.content?.parts?.map(p => p.text || "").join("") || "No response returned.";
+          let replyText = data?.candidates?.[0]?.content?.parts?.map(p => p.text || "").join("") || "No response returned.";
+          replyText = replyText.replace(/\$\$([^$]+)\$\$/g, "$1").replace(/\$([^$]+)\$/g, "$1");
+
           geminiChatHistory.push({ role: "user", parts: [{ text: userPrompt }] });
           geminiChatHistory.push({ role: "model", parts: [{ text: replyText }] });
           return replyText;
-
         } catch (err) {
           if (err.message.includes("Invalid Gemini API Key")) throw err;
           lastError = err.message;
@@ -788,6 +879,7 @@
         } else {
           loading.innerHTML = `<div class="bg-white/10 p-3 rounded-xl"><span class="font-bold text-amber-300">Gemini:</span> ${formatMarkdown(reply)}</div>`;
         }
+        logSystemAction("AI", `Generated diagram for: ${promptText}`);
       } catch (err) {
         loading.innerHTML = `<div class="bg-rose-500/25 p-2.5 rounded-xl text-rose-200">Error: ${escapeHtml(err.message)}</div>`;
       }
@@ -804,12 +896,21 @@
       if (!geminiAttachedFile) return;
       appendGeminiMessage("You", `Solve file: ${geminiAttachedFile.name}`, true);
       const l = appendGeminiMessage("Gemini AI", "Solving...", false);
-      try { const r = await callGeminiApi(`Solve all questions and problems in ${geminiAttachedFile.name} step-by-step.`, true); l.innerHTML = `<span class="font-bold text-amber-300">Gemini:</span> ${formatMarkdown(r)}`; }
+      try { 
+        const r = await callGeminiApi(`Solve all questions and problems in ${geminiAttachedFile.name} step-by-step.`, true); 
+        l.innerHTML = `<span class="font-bold text-amber-300">Gemini:</span> ${formatMarkdown(r)}`; 
+        logSystemAction("AI", `Solved attached file via Gemini: ${geminiAttachedFile.name}`);
+      }
       catch (err) { l.innerHTML = `<span class="text-rose-300">Error: ${escapeHtml(err.message)}</span>`; }
     }
     async function askGeminiQuick(txt) {
-      appendGeminiMessage("You", txt, true); const l = appendGeminiMessage("Gemini AI", "Thinking...", false);
-      try { const r = await callGeminiApi(txt, Boolean(geminiAttachedFile)); l.innerHTML = `<span class="font-bold text-amber-300">Gemini:</span> ${formatMarkdown(r)}`; }
+      appendGeminiMessage("You", txt, true); 
+      const l = appendGeminiMessage("Gemini AI", "Thinking...", false);
+      try { 
+        const r = await callGeminiApi(txt, Boolean(geminiAttachedFile)); 
+        l.innerHTML = `<span class="font-bold text-amber-300">Gemini:</span> ${formatMarkdown(r)}`; 
+        logSystemAction("AI", `Gemini queried: "${txt.slice(0, 30)}..."`);
+      }
       catch (err) { l.innerHTML = `<span class="text-rose-300">Error: ${escapeHtml(err.message)}</span>`; }
     }
     function handleGeminiAiSubmit(e) {
@@ -824,141 +925,19 @@
       askGeminiQuick(v);
     }
 
-    // 2. ChatGPT
-    function getOpenAiApiKey() { return (localStorage.getItem("sr_openai_api_key") || DEFAULT_OPENAI_API_KEY || "").trim(); }
-    function clearChatGptChat() { chatgptChatHistory = []; document.getElementById("chatgptMessages").innerHTML = `<div class="text-emerald-200">Chat cleared!</div>`; }
-    function clearChatGptFile() {
-      chatgptAttachedFile = null; chatgptAttachedBase64 = null; chatgptAttachedMime = ""; chatgptExtractedText = "";
-      document.getElementById("chatgptFileInput").value = "";
-      document.getElementById("chatgptFileStatus").textContent = "No file attached";
-      document.getElementById("solveChatgptFileBtn").classList.add("hidden");
-      document.getElementById("clearChatgptFileBtn").classList.add("hidden");
-    }
-    async function handleChatGptFileSelected(e) {
-      const file = e.target.files?.[0]; if (!file) return;
-      chatgptAttachedFile = file; chatgptExtractedText = "";
-      document.getElementById("chatgptFileStatus").textContent = `Preparing ${file.name}...`;
-      document.getElementById("clearChatgptFileBtn").classList.remove("hidden");
-      try {
-        if (file.size <= 15 * 1024 * 1024 && file.type.startsWith("image/")) chatgptAttachedBase64 = await fileToBase64(file);
-        else chatgptExtractedText = await extractTextFromUploadedFile(file);
-        document.getElementById("chatgptFileStatus").textContent = `Attached: ${file.name}`;
-        document.getElementById("solveChatgptFileBtn").classList.remove("hidden");
-      } catch (err) { document.getElementById("chatgptFileStatus").textContent = `Error: ${err.message}`; }
-    }
-    async function callOpenAiApi(userPrompt, includeAttachment = false) {
-      const apiKey = getOpenAiApiKey(); if (!apiKey) { openAiKeyModal("openai"); throw new Error("Please set your OpenAI API key."); }
-      let content = userPrompt;
-      if (includeAttachment && chatgptExtractedText) content += `\n\n--- File ---\n${chatgptExtractedText.slice(0, 20000)}`;
-      const res = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST", headers: { "Content-Type": "application/json", "Authorization": `Bearer ${apiKey}` },
-        body: JSON.stringify({ model: OPENAI_MODEL, messages: [{ role: "system", content: "Expert NCTB SSC tutor." }, ...chatgptChatHistory.slice(-10), { role: "user", content }], temperature: 0.4 })
-      });
-      const data = await res.json(); if (!res.ok) throw new Error(data?.error?.message || "OpenAI error.");
-      const reply = data?.choices?.[0]?.message?.content || "No response.";
-      chatgptChatHistory.push({ role: "user", content: userPrompt }, { role: "assistant", content: reply });
-      return reply;
-    }
-    function appendChatGptMessage(sender, html, isUser) {
-      const box = document.getElementById("chatgptMessages");
-      const d = document.createElement("div"); d.className = isUser ? "text-right" : "text-left text-emerald-100";
-      d.innerHTML = isUser ? `<span class="inline-block bg-emerald-600 text-white px-3 py-1.5 rounded-xl text-left max-w-[85%]"><strong>You:</strong> ${escapeHtml(html)}</span>` : `<div class="bg-white/10 p-3 rounded-xl leading-relaxed"><span class="font-bold text-amber-300">${sender}:</span> ${html}</div>`;
-      box.appendChild(d); box.scrollTop = box.scrollHeight; return d;
-    }
-    async function solveChatGptAttachedFile() {
-      if (!chatgptAttachedFile) return;
-      appendChatGptMessage("You", `Solve file: ${chatgptAttachedFile.name}`, true);
-      const l = appendChatGptMessage("ChatGPT", "Analyzing...", false);
-      try { const r = await callOpenAiApi("Solve attached file", true); l.innerHTML = `<span class="font-bold text-amber-300">ChatGPT:</span> ${formatMarkdown(r)}`; }
-      catch (err) { l.innerHTML = `<span class="text-rose-300">Error: ${escapeHtml(err.message)}</span>`; }
-    }
-    async function askChatGptQuick(txt) {
-      appendChatGptMessage("You", txt, true); const l = appendChatGptMessage("ChatGPT", "Thinking...", false);
-      try { const r = await callOpenAiApi(txt, Boolean(chatgptAttachedFile)); l.innerHTML = `<span class="font-bold text-amber-300">ChatGPT:</span> ${formatMarkdown(r)}`; }
-      catch (err) { l.innerHTML = `<span class="text-rose-300">Error: ${escapeHtml(err.message)}</span>`; }
-    }
-    function handleChatGptSubmit(e) { e.preventDefault(); const i = document.getElementById("chatgptInput"), v = i.value.trim(); if (!v) return; i.value = ""; askChatGptQuick(v); }
-
-    // 3. Local Study Engine Pro
+    // Local Study Engine Pro
     const SSC_STUDY_KNOWLEDGE = [
-      { keys: ["motion", "velocity", "acceleration", "displacement"], title: "SSC Physics Ch. 2: Motion", theory: "Motion is change in position over time. Acceleration is rate of change of velocity.", formulas: "<code>v = u + at</code> &bull; <code>s = ut + ½at²</code> &bull; <code>v² = u² + 2as</code>", example: "<code>u=0, a=3, t=6</code> &rArr; <code>v=18 m/s, s=54 m</code>", diagram: "projectile" },
-      { keys: ["force", "newton", "momentum"], title: "SSC Physics Ch. 3: Force", theory: "Newton's 2nd Law: <code>F = ma</code>.", formulas: "<code>F = ma</code> &bull; <code>p = mv</code>", example: "<code>F=20N, m=4kg</code> &rArr; <code>a=5 m/s²</code>", diagram: "force" },
-      { keys: ["mole", "chemistry"], title: "SSC Chemistry: Mole Concept", theory: "One mole contains <code>6.022 × 10²³</code> particles.", formulas: "<code>n = m / M</code>", example: "<code>88g CO₂</code> &rArr; <code>2 moles</code>", diagram: null },
-      { keys: ["cell", "biology", "mitosis"], title: "SSC Biology: Cell Division", theory: "Mitosis produces 2 identical cells; Meiosis produces 4 gametes.", formulas: "Cell division for growth & reproduction.", example: "Mitosis maintains chromosome count.", diagram: "cell" },
-      { keys: ["trig", "trigonometry", "sin"], title: "SSC Math: Trigonometry", theory: "Relates triangle sides to angles.", formulas: "<code>sin²θ + cos²θ = 1</code>", example: "<code>tan θ = 3/4</code> &rArr; <code>sin θ + cos θ = 1.4</code>", diagram: "triangle" }
+      { keys: ["motion", "velocity", "acceleration", "displacement"], title: "SSC Physics Ch. 2: Motion", theory: "Motion is change in position over time. Acceleration is rate of change of velocity.", formulas: "v = u + at &bull; s = ut + ½at²", example: "u=0, a=3, t=6 &rArr; v=18 m/s, s=54 m" },
+      { keys: ["force", "newton", "momentum"], title: "SSC Physics Ch. 3: Force", theory: "Newton's 2nd Law: F = ma.", formulas: "F = ma &bull; p = mv", example: "F=20N, m=4kg &rArr; a=5 m/s²" },
+      { keys: ["mole", "chemistry"], title: "SSC Chemistry: Mole Concept", theory: "One mole contains 6.022 × 10²³ particles.", formulas: "n = m / M", example: "88g CO₂ &rArr; 2 moles" },
+      { keys: ["cell", "biology", "mitosis"], title: "SSC Biology: Cell Division", theory: "Mitosis produces 2 identical cells.", formulas: "Cell division for growth.", example: "Mitosis maintains chromosomes." }
     ];
-    function evaluateLocalMathExpression(raw) {
-      const expr = String(raw || "").trim(); if (!expr || !window.math) return null;
-      if (expr.includes("=") && /x\^2|x²/i.test(expr)) {
-        try {
-          const norm = expr.replace(/x²/g, "x^2");
-          const [lhs, rhs] = norm.split("=");
-          const f = x => Number(math.evaluate(`(${lhs}) - (${rhs})`, { x }));
-          const c = f(0), f1 = f(1), fm1 = f(-1);
-          const a = (f1 + fm1 - 2 * c) / 2, b = (f1 - fm1) / 2;
-          if (Math.abs(a) > 1e-9) {
-            const disc = b * b - 4 * a * c;
-            if (disc >= 0) {
-              const x1 = Number(((-b + Math.sqrt(disc)) / (2 * a)).toFixed(4));
-              const x2 = Number(((-b - Math.sqrt(disc)) / (2 * a)).toFixed(4));
-              return `Roots: <code>x₁ = ${x1}</code>, <code>x₂ = ${x2}</code>`;
-            }
-          }
-        } catch (_) {}
-      }
-      try {
-        const val = math.evaluate(expr, { sin: d => Math.sin(d*Math.PI/180), cos: d => Math.cos(d*Math.PI/180), tan: d => Math.tan(d*Math.PI/180) });
-        return `<strong>${typeof val === "number" ? Number(val.toFixed(6)) : val}</strong>`;
-      } catch (_) { return null; }
-    }
-    function createOfflineDiagramDataUrl(q) {
-      const canvas = document.createElement("canvas"); canvas.width = 480; canvas.height = 200;
-      const ctx = canvas.getContext("2d"); ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, 480, 200);
-      ctx.font = "bold 13px sans-serif"; ctx.fillStyle = "#0f172a";
-      if (q.includes("triangle")) {
-        ctx.fillText("Right-Angled Triangle", 18, 24);
-        ctx.beginPath(); ctx.moveTo(90, 160); ctx.lineTo(330, 160); ctx.lineTo(330, 60); ctx.closePath();
-        ctx.fillStyle = "#eef2ff"; ctx.fill(); ctx.strokeStyle = "#4f46e5"; ctx.lineWidth = 2.5; ctx.stroke();
-        ctx.strokeRect(314, 144, 16, 16);
-      } else {
-        ctx.fillText("Educational Diagram", 18, 24);
-        ctx.fillStyle = "#dcfce7"; ctx.strokeStyle = "#15803d"; ctx.lineWidth = 3;
-        ctx.fillRect(120, 45, 240, 120); ctx.strokeRect(120, 45, 240, 120);
-      }
-      return canvas.toDataURL("image/png");
-    }
-    function clearLocalFile() {
-      localAttachedFile = null; localExtractedText = "";
-      document.getElementById("localAiFileInput").value = "";
-      document.getElementById("localAiFileStatus").textContent = "No file attached";
-      document.getElementById("solveLocalFileBtn").classList.add("hidden");
-      document.getElementById("clearLocalFileBtn").classList.add("hidden");
-    }
-    async function handleLocalFileSelected(e) {
-      const file = e.target.files?.[0]; if (!file) return;
-      localAttachedFile = file; localExtractedText = "";
-      document.getElementById("localAiFileStatus").textContent = `Attached: ${file.name}`;
-      document.getElementById("solveLocalFileBtn").classList.remove("hidden");
-      document.getElementById("clearLocalFileBtn").classList.remove("hidden");
-      try { localExtractedText = await extractTextFromUploadedFile(file); } catch (_) {}
-    }
-    async function solveLocalAttachedFile() {
-      if (!localAttachedFile) return;
-      appendLocalAiMessage("You", `Scan local file: ${localAttachedFile.name}`, true);
-      const note = SSC_STUDY_KNOWLEDGE.find(n => n.keys.some(k => localAttachedFile.name.toLowerCase().includes(k) || localExtractedText.toLowerCase().includes(k)));
-      const html = note ? `<div class="space-y-1"><strong class="text-amber-300">${note.title}</strong><div>${note.theory}</div><div>Formulas: ${note.formulas}</div></div>` : `Scanned text: <pre class="bg-black/30 p-2 text-[11px] overflow-x-auto">${escapeHtml(localExtractedText.slice(0, 400))}</pre>`;
-      appendLocalAiMessage("Local AI", html, false);
-    }
+
     function generateLocalReply(raw) {
       const q = raw.trim().toLowerCase();
-      if (/^(draw|graph|diagram)\b/.test(q)) {
-        return `<div>Diagram:</div><img src="${createOfflineDiagramDataUrl(q)}" class="rounded-xl bg-white max-h-44 mt-1" />`;
-      }
-      const math = evaluateLocalMathExpression(q);
       const note = SSC_STUDY_KNOWLEDGE.find(n => n.keys.some(k => q.includes(k)));
-      if (math !== null) return `Result: ${math}`;
-      if (note) return `<div class="space-y-1"><strong class="text-amber-300">${note.title}</strong><div>${note.theory}</div><div>Formulas: ${note.formulas}</div><div class="bg-black/25 p-1.5 rounded">${note.example}</div></div>`;
-      return `Try asking: <code>motion</code>, <code>force</code>, <code>mole</code>, <code>x^2 - 5*x + 6 = 0</code>, or <code>draw triangle</code>.`;
+      if (note) return `<div class="space-y-1"><strong class="text-amber-300">${note.title}</strong><div>${note.theory}</div><div>Formulas: ${note.formulas}</div></div>`;
+      return `Local AI reply for: "${escapeHtml(raw)}". Try asking about <code>motion</code>, <code>force</code>, <code>mole</code>, or <code>cell</code>.`;
     }
     function appendLocalAiMessage(sender, html, isUser) {
       const box = document.getElementById("localAiMessages");
@@ -966,10 +945,14 @@
       d.innerHTML = isUser ? `<span class="inline-block bg-teal-600 text-white px-3 py-1.5 rounded-xl text-left max-w-[85%]"><strong>You:</strong> ${escapeHtml(html)}</span>` : `<div class="bg-white/10 p-3 rounded-xl leading-relaxed"><span class="font-bold text-amber-300">${sender}:</span> ${html}</div>`;
       box.appendChild(d); box.scrollTop = box.scrollHeight;
     }
-    function askLocalQuick(txt) { appendLocalAiMessage("You", txt, true); appendLocalAiMessage("Local AI", generateLocalReply(txt), false); }
+    function askLocalQuick(txt) { 
+      appendLocalAiMessage("You", txt, true); 
+      appendLocalAiMessage("Local AI", generateLocalReply(txt), false); 
+      logSystemAction("LOCAL_AI", `Queried local engine: ${txt}`);
+    }
     function handleLocalAiSubmit(e) { e.preventDefault(); const i = document.getElementById("localAiInput"), v = i.value.trim(); if (!v) return; i.value = ""; askLocalQuick(v); }
 
-    // Standard Portal Functions
+    // Activity Log Modal controls (.TXT Format Export Enabled)
     function updateActivityAlertToggleUI() { const b = document.getElementById("toggleLogAlertsBtn"); if (b) b.textContent = logAlertsEnabled ? "🔔 Alerts: ON" : "🔕 Alerts: OFF"; }
     function renderActivityNotificationsFeed() {
       const feed = document.getElementById("activityNotificationsFeed"), dot = document.getElementById("logAlertDot"); if (!feed) return;
@@ -977,9 +960,30 @@
       if (!activityAlertsFeed.length) { feed.innerHTML = `<div class="text-slate-500">No new alerts yet.</div>`; return; }
       feed.innerHTML = activityAlertsFeed.slice(0, 15).map(n => `<div class="flex justify-between bg-white/80 rounded-lg px-2.5 py-1.5 text-slate-800"><span>${escapeHtml(n.text)}</span><span class="text-[10px] text-slate-400">${escapeHtml(n.time)}</span></div>`).join("");
     }
-    async function toggleActivityNotifications() { logAlertsEnabled = !logAlertsEnabled; localStorage.setItem("sr_log_alerts_enabled", String(logAlertsEnabled)); updateActivityAlertToggleUI(); renderActivityNotificationsFeed(); }
-    function saveLogsToDevice() { if (!currentUser?.is_admin) return; const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob(["Logs\n" + (allActivityLogs || []).map(l => l.action).join("\n")], { type: "text/plain" })); a.download = "logs.txt"; a.click(); }
-    async function openActivityLogModal() { if (!currentUser?.is_admin) return; document.getElementById("activityLogModal").classList.remove("hidden"); await refreshAdminDashboard(false); }
+    function toggleActivityNotifications() { 
+      logAlertsEnabled = !logAlertsEnabled; 
+      localStorage.setItem("sr_log_alerts_enabled", String(logAlertsEnabled)); 
+      updateActivityAlertToggleUI(); 
+      renderActivityNotificationsFeed(); 
+      logSystemAction("SETTINGS", `Toggled live log notifications to: ${logAlertsEnabled ? "ON" : "OFF"}`);
+    }
+    function saveLogsToDevice() { 
+      const textContent = systemActivityLogs.map(l => `[${l.time}] [${l.type}] Actor: ${l.actor} - Action: ${l.action}`).join("\n");
+      const a = document.createElement("a"); 
+      a.href = URL.createObjectURL(new Blob([textContent], { type: "text/plain" })); 
+      a.download = "study_room_activity_logs.txt"; 
+      a.click(); 
+      logSystemAction("EXPORT", "Activity logs exported as .txt file.");
+    }
+    function openActivityLogModal() { 
+      if (!currentUser?.is_admin) {
+        alert("Activity log is restricted to batch administrators.");
+        return;
+      }
+      document.getElementById("activityLogModal").classList.remove("hidden"); 
+      renderActivityLogsUI();
+      logSystemAction("SECURITY", "Admin opened the expanded Activity Log center.");
+    }
     function closeActivityLogModal() { document.getElementById("activityLogModal").classList.add("hidden"); }
 
     function updateVisibilityUI() {
@@ -990,7 +994,14 @@
       else { lock.classList.add("hidden"); portal.classList.remove("hidden"); }
     }
     async function fetchPortalStatus() { const { data } = await db.rpc("get_portal_status"); if (data) isPortalPublic = Boolean(data.is_public); updateVisibilityUI(); }
-    async function changePortalVisibility(pub) { if (!currentUser?.is_admin) return; await db.rpc("admin_set_visibility", { p_admin_phone: currentUser.phone, p_admin_password: currentUser.pass, p_is_public: pub }); isPortalPublic = pub; updateVisibilityUI(); await loadResources(); }
+    async function changePortalVisibility(pub) { 
+      if (!currentUser?.is_admin) return; 
+      await db.rpc("admin_set_visibility", { p_admin_phone: currentUser.phone, p_admin_password: currentUser.pass, p_is_public: pub }); 
+      isPortalPublic = pub; 
+      updateVisibilityUI(); 
+      await loadResources(); 
+      logSystemAction("ADMIN", `Changed portal visibility mode to: ${pub ? "PUBLIC" : "PRIVATE"}`);
+    }
 
     function updateAuthUI() {
       const badge = document.getElementById("userBadge"), nameEl = document.getElementById("userNameDisplay"), adminTag = document.getElementById("adminTag"), adminBtn = document.getElementById("adminPanelBtn"), activityBtn = document.getElementById("activityLogHeaderBtn"), authBtn = document.getElementById("authOpenBtn"), logoutBtn = document.getElementById("logoutBtn"), addResBtn = document.getElementById("addResHeaderBtn");
@@ -1008,21 +1019,71 @@
     function switchAuthMode(m) { document.getElementById("loginForm").classList.toggle("hidden", m !== "login"); document.getElementById("registerForm").classList.toggle("hidden", m === "login"); }
 
     async function handleRegister(e) {
-      e.preventDefault(); const p = document.getElementById("regPhone").value.replace(/\s+/g, ""), pass = document.getElementById("regPass").value;
-      const { data } = await db.rpc("register_user", { p_name: document.getElementById("regName").value, p_phone: p, p_password: pass });
+      e.preventDefault(); 
+      const nameVal = document.getElementById("regName").value.trim();
+      const p = document.getElementById("regPhone").value.replace(/\s+/g, "");
+      const pass = document.getElementById("regPass").value;
+
+      // Check Permanent Blacklist BEFORE creating account
+      const allowed = await verifyNotPermanentlyBanned(p, nameVal);
+      if (!allowed) {
+        logSystemAction("SECURITY_BLOCK", `Blocked banned registration attempt: Name="${nameVal}", Phone="${p}", Device="${CURRENT_DEVICE_ID}"`);
+        return;
+      }
+
+      const { data } = await db.rpc("register_user", { p_name: nameVal, p_phone: p, p_password: pass });
       if (!data || !data.ok) { alert(data?.error || "Registration failed."); return; }
+
+      // Bind this phone to current device ID for future tracking
+      localStorage.setItem(`sr_user_dev_${p.toLowerCase()}`, CURRENT_DEVICE_ID);
+
       currentUser = { id: data.id, name: data.name, phone: p, is_admin: data.is_admin, pass };
-      localStorage.setItem("sr_user", JSON.stringify(currentUser)); closeAuthModal(); updateAuthUI(); await loadAllPortalData();
+      localStorage.setItem("sr_user", JSON.stringify(currentUser)); 
+      closeAuthModal(); 
+      updateAuthUI(); 
+      logSystemAction("AUTH", `New user registered account: ${currentUser.name} (${p}) [Device: ${CURRENT_DEVICE_ID}]`);
+      await loadAllPortalData();
     }
+
     async function handleLogin(e) {
-      e.preventDefault(); const p = document.getElementById("loginPhone").value.replace(/\s+/g, ""), pass = document.getElementById("loginPass").value;
+      e.preventDefault(); 
+      const p = document.getElementById("loginPhone").value.replace(/\s+/g, "");
+      const pass = document.getElementById("loginPass").value;
+
+      // Check Permanent Blacklist BEFORE login
+      const allowed = await verifyNotPermanentlyBanned(p, "");
+      if (!allowed) {
+        logSystemAction("SECURITY_BLOCK", `Blocked banned login attempt: Phone="${p}", Device="${CURRENT_DEVICE_ID}"`);
+        return;
+      }
+
       const { data } = await db.rpc("login_user", { p_phone: p, p_password: pass });
-      if (!data || !data.ok) { alert(data?.error || "Login failed."); return; }
+      if (!data || !data.ok) { 
+        logSystemAction("SECURITY", `Failed login attempt for phone: ${p}`);
+        alert(data?.error || "Login failed."); 
+        return; 
+      }
+
+      // Also check username against blacklist post-lookup
+      const allowedName = await verifyNotPermanentlyBanned(p, data.name);
+      if (!allowedName) {
+        logSystemAction("SECURITY_BLOCK", `Blocked banned user login by username: ${data.name} (${p})`);
+        return;
+      }
+
+      localStorage.setItem(`sr_user_dev_${p.toLowerCase()}`, CURRENT_DEVICE_ID);
+
       currentUser = { id: data.id, name: data.name, phone: p, is_admin: data.is_admin, pass };
-      localStorage.setItem("sr_user", JSON.stringify(currentUser)); closeAuthModal(); updateAuthUI(); await loadAllPortalData();
+      localStorage.setItem("sr_user", JSON.stringify(currentUser)); 
+      closeAuthModal(); 
+      updateAuthUI(); 
+      logSystemAction("AUTH", `User logged into portal: ${currentUser.name} [Device: ${CURRENT_DEVICE_ID}]`);
+      await loadAllPortalData();
     }
+
     async function handleLogout() {
       if (currentUser) await db.rpc("logout_user", { p_phone: currentUser.phone });
+      logSystemAction("AUTH", `User logged out: ${currentUser?.name || "Unknown"}`);
       currentUser = null; allResources = []; localStorage.removeItem("sr_user"); updateAuthUI(); await loadAllPortalData();
     }
 
@@ -1044,7 +1105,11 @@
       e.preventDefault(); if (!currentUser) { openAuthModal("login"); return; }
       const i = document.getElementById("portalChatInput"), msg = i.value.trim(); if (!msg) return;
       const { data } = await db.rpc("send_portal_chat", { p_phone: currentUser.phone, p_password: currentUser.pass, p_message: msg });
-      if (data && data.ok) { i.value = ""; await loadPortalChat(); }
+      if (data && data.ok) { 
+        i.value = ""; 
+        await loadPortalChat(); 
+        logSystemAction("CHAT", `Live chat message sent by ${currentUser.name}`);
+      }
     }
     async function loadPortalComments() {
       const box = document.getElementById("portalCommentsList");
@@ -1056,7 +1121,9 @@
       e.preventDefault(); if (!currentUser) { openAuthModal("login"); return; }
       const i = document.getElementById("portalCommentInput"), msg = i.value.trim(); if (!msg) return;
       await db.rpc("add_portal_comment", { p_phone: currentUser.phone, p_password: currentUser.pass, p_message: msg });
-      i.value = ""; await loadPortalComments();
+      i.value = ""; 
+      await loadPortalComments();
+      logSystemAction("COMMENT", `Comment posted by ${currentUser.name}`);
     }
     function setTab(t) { currentTab = t; renderResources(); }
     function renderResources() {
@@ -1069,25 +1136,59 @@
     function closeResourceModal() { document.getElementById("resourceModal").classList.add("hidden"); }
     async function saveResource(e) {
       e.preventDefault();
-      await db.rpc("submit_resource", { p_phone: currentUser.phone, p_password: currentUser.pass, p_title: document.getElementById("resTitle").value, p_category: document.getElementById("resCategory").value, p_url: document.getElementById("resUrl").value, p_description: document.getElementById("resDesc").value });
-      closeResourceModal(); e.target.reset(); loadResources(); alert("Submitted successfully!");
+      const title = document.getElementById("resTitle").value;
+      await db.rpc("submit_resource", { p_phone: currentUser.phone, p_password: currentUser.pass, p_title: title, p_category: document.getElementById("resCategory").value, p_url: document.getElementById("resUrl").value, p_description: document.getElementById("resDesc").value });
+      closeResourceModal(); 
+      e.target.reset(); 
+      loadResources(); 
+      logSystemAction("RESOURCE", `New resource submitted for review: "${title}"`);
+      alert("Submitted successfully!");
     }
-    function openAdminModal() { document.getElementById("adminModal").classList.remove("hidden"); refreshAdminDashboard(false); }
+    function openAdminModal() { document.getElementById("adminModal").classList.remove("hidden"); refreshAdminDashboard(false); logSystemAction("ADMIN", "Opened Admin Moderation Panel."); }
     function closeAdminModal() { document.getElementById("adminModal").classList.add("hidden"); }
+
     async function refreshAdminDashboard(bg) {
       await fetchPortalStatus(); if (!currentUser?.is_admin) return;
       const { data } = await db.rpc("admin_get_dashboard", { p_admin_phone: currentUser.phone, p_admin_password: currentUser.pass });
       if (!data || !data.ok) return;
-      allActivityLogs = data.logs || [];
       if (bg) return;
-      document.getElementById("adminUsersList").innerHTML = data.users.map(u => `<div class="p-3 bg-white flex justify-between"><span>${escapeHtml(u.name)} (${escapeHtml(u.phone)})</span></div>`).join("");
+
+      document.getElementById("adminUsersList").innerHTML = data.users.map(u => `
+        <div class="p-3 bg-white flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <span class="font-bold text-slate-900">${escapeHtml(u.name)}</span>
+            <span class="text-slate-500 ml-1">(${escapeHtml(u.phone)})</span>
+            ${u.is_admin ? `<span class="ml-1.5 text-[10px] font-extrabold bg-amber-100 text-amber-800 px-2 py-0.5 rounded">ADMIN</span>` : ""}
+          </div>
+          ${!u.is_admin ? `
+            <button type="button"
+              onclick="banAndRemoveMember('${escapeHtml(u.id)}', '${escapeHtml(u.name).replace(/'/g, "\\'")}', '${escapeHtml(u.phone)}')"
+              class="bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-extrabold px-3 py-1.5 rounded-lg shadow-sm transition active:scale-95">
+              🚫 Ban &amp; Remove Permanently
+            </button>
+          ` : `<span class="text-[10px] text-slate-400">Protected</span>`}
+        </div>
+      `).join("");
     }
+
     async function loadAllPortalData() { await loadResources(); await loadPortalComments(); await loadPortalChat(); }
     setInterval(() => { refreshAdminDashboard(true); if (currentUser) loadPortalChat(); }, 10000);
 
     (async function init() {
-      updateAuthUI(); updateActivityAlertToggleUI(); renderActivityNotificationsFeed();
-      await fetchPortalStatus(); await loadAllPortalData();
+      // Immediately check if this device is already permanently banned
+      const isAllowed = await verifyNotPermanentlyBanned(currentUser?.phone || "", currentUser?.name || "");
+      if (!isAllowed) {
+        logSystemAction("SECURITY_BLOCK", `Blocked permanently banned device on page load: ${CURRENT_DEVICE_ID}`);
+        return;
+      }
+
+      updateAuthUI(); 
+      updateActivityAlertToggleUI(); 
+      renderActivityNotificationsFeed();
+      renderActivityLogsUI();
+      logSystemAction("SYSTEM", `Portal initialized on device [${CURRENT_DEVICE_ID}].`);
+      await fetchPortalStatus(); 
+      await loadAllPortalData();
     })();
   </script>
 </body>
