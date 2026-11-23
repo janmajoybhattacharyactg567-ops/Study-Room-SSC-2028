@@ -365,7 +365,7 @@
     </div>
   </div>
 
-  <!-- Dedicated Activity Log Modal (Spacious & Readable) -->
+  <!-- Dedicated Activity Log Modal -->
   <div id="activityLogModal" class="hidden fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-40 flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-3xl w-full p-6 shadow-2xl border border-slate-100 max-h-[85vh] flex flex-col">
       <div class="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-100">
@@ -474,7 +474,7 @@
     </div>
   </div>
 
-  <!-- Admin Panel Modal (Fixed Scrollable Layout - Never Cut Off) -->
+  <!-- Admin Panel Modal (Fixed Scrollable Layout & Fallbacks) -->
   <div id="adminModal" class="hidden fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-40 flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-slate-100 max-h-[90vh] flex flex-col overflow-hidden">
       <!-- Fixed Header -->
@@ -507,12 +507,16 @@
 
         <div>
           <h4 class="text-xs font-extrabold uppercase tracking-wider text-amber-600 mb-2.5">Pending Content Submissions</h4>
-          <div id="adminPendingList" class="divide-y divide-slate-100 border border-amber-200/70 bg-amber-50/30 rounded-2xl text-xs overflow-hidden"></div>
+          <div id="adminPendingList" class="divide-y divide-slate-100 border border-amber-200/70 bg-amber-50/30 rounded-2xl text-xs overflow-hidden">
+            <div class="p-4 text-slate-400 text-center">Loading pending submissions...</div>
+          </div>
         </div>
 
         <div>
           <h4 class="text-xs font-extrabold uppercase tracking-wider text-indigo-900 mb-2.5">Registered Members &amp; Device Details</h4>
-          <div id="adminUsersList" class="space-y-3.5 pb-2"></div>
+          <div id="adminUsersList" class="space-y-3.5 pb-4">
+            <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl text-center text-xs text-slate-500">Loading registered members...</div>
+          </div>
         </div>
       </div>
     </div>
@@ -1166,14 +1170,68 @@
     function openAdminModal() { document.getElementById("adminModal").classList.remove("hidden"); refreshAdminDashboard(false); }
     function closeAdminModal() { document.getElementById("adminModal").classList.add("hidden"); }
 
+    async function approveSubmission(resId) {
+      if (!currentUser?.is_admin) return;
+      await db.rpc("admin_approve_resource", { p_admin_phone: currentUser.phone, p_admin_password: currentUser.pass, p_resource_id: resId });
+      logSystemAction("RESOURCE", `Approved resource ID: ${resId}`);
+      await refreshAdminDashboard(false);
+      await loadResources();
+    }
+
+    async function rejectSubmission(resId) {
+      if (!currentUser?.is_admin) return;
+      await db.rpc("admin_delete_resource", { p_admin_phone: currentUser.phone, p_admin_password: currentUser.pass, p_resource_id: resId });
+      logSystemAction("RESOURCE", `Rejected/Deleted resource ID: ${resId}`);
+      await refreshAdminDashboard(false);
+      await loadResources();
+    }
+
     async function refreshAdminDashboard(bg) {
-      await fetchPortalStatus(); if (!currentUser?.is_admin) return;
-      const { data } = await db.rpc("admin_get_dashboard", { p_admin_phone: currentUser.phone, p_admin_password: currentUser.pass });
-      if (!data || !data.ok) return;
+      await fetchPortalStatus(); 
+      if (!currentUser?.is_admin) return;
+      
+      const { data, error } = await db.rpc("admin_get_dashboard", { 
+        p_admin_phone: currentUser.phone, 
+        p_admin_password: currentUser.pass 
+      });
+
+      const usersListEl = document.getElementById("adminUsersList");
+      const pendingListEl = document.getElementById("adminPendingList");
+
+      if (error || !data || !data.ok) {
+        if (!bg && usersListEl) {
+          usersListEl.innerHTML = `<div class="p-4 bg-rose-50 border border-rose-200 rounded-2xl text-center text-xs text-rose-700">Failed to load members list. Check connection or SQL permissions.</div>`;
+        }
+        return;
+      }
 
       if (bg) return;
 
-      document.getElementById("adminUsersList").innerHTML = data.users.map(u => {
+      // Render Pending Submissions
+      if (!data.pending || data.pending.length === 0) {
+        pendingListEl.innerHTML = `<div class="p-4 text-slate-400 text-center text-xs">No pending submissions.</div>`;
+      } else {
+        pendingListEl.innerHTML = data.pending.map(p => `
+          <div class="p-3.5 flex items-center justify-between gap-2">
+            <div class="min-w-0">
+              <div class="font-bold text-slate-900 truncate">${escapeHtml(p.title)}</div>
+              <div class="text-[10px] text-slate-500">By ${escapeHtml(p.submitted_by || "Student")} &bull; ${escapeHtml(p.category)}</div>
+            </div>
+            <div class="flex gap-1.5 shrink-0">
+              <button onclick="approveSubmission('${escapeHtml(p.id)}')" class="bg-emerald-600 text-white px-2.5 py-1.5 rounded-lg font-bold text-[11px]">Approve</button>
+              <button onclick="rejectSubmission('${escapeHtml(p.id)}')" class="bg-rose-600 text-white px-2.5 py-1.5 rounded-lg font-bold text-[11px]">Delete</button>
+            </div>
+          </div>
+        `).join("");
+      }
+
+      // Render Registered Members with Empty Fallback
+      if (!data.users || data.users.length === 0) {
+        usersListEl.innerHTML = `<div class="p-6 bg-slate-50 border border-slate-200 rounded-2xl text-center text-xs text-slate-500">No registered members found yet.</div>`;
+        return;
+      }
+
+      usersListEl.innerHTML = data.users.map(u => {
         const isSelf = u.phone === currentUser.phone;
         const safeName = escapeHtml(u.name).replace(/'/g, "\\'");
         const safeDevId = escapeHtml(u.device_id || "").replace(/'/g, "\\'");
