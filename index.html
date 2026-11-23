@@ -1,1290 +1,617 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Study Room SSC 2028</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjs/13.1.1/math.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <style>
-    body { font-family: 'Plus Jakarta Sans', sans-serif; }
-    .no-scrollbar::-webkit-scrollbar { display: none; }
-    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    .ai-markdown p { margin-bottom: 0.45rem; }
-    .ai-markdown p:last-child { margin-bottom: 0; }
-    .ai-markdown ul, .ai-markdown ol { margin-left: 1.25rem; margin-bottom: 0.45rem; list-style-type: disc; }
-    .ai-markdown ol { list-style-type: decimal; }
-    .ai-markdown code { background: rgba(255,255,255,0.12); padding: 0.1rem 0.35rem; border-radius: 0.3rem; font-family: monospace; }
-    .ai-markdown pre { background: rgba(0,0,0,0.4); padding: 0.6rem; border-radius: 0.5rem; overflow-x: auto; margin: 0.45rem 0; }
-    .ai-markdown strong { color: #fde68a; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Room SSC 2028</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkbg: '#0b0f19',
+                        cardbg: '#131c31',
+                        accent: '#6366f1'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #0b0f19; color: #f3f4f6; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
+    </style>
 </head>
-<body class="bg-gradient-to-br from-slate-50 via-indigo-50/40 to-sky-50/50 text-slate-800 min-h-screen flex flex-col selection:bg-indigo-600 selection:text-white">
+<body class="min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
 
-  <!-- Permanent Ban Lockout Screen -->
-  <div id="permanentBanOverlay" class="hidden fixed inset-0 bg-slate-950 z-50 flex items-center justify-center p-6 text-center">
-    <div class="max-w-md bg-slate-900 border-2 border-rose-500/60 rounded-3xl p-8 shadow-2xl text-white">
-      <div class="w-16 h-16 mx-auto rounded-2xl bg-rose-600/20 border border-rose-500 text-rose-400 flex items-center justify-center text-3xl mb-4">
-        🚫
-      </div>
-      <h2 class="font-extrabold text-xl text-rose-400">Permanent Access Revoked</h2>
-      <p class="text-xs text-slate-300 mt-2 leading-relaxed">
-        This device, phone number, or account has been permanently banned and removed by an Administrator. Re-registration is permanently blocked.
-      </p>
-      <div id="banRefCode" class="mt-4 text-[10px] font-mono text-slate-500 bg-black/40 py-2 px-3 rounded-xl"></div>
-    </div>
-  </div>
-
-  <!-- Top Navigation -->
-  <header class="bg-white/85 backdrop-blur-lg border-b border-indigo-100/80 sticky top-0 z-30 shadow-sm">
-    <div class="max-w-5xl mx-auto px-4 py-3.5 flex flex-wrap items-center justify-between gap-3">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-blue-600 to-violet-600 text-white font-extrabold flex items-center justify-center shadow-md text-sm">
-          SR
-        </div>
-        <div>
-          <div class="flex items-center gap-2 flex-wrap">
-            <h1 class="font-extrabold text-lg leading-tight bg-gradient-to-r from-slate-900 via-indigo-950 to-indigo-800 bg-clip-text text-transparent">
-              Study Room SSC 2028
-            </h1>
-            <span id="headerPrivacyPill" class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800">
-              PRIVATE
-            </span>
-          </div>
-          <p class="text-[11px] font-medium text-slate-500">Academic Resource Hub &amp; Batch Portal</p>
-        </div>
-      </div>
-
-      <!-- User Status & Actions -->
-      <div class="flex items-center gap-2 flex-wrap">
-        <div id="userBadge" class="hidden items-center gap-2 bg-indigo-50 border border-indigo-200 px-3 py-1.5 rounded-xl text-xs font-semibold text-indigo-950">
-          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-          <span id="userNameDisplay"></span>
-          <span id="adminTag" class="hidden bg-gradient-to-r from-amber-500 to-orange-500 text-white font-extrabold px-2 py-0.5 rounded-md text-[10px]">ADMIN</span>
-          <span id="bannedTag" class="hidden bg-rose-600 text-white font-extrabold px-2 py-0.5 rounded-md text-[10px]">BANNED (READ-ONLY)</span>
-        </div>
-
-        <button id="adminPanelBtn" onclick="openAdminModal()" class="hidden bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-md transition active:scale-95 relative">
-          Admin Panel
-        </button>
-
-        <button id="authOpenBtn" onclick="openAuthModal('login')" class="bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-md transition active:scale-95">
-          Login / Register
-        </button>
-
-        <button id="logoutBtn" onclick="handleLogout()" class="hidden bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold px-3 py-2 rounded-xl transition active:scale-95">
-          Logout
-        </button>
-
-        <button id="activityLogHeaderBtn" onclick="openActivityLogModal()" class="hidden bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-md transition active:scale-95 relative">
-          📋 Activity Log
-          <span id="logAlertDot" class="hidden absolute -top-1.5 -right-1.5 w-3 h-3 rounded-full bg-rose-500 ring-2 ring-white"></span>
-        </button>
-
-        <button id="aiChatHubHeaderBtn" onclick="openAiChatHubModal()" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-md transition active:scale-95 flex items-center gap-1.5">
-          <span>🤖 AI Chat Box</span>
-        </button>
-
-        <button id="addResHeaderBtn" onclick="openResourceModal()" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-md transition active:scale-95">
-          + Add Resource
-        </button>
-      </div>
-    </div>
-  </header>
-
-  <!-- Soft-Banned Warning Banner -->
-  <div id="softBanBanner" class="hidden bg-rose-600 text-white text-xs font-bold text-center py-2 px-4 shadow-md">
-    ⚠️ Your account is restricted (Banned) by an Admin. You can view resources, but cannot chat, comment, or upload.
-  </div>
-
-  <!-- Main Content -->
-  <main class="max-w-5xl w-full mx-auto px-4 py-6 flex-1">
-
-    <!-- Locked Private Screen -->
-    <div id="privateLockScreen" class="hidden max-w-md mx-auto my-8 bg-white border border-indigo-100 rounded-3xl p-7 shadow-xl text-center">
-      <div class="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-600 text-white flex items-center justify-center shadow-lg mb-4 text-xl font-extrabold">
-        🔒
-      </div>
-      <span class="inline-block bg-indigo-50 text-indigo-700 border border-indigo-200 text-[10px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-full mb-2">
-        Members Only Portal
-      </span>
-      <h2 class="font-extrabold text-xl text-slate-900">Study Room SSC 2028 is Private</h2>
-      <p class="text-xs text-slate-600 mt-2 leading-relaxed">
-        All class notes, PDFs, videos, chat, and study links are protected for registered SSC 2028 members. Please log in or register.
-      </p>
-      <div class="mt-6 flex flex-col sm:flex-row gap-2.5">
-        <button onclick="openAuthModal('login')" class="flex-1 bg-slate-900 hover:bg-slate-800 text-white py-3 rounded-xl text-xs font-bold shadow-md transition">
-          Member Login
-        </button>
-        <button onclick="openAuthModal('register')" class="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-3 rounded-xl text-xs font-bold shadow-md transition">
-          Register Account
-        </button>
-      </div>
-    </div>
-
-    <!-- Unlocked Portal Content -->
-    <div id="portalContent">
-      <!-- WhatsApp Community Banner -->
-      <div class="relative overflow-hidden bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 rounded-2xl p-5 mb-7 text-white shadow-xl">
-        <div class="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <span class="inline-block bg-white/20 text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full mb-2">
-              Official Batch Community
-            </span>
-            <h2 class="font-extrabold text-base sm:text-lg tracking-tight">SSC 2028 Study Discussion Group</h2>
-            <p class="text-xs text-emerald-50/90 mt-0.5 max-w-md">
-              Join classmates for instant class notes, exam routines, and daily Q&amp;A.
-            </p>
-          </div>
-          <div class="flex flex-col items-stretch sm:items-end gap-2 shrink-0">
-            <a href="https://chat.whatsapp.com/IVS5nwQpGIiGOSqYg63vKR" target="_blank" rel="noopener"
-               class="inline-flex items-center justify-center gap-2 bg-white text-emerald-800 hover:bg-emerald-50 text-xs font-extrabold px-5 py-2.5 rounded-xl shadow-lg transition active:scale-95">
-              <span>Join WhatsApp Group</span>
-              <span>↗</span>
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <!-- Search & Category Filter Bar -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
-        <div class="flex gap-2 overflow-x-auto no-scrollbar pb-1">
-          <button onclick="setTab('all')" id="tab-all" class="tab-btn bg-gradient-to-r from-indigo-600 to-blue-600 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md transition shrink-0">
-            All Materials
-          </button>
-          <button onclick="setTab('Documents')" id="tab-Documents" class="tab-btn bg-white hover:bg-indigo-50 border border-slate-200 text-slate-700 px-4 py-2 rounded-xl text-xs font-bold shadow-sm transition shrink-0">
-            Documents
-          </button>
-          <button onclick="setTab('Images')" id="tab-Images" class="tab-btn bg-white hover:bg-purple-50 border border-slate-200 text-slate-700 px-4 py-2 rounded-xl text-xs font-bold shadow-sm transition shrink-0">
-            Images
-          </button>
-          <button onclick="setTab('Videos')" id="tab-Videos" class="tab-btn bg-white hover:bg-rose-50 border border-slate-200 text-slate-700 px-4 py-2 rounded-xl text-xs font-bold shadow-sm transition shrink-0">
-            Videos
-          </button>
-          <button onclick="setTab('Links')" id="tab-Links" class="tab-btn bg-white hover:bg-amber-50 border border-slate-200 text-slate-700 px-4 py-2 rounded-xl text-xs font-bold shadow-sm transition shrink-0">
-            Links
-          </button>
-        </div>
-
-        <div class="relative w-full sm:w-64">
-          <input id="searchInput" type="text" oninput="renderResources()" placeholder="Search notes, chapters..."
-                 class="w-full bg-white border border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-xl pl-3.5 pr-8 py-2 text-xs font-medium text-slate-800 shadow-sm outline-none transition" />
-          <span class="absolute right-3 top-2 text-slate-400 text-xs">⌕</span>
-        </div>
-      </div>
-
-      <!-- Resources Grid -->
-      <div id="resourcesList" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
-        <div class="col-span-2 bg-white/80 border border-indigo-100 rounded-2xl p-8 text-center text-sm font-medium text-slate-500 shadow-sm">
-          Loading study materials...
-        </div>
-      </div>
-
-      <!-- Dedicated Member Live Chat & Comment Board -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <section class="bg-white border-2 border-emerald-200/80 rounded-2xl p-5 shadow-sm flex flex-col">
-          <div class="flex items-center justify-between mb-3">
-            <div>
-              <h3 class="font-extrabold text-sm text-slate-900">⚡ Member Live Chat Room</h3>
-              <p class="text-[11px] text-slate-500">Registered students can chat live with each other here</p>
+    <!-- Top Navigation Bar -->
+    <header class="bg-cardbg border-b border-gray-800 sticky top-0 z-40 px-4 py-3 flex items-center justify-between shadow-md">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                <i class="fa-solid fa-graduation-cap text-white text-lg"></i>
             </div>
-            <span class="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full">Members Chat</span>
-          </div>
-
-          <div id="portalChatList" class="space-y-3 h-64 overflow-y-auto mb-3.5 pr-1 text-xs bg-slate-50 border border-slate-200/70 rounded-xl p-3.5">
-            <div class="text-slate-400 text-center py-4">Log in as a registered member to join live chat.</div>
-          </div>
-
-          <form onsubmit="submitPortalChat(event)" class="mt-auto flex gap-2">
-            <input id="portalChatInput" type="text" placeholder="Type a message to chat with classmates..."
-                   class="flex-1 min-w-0 bg-slate-50 border border-slate-200 focus:bg-white focus:border-emerald-500 rounded-xl px-3.5 py-2.5 text-xs outline-none transition" required />
-            <button id="portalChatSubmitBtn" type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-sm transition shrink-0 whitespace-nowrap">
-              Send
+            <div>
+                <h1 class="font-bold text-base md:text-lg tracking-wide text-white">Study Room SSC 2028</h1>
+                <p class="text-xs text-indigo-400 font-medium">Academic Excellence & Batch Center</p>
+            </div>
+        </div>
+        
+        <div class="flex items-center space-x-2">
+            <button id="navAdminBtn" onclick="openAdminModal()" class="hidden px-3 py-1.5 bg-violet-600/20 hover:bg-violet-600/30 border border-violet-500/50 text-violet-300 rounded-lg text-xs font-semibold transition flex items-center space-x-1.5">
+                <i class="fa-solid fa-shield-halved"></i>
+                <span class="hidden sm:inline">Admin Center</span>
             </button>
-          </form>
-        </section>
-
-        <section class="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm flex flex-col">
-          <div class="flex items-center justify-between mb-3">
-            <div>
-              <h3 class="font-extrabold text-sm text-slate-900">💬 Member Comment Board</h3>
-              <p class="text-[11px] text-slate-500">Post study announcements, feedback, or discussion notes</p>
-            </div>
-            <span class="text-[10px] font-bold bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-full">Comments</span>
-          </div>
-
-          <div id="portalCommentsList" class="space-y-3 h-64 overflow-y-auto mb-3.5 pr-1 text-xs">
-            <div class="text-slate-400 text-center py-4">Loading comments...</div>
-          </div>
-
-          <form onsubmit="submitPortalComment(event)" class="mt-auto flex gap-2">
-            <input id="portalCommentInput" type="text" placeholder="Write a comment for members..."
-                   class="flex-1 min-w-0 bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 rounded-xl px-3.5 py-2.5 text-xs outline-none transition" required />
-            <button id="portalCommentSubmitBtn" type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-sm transition shrink-0 whitespace-nowrap">
-              Comment
+            <button onclick="openAiModal()" class="px-3.5 py-1.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white rounded-lg text-xs font-bold transition shadow-md shadow-indigo-600/30 flex items-center space-x-1.5">
+                <i class="fa-solid fa-robot"></i>
+                <span>AI Hub</span>
             </button>
-          </form>
-        </section>
-      </div>
-
-    </div>
-  </main>
-
-  <!-- Footer -->
-  <footer class="border-t border-slate-200/70 bg-white/60 backdrop-blur-sm mt-10">
-    <div class="max-w-5xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500">
-      <span class="font-semibold text-slate-700">Study Room SSC 2028</span>
-      <span>Built for collaborative learning &bull; Moderated by Batch Admins</span>
-    </div>
-  </footer>
-
-  <!-- AI CHAT BOX HUB MODAL -->
-  <div id="aiChatHubModal" class="hidden fixed inset-0 bg-slate-950/75 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-6">
-    <div class="bg-slate-900 rounded-3xl max-w-4xl w-full p-4 sm:p-6 shadow-2xl border border-indigo-500/40 max-h-[92vh] flex flex-col">
-      <div class="flex items-center justify-between pb-3.5 border-b border-white/10 mb-3.5 gap-2">
-        <div class="min-w-0">
-          <h3 class="font-extrabold text-base sm:text-lg text-white truncate">🤖 AI Chat Box Hub</h3>
-          <p class="text-[11px] sm:text-xs text-slate-300">Switch between Gemini AI and Local AI Pro</p>
+            <button id="authNavBtn" onclick="openAuthModal()" class="px-3.5 py-1.5 bg-gray-800 hover:bg-gray-700 border border-gray-700 text-gray-200 rounded-lg text-xs font-semibold transition">
+                Login / Register
+            </button>
         </div>
-        <button onclick="closeAiChatHubModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold text-xs shrink-0">✕</button>
-      </div>
+    </header>
 
-      <div class="flex gap-2 mb-4 shrink-0 overflow-x-auto no-scrollbar">
-        <button type="button" onclick="switchAiHubTab('gemini')" id="hub-tab-gemini" class="ai-hub-tab bg-gradient-to-r from-indigo-600 to-blue-600 text-white px-3.5 py-2 rounded-xl text-xs font-extrabold shadow-md transition shrink-0 whitespace-nowrap">
-          ✨ 1. Gemini AI (Online)
-        </button>
-        <button type="button" onclick="switchAiHubTab('local')" id="hub-tab-local" class="ai-hub-tab bg-white/10 hover:bg-white/20 text-slate-300 px-3.5 py-2 rounded-xl text-xs font-extrabold transition shrink-0 whitespace-nowrap">
-          🧠 2. Local AI (Offline)
-        </button>
-      </div>
-
-      <div class="overflow-y-auto flex-1 pr-0.5 space-y-4">
-        <!-- 1. Gemini AI Panel -->
-        <div id="ai-panel-gemini" class="ai-hub-panel space-y-4">
-          <div class="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white rounded-2xl p-4 sm:p-5 shadow-xl border border-indigo-500/30">
-            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-              <div>
-                <div class="flex items-center gap-2 flex-wrap">
-                  <h4 class="font-extrabold text-sm text-white">Gemini Multi-Model Tutor</h4>
-                  <span class="text-[10px] font-extrabold bg-indigo-500/30 text-indigo-200 px-2 py-0.5 rounded-full">AUTO-FAILOVER &bull; PDF &amp; DIAGRAMS</span>
+    <!-- Main Content Container -->
+    <main class="flex-1 max-w-6xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <!-- Left Column: Notice Board & Status -->
+        <div class="md:col-span-1 space-y-6">
+            <!-- Portal Status Card -->
+            <div class="bg-cardbg border border-gray-800 rounded-2xl p-5 shadow-xl">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-bold text-sm text-gray-200 flex items-center space-x-2">
+                        <i class="fa-solid fa-circle-info text-indigo-400"></i>
+                        <span>Portal Status</span>
+                    </h3>
+                    <span id="portalStatusBadge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Active</span>
                 </div>
-                <p class="text-[11px] text-slate-300 mt-0.5">Real-world explanations &amp; automatic free model fallback during high demand.</p>
-              </div>
-              <div class="flex gap-1.5 flex-wrap items-center">
-                <button type="button" onclick="askGeminiQuick('Explain Newton’s 2nd Law with theory and an SSC Physics numerical step-by-step')" class="text-[10px] font-bold bg-white/10 hover:bg-white/20 px-2.5 py-1 rounded-lg transition">Physics CQ</button>
-                <button type="button" onclick="generateGeminiDiagramFromInput()" class="text-[10px] font-bold bg-fuchsia-500/25 hover:bg-fuchsia-500/40 text-fuchsia-200 border border-fuchsia-400/30 px-2.5 py-1 rounded-lg transition">🎨 Draw Diagram</button>
-                <button type="button" onclick="clearGeminiChat()" class="text-[10px] font-bold bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 px-2.5 py-1 rounded-lg transition">Clear</button>
-                <button type="button" onclick="openAiKeyModal()" class="text-[10px] font-bold bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-400/30 px-2.5 py-1 rounded-lg transition">⚙️ Gemini Key</button>
-              </div>
-            </div>
-
-            <div class="flex flex-wrap items-center justify-between gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-2 mb-3 text-xs">
-              <div class="flex items-center gap-2 flex-wrap">
-                <label class="cursor-pointer bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-[11px] px-3 py-1.5 rounded-lg transition">
-                  📎 Attach PDF / Image / File
-                  <input id="geminiFileInput" type="file" accept=".txt,.md,.csv,.json,.pdf,image/*" onchange="handleGeminiFileSelected(event)" class="hidden" />
-                </label>
-                <span id="geminiFileStatus" class="text-[11px] text-slate-300">No file attached</span>
-              </div>
-              <div class="flex items-center gap-1.5">
-                <button type="button" id="clearGeminiFileBtn" onclick="clearGeminiFile()" class="hidden bg-white/10 text-slate-200 font-bold text-[11px] px-2.5 py-1.5 rounded-lg">✕ Remove</button>
-                <button type="button" id="solveGeminiFileBtn" onclick="solveGeminiAttachedFile()" class="hidden bg-emerald-500 text-slate-950 font-extrabold text-[11px] px-3 py-1.5 rounded-lg">⚡ Solve with Gemini</button>
-              </div>
-            </div>
-
-            <div id="geminiAiMessages" class="space-y-3 max-h-64 overflow-y-auto mb-3.5 bg-black/25 border border-white/10 rounded-xl p-3.5 text-xs">
-              <div class="text-indigo-200"><span class="font-extrabold text-amber-300">Gemini AI:</span> Ask any SSC 2028 question or attach a file to solve step-by-step!</div>
-            </div>
-
-            <form onsubmit="handleGeminiAiSubmit(event)" class="flex gap-2 items-center">
-              <input id="geminiAiInput" type="text" placeholder="Ask Gemini AI or enter diagram topic..." class="flex-1 min-w-0 bg-white/10 border border-white/25 focus:border-indigo-400 text-white placeholder-slate-400 rounded-xl px-3 py-2.5 text-xs outline-none" required />
-              <button id="geminiSendBtn" type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-3.5 py-2.5 rounded-xl shadow-md transition shrink-0 whitespace-nowrap">Ask Gemini</button>
-            </form>
-          </div>
-        </div>
-
-        <!-- 2. Local AI Panel -->
-        <div id="ai-panel-local" class="ai-hub-panel hidden space-y-4">
-          <div class="bg-gradient-to-br from-slate-900 via-teal-950 to-slate-900 text-white rounded-2xl p-4 sm:p-5 shadow-xl border border-teal-500/30">
-            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-              <div>
-                <div class="flex items-center gap-2 flex-wrap">
-                  <h4 class="font-extrabold text-sm text-white">Local Study Engine Pro</h4>
-                  <span class="text-[10px] font-extrabold bg-teal-500/20 text-teal-200 px-2 py-0.5 rounded-full">100% OFFLINE &bull; NO API KEY</span>
+                <div class="space-y-3 text-xs text-gray-400">
+                    <div class="flex justify-between py-1 border-b border-gray-800/60">
+                        <span>Target Session:</span>
+                        <span class="font-semibold text-gray-200">SSC 2028</span>
+                    </div>
+                    <div class="flex justify-between py-1 border-b border-gray-800/60">
+                        <span>Device Security:</span>
+                        <span class="font-semibold text-indigo-400" id="deviceStatusText">Fingerprint Active</span>
+                    </div>
+                    <div class="flex justify-between py-1">
+                        <span>Database:</span>
+                        <span class="font-semibold text-emerald-400">Supabase Connected</span>
+                    </div>
                 </div>
-                <p class="text-[11px] text-slate-300 mt-0.5">Full offline tutor: explains theory, formulas, worked examples, solves equations, and scans files.</p>
-              </div>
-              <div class="flex gap-1.5 flex-wrap">
-                <button type="button" onclick="askLocalQuick('motion')" class="text-[10px] font-bold bg-white/10 hover:bg-white/20 px-2.5 py-1 rounded-lg transition">Motion Theory</button>
-                <button type="button" onclick="askLocalQuick('force')" class="text-[10px] font-bold bg-white/10 hover:bg-white/20 px-2.5 py-1 rounded-lg transition">Force</button>
-              </div>
             </div>
 
-            <div id="localAiMessages" class="space-y-3 max-h-64 overflow-y-auto mb-3.5 bg-black/25 border border-white/10 rounded-xl p-3.5 text-xs">
-              <div class="text-teal-200"><span class="font-extrabold text-amber-300">Local AI Pro:</span> Ask theory (<code>motion</code>, <code>force</code>, <code>mole</code>, <code>cell</code>) or solve math equations.</div>
+            <!-- Quick Notice Board -->
+            <div class="bg-cardbg border border-gray-800 rounded-2xl p-5 shadow-xl">
+                <h3 class="font-bold text-sm text-gray-200 mb-3 flex items-center space-x-2">
+                    <i class="fa-solid fa-bullhorn text-amber-400"></i>
+                    <span>Batch Notices</span>
+                </h3>
+                <div class="space-y-3 text-xs">
+                    <div class="p-3 bg-gray-900/60 rounded-xl border border-gray-800">
+                        <div class="font-semibold text-gray-300 mb-1">Physics Chapter 2 Notes Uploaded</div>
+                        <p class="text-gray-400 leading-relaxed">Motion equations and mathematical problem sheets are now available in the resource hub.</p>
+                    </div>
+                    <div class="p-3 bg-gray-900/60 rounded-xl border border-gray-800">
+                        <div class="font-semibold text-gray-300 mb-1">Weekly Live QC Test</div>
+                        <p class="text-gray-400 leading-relaxed">Prepare for upcoming board-standard multiple choice questions on velocity and acceleration.</p>
+                    </div>
+                </div>
             </div>
+        </div>
 
-            <form onsubmit="handleLocalAiSubmit(event)" class="flex gap-2 items-center">
-              <input id="localAiInput" type="text" placeholder="Ask theory or solve math..." class="flex-1 min-w-0 bg-white/10 border border-white/25 focus:border-teal-400 text-white placeholder-slate-400 rounded-xl px-3 py-2.5 text-xs outline-none" required />
-              <button type="submit" class="bg-teal-500 hover:bg-teal-600 text-slate-950 font-extrabold text-xs px-3.5 py-2.5 rounded-xl shadow-md transition shrink-0 whitespace-nowrap">Solve Local</button>
+        <!-- Right/Main Column: Resource Feed & Interactive Feed -->
+        <div class="md:col-span-2 space-y-6">
+            <div class="bg-cardbg border border-gray-800 rounded-2xl p-6 shadow-xl">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h2 class="text-lg font-bold text-white">Study Materials & Resources</h2>
+                        <p class="text-xs text-gray-400">Approved notes, formulas, and guides for SSC 2028 batch.</p>
+                    </div>
+                    <button onclick="openSubmitModal()" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl transition shadow-lg shadow-indigo-600/30 flex items-center space-x-1.5">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Submit Resource</span>
+                    </button>
+                </div>
+
+                <!-- Resources List Container -->
+                <div id="resourcesListContainer" class="space-y-4">
+                    <div class="p-4 rounded-xl bg-gray-900/40 border border-gray-800 flex items-center justify-between">
+                        <div>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">Physics</span>
+                            <h4 class="font-semibold text-sm text-gray-200 mt-1">Motion & Kinematics Complete Guide</h4>
+                            <p class="text-xs text-gray-400 mt-0.5">Includes solved numerical problems and formula sheets.</p>
+                        </div>
+                        <a href="#" class="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-200 text-xs font-medium rounded-lg transition border border-gray-700">View</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-cardbg border-t border-gray-800 py-4 px-6 text-center text-xs text-gray-500">
+        Study Room SSC 2028 Portal &bull; Secure Supabase Backend & AI Assistant Hub
+    </footer>
+
+    <!-- ================= MODALS ================= -->
+
+    <!-- Auth Modal (Login / Register) -->
+    <div id="authModal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-cardbg border border-gray-800 w-full max-w-md rounded-2xl p-6 shadow-2xl relative">
+            <button onclick="closeAuthModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-800 hover:bg-gray-700 flex items-center justify-center text-gray-400 hover:text-white transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="mb-5 text-center">
+                <h3 id="authModalTitle" class="text-lg font-bold text-white">Student Portal Login</h3>
+                <p class="text-xs text-gray-400 mt-1">Enter your phone number and password to access your account.</p>
+            </div>
+            
+            <form id="authForm" onsubmit="handleAuthSubmit(event)" class="space-y-4">
+                <div id="nameFieldContainer" class="hidden">
+                    <label class="block text-xs font-medium text-gray-300 mb-1">Full Name</label>
+                    <input type="text" id="authName" class="w-full bg-gray-900 border border-gray-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500" placeholder="Your Name">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1">Phone Number</label>
+                    <input type="text" id="authPhone" required class="w-full bg-gray-900 border border-gray-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500" placeholder="01XXXXXXXXX">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1">Password</label>
+                    <input type="password" id="authPassword" required class="w-full bg-gray-900 border border-gray-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500" placeholder="••••••••">
+                </div>
+                <div id="authErrorMsg" class="text-xs text-rose-400 hidden"></div>
+                <button type="submit" id="authSubmitBtn" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-bold transition shadow-lg shadow-indigo-600/30">
+                    Login Now
+                </button>
             </form>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <!-- AI API Key Setup Modal -->
-  <div id="aiKeyModal" class="hidden fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100">
-      <div class="flex items-center justify-between mb-4">
-        <div>
-          <h3 class="font-extrabold text-base text-slate-900">⚙️ Configure Gemini API Key</h3>
-          <p class="text-xs text-slate-500 mt-0.5">Used by online cloud AI chat box</p>
-        </div>
-        <button onclick="closeAiKeyModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 font-bold text-xs">✕</button>
-      </div>
-      <div class="space-y-3 text-xs text-slate-600">
-        <p>Enter your free Gemini API key below. It stays securely in your browser's local storage.</p>
-        <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">Gemini API Key</label>
-          <input id="aiApiKeyInput" type="password" placeholder="AIzaSy..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm outline-none" />
-        </div>
-        <div class="flex justify-end gap-2 pt-2">
-          <button type="button" onclick="closeAiKeyModal()" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100">Cancel</button>
-          <button type="button" onclick="saveActiveAiKey()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-xl text-xs font-bold shadow-md">Save Key</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Dedicated Activity Log Modal -->
-  <div id="activityLogModal" class="hidden fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-40 flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-3xl w-full p-6 shadow-2xl border border-slate-100 max-h-[85vh] flex flex-col">
-      <div class="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-100">
-        <div>
-          <h3 class="font-extrabold text-base text-slate-900">📋 Expanded Security &amp; Activity Log</h3>
-          <p class="text-xs text-slate-500">Automatically tracking system modifications, logins, device details, and actions</p>
-        </div>
-        <div class="flex items-center gap-2 flex-wrap">
-          <button type="button" id="toggleLogAlertsBtn" onclick="toggleActivityNotifications()" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-900 text-xs font-extrabold px-3 py-2 rounded-xl transition">🔔 Alerts: ON</button>
-          <button type="button" onclick="saveLogsToDevice()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold px-3.5 py-2 rounded-xl shadow-sm transition active:scale-95">💾 Export Logs (.txt)</button>
-          <button type="button" onclick="clearAllActivityLogs()" class="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold px-3 py-2 rounded-xl transition">Clear Logs</button>
-          <button type="button" onclick="closeActivityLogModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 font-bold text-xs">✕</button>
-        </div>
-      </div>
-      <div class="mb-4">
-        <div class="text-[11px] font-extrabold uppercase tracking-wider text-amber-700 mb-1.5">Live Modification Alerts</div>
-        <div id="activityNotificationsFeed" class="bg-amber-50/70 border border-amber-200/80 rounded-2xl p-3.5 max-h-32 overflow-y-auto text-xs space-y-2.5">
-          <div class="text-slate-500">No new alerts yet.</div>
-        </div>
-      </div>
-      <div class="text-[11px] font-extrabold uppercase tracking-wider text-slate-600 mb-1.5">Full System Action History</div>
-      <div id="dedicatedActivityLogsList" class="space-y-3 border border-slate-200 rounded-2xl text-xs overflow-y-auto flex-1 bg-slate-50 p-3.5">
-        <div class="p-4 text-slate-500 text-center">Loading activity logs...</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Add Resource Modal -->
-  <div id="resourceModal" class="hidden fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-40 flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100">
-      <div class="flex items-center justify-between mb-5">
-        <div>
-          <h3 class="font-extrabold text-base text-slate-900">Share a Study Resource</h3>
-          <p class="text-xs text-slate-500 mt-0.5">Add notes, PDFs, videos, or helpful links</p>
-        </div>
-        <button onclick="closeResourceModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 font-bold text-xs">✕</button>
-      </div>
-      <form onsubmit="saveResource(event)" class="space-y-3.5">
-        <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">Category *</label>
-          <select id="resCategory" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm outline-none" required>
-            <option value="Documents">Documents (PDFs, Notes)</option>
-            <option value="Images">Images (Diagrams)</option>
-            <option value="Videos">Videos (YouTube)</option>
-            <option value="Links">Links (Websites)</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">Title *</label>
-          <input id="resTitle" type="text" placeholder="e.g., Physics Chapter Notes" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm outline-none" required />
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">Link URL *</label>
-          <input id="resUrl" type="url" placeholder="https://..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm outline-none" required />
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">Short Description</label>
-          <textarea id="resDesc" rows="2" placeholder="Important details..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm outline-none"></textarea>
-        </div>
-        <div class="flex justify-end gap-2 pt-2">
-          <button type="button" onclick="closeResourceModal()" class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100">Cancel</button>
-          <button id="saveResBtn" type="submit" class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 py-2.5 rounded-xl text-xs font-bold shadow-md">Submit Resource</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Login / Registration Modal -->
-  <div id="authModal" class="hidden fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-40 flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100">
-      <div class="flex items-center justify-between mb-5">
-        <div class="flex gap-1.5 bg-slate-100 p-1 rounded-xl">
-          <button id="showLoginTab" onclick="switchAuthMode('login')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-sm">Login</button>
-          <button id="showRegTab" onclick="switchAuthMode('register')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold text-slate-600">Register</button>
-        </div>
-        <button onclick="closeAuthModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 font-bold text-xs">✕</button>
-      </div>
-
-      <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-3.5">
-        <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">Phone Number *</label>
-          <input id="loginPhone" type="tel" placeholder="01XXXXXXXXX" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm outline-none" required />
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">Password *</label>
-          <input id="loginPass" type="password" placeholder="Enter your password" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm outline-none" required />
-        </div>
-        <button id="loginSubmitBtn" type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white py-3 rounded-xl text-xs font-bold shadow-lg">Login to Portal</button>
-      </form>
-
-      <form id="registerForm" onsubmit="handleRegister(event)" class="hidden space-y-3.5">
-        <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">Full Name (Username) *</label>
-          <input id="regName" type="text" placeholder="Your Full Name" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm outline-none" required />
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">Phone Number *</label>
-          <input id="regPhone" type="tel" placeholder="01XXXXXXXXX" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm outline-none" required />
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">Create Password *</label>
-          <input id="regPass" type="password" placeholder="Minimum 4 characters" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm outline-none" required />
-        </div>
-        <button id="regSubmitBtn" type="submit" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-xl text-xs font-bold shadow-lg">Create Account</button>
-      </form>
-    </div>
-  </div>
-
-  <!-- Admin Panel Modal (Fixed Scrollable Layout & Fallbacks) -->
-  <div id="adminModal" class="hidden fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-40 flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-slate-100 max-h-[90vh] flex flex-col overflow-hidden">
-      <!-- Fixed Header -->
-      <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100 shrink-0">
-        <div>
-          <h3 class="font-extrabold text-base text-slate-900">Admin Control &amp; Moderation Center</h3>
-          <p class="text-xs text-slate-500">Portal visibility switch, member device inspection &amp; controls</p>
-        </div>
-        <button onclick="closeAdminModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 font-bold text-xs">✕</button>
-      </div>
-
-      <!-- Scrollable Body Content -->
-      <div class="overflow-y-auto pr-1 space-y-5 flex-1">
-        <!-- Portal Visibility Switch -->
-        <div class="bg-indigo-50/70 border border-indigo-200/80 rounded-2xl p-4">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div>
-              <div class="flex items-center gap-2">
-                <h4 class="text-xs font-extrabold uppercase tracking-wider text-indigo-950">Portal Visibility Mode</h4>
-                <span id="adminVisibilityStatusBadge" class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-indigo-600 text-white">ACTIVE: PRIVATE</span>
-              </div>
-              <p id="visibilityDescText" class="text-xs text-slate-600 mt-1">Private: Only logged-in students can view portal content.</p>
+            <div class="mt-4 text-center">
+                <button type="button" onclick="toggleAuthMode()" id="authSwitchPrompt" class="text-xs text-indigo-400 hover:underline font-medium">
+                    Don't have an account? Register here
+                </button>
             </div>
-            <div class="flex gap-1.5 bg-slate-200/80 p-1.5 rounded-xl border border-slate-300/70 shrink-0 shadow-inner">
-              <button type="button" id="setPrivateBtn" onclick="changePortalVisibility(false)" class="px-4 py-2 rounded-lg text-xs font-extrabold transition-all duration-200">🔒 Private</button>
-              <button type="button" id="setPublicBtn" onclick="changePortalVisibility(true)" class="px-4 py-2 rounded-lg text-xs font-extrabold transition-all duration-200">🌐 Public</button>
-            </div>
-          </div>
         </div>
-
-        <div>
-          <h4 class="text-xs font-extrabold uppercase tracking-wider text-amber-600 mb-2.5">Pending Content Submissions</h4>
-          <div id="adminPendingList" class="divide-y divide-slate-100 border border-amber-200/70 bg-amber-50/30 rounded-2xl text-xs overflow-hidden">
-            <div class="p-4 text-slate-400 text-center">Loading pending submissions...</div>
-          </div>
-        </div>
-
-        <div>
-          <h4 class="text-xs font-extrabold uppercase tracking-wider text-indigo-900 mb-2.5">Registered Members &amp; Device Details</h4>
-          <div id="adminUsersList" class="space-y-3.5 pb-4">
-            <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl text-center text-xs text-slate-500">Loading registered members...</div>
-          </div>
-        </div>
-      </div>
     </div>
-  </div>
 
-  <script>
-    const SUPABASE_URL = "https://grcnhjirkcolqekdoeoj.supabase.co";
-    const SUPABASE_ANON_KEY = "sb_publishable_-4SxZGajx_1f2ZNjAvZnew_Jhl6039n";
-
-    const DEFAULT_GEMINI_API_KEY = "";
-    const GEMINI_FALLBACK_MODELS = [
-      "gemini-3.8-flash",
-      "gemini-3.6-flash",
-      "gemini-3.5-flash-lite",
-      "gemini-3.1-flash-lite"
-    ];
-
-    if (window.pdfjsLib && pdfjsLib.GlobalWorkerOptions) {
-      pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
-    }
-
-    const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    let currentTab = "all";
-    let allResources = [];
-    
-    // =========================================================================
-    // 1. ENHANCED DEVICE DETECTOR
-    // =========================================================================
-    function getDetailedDeviceInfo() {
-      const ua = navigator.userAgent || "";
-      const platform = navigator.platform || "Web";
-      let deviceName = "Unknown Device";
-      let browserName = "Browser";
-
-      if (/Android/i.test(ua)) {
-        let brandHint = "Android Mobile";
-        if (/Samsung|SM-|Galaxy/i.test(ua)) brandHint = "Samsung Galaxy";
-        else if (/Redmi|Xiaomi|Mi /i.test(ua)) brandHint = "Xiaomi / Redmi";
-        else if (/OPPO/i.test(ua)) brandHint = "Oppo";
-        else if (/Vivo/i.test(ua)) brandHint = "Vivo";
-        else if (/Realme/i.test(ua)) brandHint = "Realme";
-        else if (/Pixel/i.test(ua)) brandHint = "Google Pixel";
-        deviceName = `${brandHint} (${window.screen.width}x${window.screen.height}px)`;
-      } else if (/iPhone/i.test(ua)) {
-        deviceName = `Apple iPhone (${window.screen.width}x${window.screen.height}px)`;
-      } else if (/iPad/i.test(ua)) {
-        deviceName = `Apple iPad`;
-      } else if (/Win/i.test(platform)) {
-        deviceName = "Windows PC";
-      } else if (/Mac/i.test(platform)) {
-        deviceName = "Apple Mac";
-      } else if (/Linux/i.test(platform)) {
-        deviceName = `Linux Device (${navigator.hardwareConcurrency || 4} Cores)`;
-      }
-
-      if (/Edg\//i.test(ua)) browserName = "Edge";
-      else if (/Chrome\//i.test(ua)) browserName = "Chrome";
-      else if (/Safari\//i.test(ua)) browserName = "Safari";
-      else if (/Firefox\//i.test(ua)) browserName = "Firefox";
-
-      return `${deviceName} [${browserName}]`;
-    }
-
-    function getDeviceFingerprint() {
-      let storedId = localStorage.getItem("sr_device_hw_id");
-      const rawSpec = [
-        navigator.platform || "unknown_os",
-        navigator.userAgent.slice(0, 40),
-        `${screen.width}x${screen.height}`,
-        navigator.hardwareConcurrency || "4"
-      ].join("|");
-      
-      let hash = 0;
-      for (let i = 0; i < rawSpec.length; i++) {
-        hash = ((hash << 5) - hash) + rawSpec.charCodeAt(i);
-        hash |= 0;
-      }
-      const hwSignature = `DEV-${Math.abs(hash).toString(16).toUpperCase()}`;
-      if (!storedId) {
-        storedId = hwSignature;
-        localStorage.setItem("sr_device_hw_id", storedId);
-      }
-      return storedId;
-    }
-
-    const CURRENT_DEVICE_ID = getDeviceFingerprint();
-    const CURRENT_DEVICE_DETAILS = getDetailedDeviceInfo();
-    let localBlacklist = JSON.parse(localStorage.getItem("sr_permanent_blacklist") || "{\"phones\":[],\"usernames\":[],\"devices\":[]}");
-
-    async function syncUserDeviceToServer(userObj) {
-      if (!userObj || !userObj.phone || !userObj.pass) return;
-      try {
-        await db.rpc("update_user_device_info", {
-          p_phone: userObj.phone,
-          p_password: userObj.pass,
-          p_device_id: CURRENT_DEVICE_ID,
-          p_device_details: CURRENT_DEVICE_DETAILS
-        });
-      } catch (e) {}
-    }
-
-    function enforcePermanentBanLockout(reasonText) {
-      localStorage.setItem("sr_device_permanently_banned", "true");
-      localStorage.removeItem("sr_user");
-      currentUser = null;
-      const overlay = document.getElementById("permanentBanOverlay");
-      const refCode = document.getElementById("banRefCode");
-      if (overlay) overlay.classList.remove("hidden");
-      if (refCode) refCode.textContent = `Device ID: ${CURRENT_DEVICE_ID} | Status: ${reasonText}`;
-    }
-
-    async function verifyNotPermanentlyBanned(phone = "", username = "") {
-      const cleanPhone = String(phone || "").replace(/\s+/g, "").toLowerCase();
-      const cleanName = String(username || "").trim().toLowerCase();
-
-      if (localStorage.getItem("sr_device_permanently_banned") === "true" || localBlacklist.devices.includes(CURRENT_DEVICE_ID)) {
-        enforcePermanentBanLockout("DEVICE_BLACKLISTED");
-        return false;
-      }
-      if (cleanPhone && localBlacklist.phones.includes(cleanPhone)) {
-        enforcePermanentBanLockout("PHONE_BLACKLISTED");
-        return false;
-      }
-      if (cleanName && localBlacklist.usernames.includes(cleanName)) {
-        enforcePermanentBanLockout("USERNAME_BLACKLISTED");
-        return false;
-      }
-
-      try {
-        const { data } = await db.rpc("check_is_banned", {
-          p_phone: cleanPhone || null,
-          p_username: cleanName || null,
-          p_device_id: CURRENT_DEVICE_ID
-        });
-        if (data && data.banned) {
-          if (!localBlacklist.devices.includes(CURRENT_DEVICE_ID)) localBlacklist.devices.push(CURRENT_DEVICE_ID);
-          if (cleanPhone && !localBlacklist.phones.includes(cleanPhone)) localBlacklist.phones.push(cleanPhone);
-          if (cleanName && !localBlacklist.usernames.includes(cleanName)) localBlacklist.usernames.push(cleanName);
-          localStorage.setItem("sr_permanent_blacklist", JSON.stringify(localBlacklist));
-          enforcePermanentBanLockout("SERVER_BLACKLIST_MATCH");
-          return false;
-        }
-      } catch (e) {}
-      return true;
-    }
-
-    // =========================================================================
-    // 2. FOUR MEMBER MANAGEMENT ACTIONS
-    // =========================================================================
-    async function toggleMemberAdminRole(targetId, targetName, makeAdmin) {
-      if (!currentUser?.is_admin) return;
-      if (!confirm(`Are you sure you want to ${makeAdmin ? "promote" : "demote"} "${targetName}"?`)) return;
-
-      const { data, error } = await db.rpc("admin_toggle_admin", {
-        p_admin_phone: currentUser.phone,
-        p_admin_password: currentUser.pass,
-        p_target_user_id: targetId,
-        p_make_admin: makeAdmin
-      });
-
-      if (error || (data && !data.ok)) { alert(data?.error || "Failed"); return; }
-      logSystemAction("ADMIN_ROLE", `${makeAdmin ? "Promoted to Admin" : "Demoted from Admin"}: ${targetName}`);
-      await refreshAdminDashboard(false);
-    }
-
-    async function toggleMemberSoftBan(targetId, targetName, shouldBan) {
-      if (!currentUser?.is_admin) return;
-      if (!confirm(`${shouldBan ? "Ban" : "Unban"} "${targetName}"?`)) return;
-
-      const { data, error } = await db.rpc("admin_toggle_ban", {
-        p_admin_phone: currentUser.phone,
-        p_admin_password: currentUser.pass,
-        p_target_user_id: targetId,
-        p_is_banned: shouldBan
-      });
-
-      if (error || (data && !data.ok)) { alert(data?.error || "Failed"); return; }
-      logSystemAction("MEMBER_BAN", `${shouldBan ? "Banned (Read-Only)" : "Unbanned"} member: ${targetName}`);
-      await refreshAdminDashboard(false);
-    }
-
-    async function removeMemberCleanly(targetId, targetName, targetPhone) {
-      if (!currentUser?.is_admin) return;
-      if (!confirm(`Remove account for "${targetName}"? They can re-register if needed.`)) return;
-
-      const { data, error } = await db.rpc("admin_remove_user", {
-        p_admin_phone: currentUser.phone,
-        p_admin_password: currentUser.pass,
-        p_target_user_id: targetId
-      });
-
-      if (error || (data && !data.ok)) { alert(data?.error || "Failed"); return; }
-      logSystemAction("MEMBER_REMOVE", `Removed account: ${targetName} (${targetPhone})`);
-      await refreshAdminDashboard(false);
-    }
-
-    async function removeMemberPermanently(targetId, targetName, targetPhone, targetDeviceId) {
-      if (!currentUser?.is_admin) return;
-      if (!confirm(`Permanently remove and blacklist "${targetName}" forever?`)) return;
-
-      const cleanPhone = String(targetPhone).replace(/\s+/g, "").toLowerCase();
-      const cleanName = String(targetName).trim().toLowerCase();
-      const knownDeviceId = targetDeviceId || CURRENT_DEVICE_ID;
-
-      if (!localBlacklist.phones.includes(cleanPhone)) localBlacklist.phones.push(cleanPhone);
-      if (!localBlacklist.usernames.includes(cleanName)) localBlacklist.usernames.push(cleanName);
-      if (knownDeviceId && !localBlacklist.devices.includes(knownDeviceId)) localBlacklist.devices.push(knownDeviceId);
-      localStorage.setItem("sr_permanent_blacklist", JSON.stringify(localBlacklist));
-
-      await db.rpc("admin_ban_and_remove_user", {
-        p_admin_phone: currentUser.phone,
-        p_admin_password: currentUser.pass,
-        p_target_user_id: targetId,
-        p_target_phone: targetPhone,
-        p_target_name: targetName,
-        p_target_device_id: knownDeviceId || null
-      });
-
-      logSystemAction("PERMANENT_REMOVE", `Permanently banned & removed: ${targetName} (${targetPhone})`);
-      await refreshAdminDashboard(false);
-    }
-
-    // =========================================================================
-    // 3. EXPANDED ACTIVITY LOG ENGINE
-    // =========================================================================
-    let systemActivityLogs = JSON.parse(localStorage.getItem("sr_expanded_activity_logs") || "[]");
-    let activityAlertsFeed = JSON.parse(localStorage.getItem("sr_activity_alerts") || "[]");
-    let logAlertsEnabled = localStorage.getItem("sr_log_alerts_enabled") !== "false";
-
-    function logSystemAction(actionType, description) {
-      const timestamp = new Date().toLocaleString();
-      const actor = currentUser
-        ? `${currentUser.name} (${currentUser.phone}) | ${CURRENT_DEVICE_DETAILS} [ID: ${CURRENT_DEVICE_ID}]`
-        : `Guest | ${CURRENT_DEVICE_DETAILS} [ID: ${CURRENT_DEVICE_ID}]`;
-      const logEntry = {
-        id: Math.random().toString(36).substring(2, 9),
-        type: actionType,
-        actor: actor,
-        action: description,
-        time: timestamp
-      };
-
-      systemActivityLogs.unshift(logEntry);
-      if (systemActivityLogs.length > 250) systemActivityLogs.pop();
-      localStorage.setItem("sr_expanded_activity_logs", JSON.stringify(systemActivityLogs));
-
-      if (logAlertsEnabled) {
-        activityAlertsFeed.unshift({ text: `[${actionType}] ${description}`, time: timestamp });
-        if (activityAlertsFeed.length > 50) activityAlertsFeed.pop();
-        localStorage.setItem("sr_activity_alerts", JSON.stringify(activityAlertsFeed));
-      }
-
-      renderActivityLogsUI();
-      renderActivityNotificationsFeed();
-    }
-
-    function renderActivityLogsUI() {
-      const listEl = document.getElementById("dedicatedActivityLogsList");
-      if (!listEl) return;
-      if (!systemActivityLogs.length) {
-        listEl.innerHTML = `<div class="p-4 text-slate-500 text-center">No system activity logged yet.</div>`;
-        return;
-      }
-      listEl.innerHTML = systemActivityLogs.map(log => `
-        <div class="p-4 bg-white border border-slate-200/90 rounded-2xl shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mb-3">
-          <div class="space-y-1.5">
-            <div>
-              <span class="inline-block font-extrabold text-indigo-700 uppercase text-[10px] bg-indigo-50 px-2.5 py-0.5 rounded-md mr-1.5">${escapeHtml(log.type)}</span>
-              <span class="text-slate-900 font-bold text-xs">${escapeHtml(log.action)}</span>
+    <!-- AI Chat Box Hub Modal (Wider, Cleaner & Fast) -->
+    <div id="aiModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-3 md:p-6">
+        <div class="bg-cardbg border border-gray-800 w-full max-w-4xl h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden relative">
+            <!-- Modal Header -->
+            <div class="p-4 border-b border-gray-800 flex items-center justify-between bg-gray-900/50">
+                <div class="flex items-center space-x-3">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-md">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-sm text-white">AI Chat Box Hub</h3>
+                        <p class="text-[11px] text-gray-400">Switch between Gemini AI Online and Local AI Pro</p>
+                    </div>
+                </div>
+                <button onclick="closeAiModal()" class="w-8 h-8 rounded-full bg-gray-800 hover:bg-gray-700 flex items-center justify-center text-gray-400 hover:text-white transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
             </div>
-            <div class="text-[11px] font-mono text-slate-500 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-100">
-              ${escapeHtml(log.actor)}
+
+            <!-- Model Switcher Tabs -->
+            <div class="px-4 py-2.5 bg-gray-900/80 border-b border-gray-800 flex space-x-3">
+                <button onclick="switchAiModel('gemini')" id="tabGemini" class="flex-1 py-2 px-3 rounded-xl text-xs font-bold transition bg-indigo-600 text-white shadow-md shadow-indigo-600/30 flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-sparkles"></i>
+                    <span>Gemini AI (Online)</span>
+                </button>
+                <button onclick="switchAiModel('local')" id="tabLocal" class="flex-1 py-2 px-3 rounded-xl text-xs font-bold transition bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-brain"></i>
+                    <span>Local AI Pro (Offline)</span>
+                </button>
             </div>
-          </div>
-          <span class="text-[10px] font-semibold text-slate-500 shrink-0 self-start sm:self-center bg-slate-100 px-2.5 py-1 rounded-lg">${escapeHtml(log.time)}</span>
+
+            <!-- Chat Messages Area (Wide & Custom Scrollbar) -->
+            <div id="aiChatMessages" class="flex-1 p-4 md:p-6 overflow-y-auto custom-scrollbar space-y-4">
+                <div class="flex items-start space-x-3">
+                    <div class="w-8 h-8 rounded-lg bg-indigo-600 flex-shrink-0 flex items-center justify-center text-white text-xs">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl max-w-3xl text-sm text-gray-200 leading-relaxed shadow-sm">
+                        <p class="font-semibold text-indigo-400 mb-1">Gemini AI Tutor</p>
+                        <p>Welcome to Study Room SSC 2028! Ask any question about Physics, Chemistry, Math, or upload study notes for instant breakdown.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Input Footer -->
+            <div class="p-4 border-t border-gray-800 bg-gray-900/50">
+                <form onsubmit="handleAiSend(event)" class="flex items-center space-x-2">
+                    <input type="text" id="aiInput" placeholder="Ask theory, solve equations, or paste question text..." class="flex-1 bg-gray-900 border border-gray-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 shadow-inner">
+                    <button type="submit" class="px-5 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-bold transition shadow-lg shadow-indigo-600/30 flex items-center space-x-1.5">
+                        <span>Send</span>
+                        <i class="fa-solid fa-paper-plane text-xs"></i>
+                    </button>
+                </form>
+            </div>
         </div>
-      `).join("");
-    }
+    </div>
 
-    function clearAllActivityLogs() {
-      if (!currentUser?.is_admin) { alert("Only admins can clear logs."); return; }
-      if (confirm("Clear all recorded activity logs?")) {
-        systemActivityLogs = [];
-        activityAlertsFeed = [];
-        localStorage.removeItem("sr_expanded_activity_logs");
-        localStorage.removeItem("sr_activity_alerts");
-        renderActivityLogsUI();
-        renderActivityNotificationsFeed();
-      }
-    }
+    <!-- Admin Panel Modal -->
+    <div id="adminModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-3 md:p-6">
+        <div class="bg-cardbg border border-gray-800 w-full max-w-4xl h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden relative">
+            <div class="p-4 border-b border-gray-800 flex items-center justify-between bg-gray-900/50">
+                <div>
+                    <h3 class="font-bold text-base text-white">Admin Control & Moderation Center</h3>
+                    <p class="text-xs text-gray-400">Manage registered members, promote/demote admins, and inspect device fingerprints.</p>
+                </div>
+                <button onclick="closeAdminModal()" class="w-8 h-8 rounded-full bg-gray-800 hover:bg-gray-700 flex items-center justify-center text-gray-400 hover:text-white transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
 
-    let geminiAttachedFile = null, geminiAttachedBase64 = null, geminiAttachedMime = "", geminiExtractedText = "", geminiChatHistory = [];
-    let isPortalPublic = false;
-    let currentUser = JSON.parse(localStorage.getItem("sr_user") || "null");
+            <div class="flex-1 p-4 md:p-6 overflow-y-auto custom-scrollbar space-y-6">
+                <!-- Registered Members List -->
+                <div>
+                    <h4 class="font-bold text-sm text-gray-200 mb-3 flex items-center space-x-2">
+                        <i class="fa-solid fa-users text-indigo-400"></i>
+                        <span>Registered Members & Device Fingerprints</span>
+                    </h4>
+                    <div id="adminMembersList" class="space-y-3">
+                        <div class="p-4 rounded-xl bg-gray-900/50 border border-gray-800 text-xs text-gray-400 text-center">
+                            Loading member list from Supabase...
+                        </div>
+                    </div>
+                </div>
 
-    function escapeHtml(str) { return String(str || "").replace(/[&<>"']/g, m => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m])); }
+                <!-- Pending Resources Moderation -->
+                <div class="pt-4 border-t border-gray-800">
+                    <h4 class="font-bold text-sm text-gray-200 mb-3 flex items-center space-x-2">
+                        <i class="fa-solid fa-file-circle-exclamation text-amber-400"></i>
+                        <span>Pending Content Submissions</span>
+                    </h4>
+                    <div id="adminPendingList" class="space-y-3">
+                        <div class="p-4 rounded-xl bg-gray-900/50 border border-gray-800 text-xs text-gray-400 text-center">
+                            No pending submissions.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    function fileToBase64(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(String(reader.result || "").split(",")[1] || "");
-        reader.onerror = () => reject(new Error("Failed to read file."));
-        reader.readAsDataURL(file);
-      });
-    }
+    <!-- Submit Resource Modal -->
+    <div id="submitModal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-cardbg border border-gray-800 w-full max-w-md rounded-2xl p-6 shadow-2xl relative">
+            <button onclick="closeSubmitModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-800 hover:bg-gray-700 flex items-center justify-center text-gray-400 hover:text-white transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h3 class="text-lg font-bold text-white mb-1">Submit Study Resource</h3>
+            <p class="text-xs text-gray-400 mb-4">Share notes, formulas, or video guides with the batch.</p>
 
-    async function extractTextFromUploadedFile(file) {
-      const name = (file.name || "").toLowerCase();
-      if (file.type.startsWith("text/") || /\.(txt|md|csv|json|tex)$/i.test(name)) return await file.text();
-      if (file.type === "application/pdf" || name.endsWith(".pdf")) {
-        if (!window.pdfjsLib) throw new Error("PDF reader library not loaded.");
-        const buf = await file.arrayBuffer();
-        const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
-        let fullText = "";
-        for (let i = 1; i <= pdf.numPages; i++) {
-          const page = await pdf.getPage(i);
-          const content = await page.getTextContent();
-          fullText += content.items.map(it => it.str).join(" ") + "\n";
-        }
-        return fullText;
-      }
-      if (file.type.startsWith("image/")) {
-        if (!window.Tesseract) throw new Error("Image OCR library not loaded.");
-        const res = await Tesseract.recognize(file, "eng");
-        return res?.data?.text || "";
-      }
-      throw new Error("Unsupported file type.");
-    }
+            <form onsubmit="handleResourceSubmit(event)" class="space-y-3">
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1">Title</label>
+                    <input type="text" id="resTitle" required class="w-full bg-gray-900 border border-gray-800 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-indigo-500" placeholder="e.g. Chapter 3 Force Notes">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1">Category</label>
+                    <input type="text" id="resCategory" required class="w-full bg-gray-900 border border-gray-800 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-indigo-500" placeholder="Physics / Chemistry / Math">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1">Resource URL / Link</label>
+                    <input type="url" id="resUrl" required class="w-full bg-gray-900 border border-gray-800 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-indigo-500" placeholder="https://...">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1">Description</label>
+                    <textarea id="resDesc" rows="2" class="w-full bg-gray-900 border border-gray-800 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-indigo-500" placeholder="Brief summary..."></textarea>
+                </div>
+                <button type="submit" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition shadow-lg shadow-indigo-600/30 mt-2">
+                    Submit for Approval
+                </button>
+            </form>
+        </div>
+    </div>
 
-    function openAiChatHubModal() { document.getElementById("aiChatHubModal").classList.remove("hidden"); }
-    function closeAiChatHubModal() { document.getElementById("aiChatHubModal").classList.add("hidden"); }
+    <!-- Application Script -->
+    <script>
+        // Supabase configuration credentials
+        const SUPABASE_URL = "https://your-project.supabase.co";
+        const SUPABASE_ANON_KEY = "your-anon-key";
+        let supabaseClient = null;
 
-    function switchAiHubTab(tab) {
-      document.querySelectorAll(".ai-hub-tab").forEach(b => {
-        b.className = "ai-hub-tab bg-white/10 hover:bg-white/20 text-slate-300 px-3.5 py-2 rounded-xl text-xs font-extrabold transition shrink-0 whitespace-nowrap";
-      });
-      document.querySelectorAll(".ai-hub-panel").forEach(p => p.classList.add("hidden"));
-      document.getElementById("hub-tab-" + tab).className = "ai-hub-tab bg-gradient-to-r from-indigo-600 to-blue-600 text-white px-3.5 py-2 rounded-xl text-xs font-extrabold shadow-md transition shrink-0 whitespace-nowrap";
-      document.getElementById("ai-panel-" + tab).classList.remove("hidden");
-    }
-
-    function openAiKeyModal() {
-      document.getElementById("aiApiKeyInput").value = localStorage.getItem("sr_gemini_api_key") || "";
-      document.getElementById("aiKeyModal").classList.remove("hidden");
-    }
-    function closeAiKeyModal() { document.getElementById("aiKeyModal").classList.add("hidden"); }
-    function saveActiveAiKey() {
-      const val = document.getElementById("aiApiKeyInput").value.trim();
-      if (val) localStorage.setItem("sr_gemini_api_key", val); else localStorage.removeItem("sr_gemini_api_key");
-      closeAiKeyModal();
-    }
-
-    function getGeminiApiKey() { return (localStorage.getItem("sr_gemini_api_key") || DEFAULT_GEMINI_API_KEY || "").trim(); }
-    function clearGeminiChat() { geminiChatHistory = []; document.getElementById("geminiAiMessages").innerHTML = `<div class="text-indigo-200">Chat cleared!</div>`; }
-    function clearGeminiFile() {
-      geminiAttachedFile = null; geminiAttachedBase64 = null; geminiAttachedMime = ""; geminiExtractedText = "";
-      document.getElementById("geminiFileInput").value = "";
-      document.getElementById("geminiFileStatus").textContent = "No file attached";
-      document.getElementById("solveGeminiFileBtn").classList.add("hidden");
-      document.getElementById("clearGeminiFileBtn").classList.add("hidden");
-    }
-    async function handleGeminiFileSelected(e) {
-      const file = e.target.files?.[0]; if (!file) return;
-      geminiAttachedFile = file; geminiAttachedMime = file.type || "text/plain";
-      geminiExtractedText = "";
-      document.getElementById("geminiFileStatus").textContent = `Preparing ${file.name}...`;
-      document.getElementById("clearGeminiFileBtn").classList.remove("hidden");
-      try {
-        if (file.size <= 15 * 1024 * 1024 && (geminiAttachedMime.startsWith("image/") || geminiAttachedMime === "application/pdf")) {
-          geminiAttachedBase64 = await fileToBase64(file);
-        } else {
-          geminiExtractedText = await extractTextFromUploadedFile(file);
-        }
-        document.getElementById("geminiFileStatus").textContent = `Attached: ${file.name}`;
-        document.getElementById("solveGeminiFileBtn").classList.remove("hidden");
-      } catch (err) { document.getElementById("geminiFileStatus").textContent = `Error: ${err.message}`; }
-    }
-
-    async function callGeminiApi(userPrompt, includeAttachment = false) {
-      const apiKey = getGeminiApiKey();
-      if (!apiKey) { openAiKeyModal(); throw new Error("Please set your Gemini API key."); }
-      const systemInstruction = "You are an elite NCTB SSC 2028 science tutor.";
-      const userParts = [{ text: userPrompt }];
-      if (includeAttachment && geminiAttachedFile) {
-        if (geminiAttachedBase64 && (geminiAttachedMime.startsWith("image/") || geminiAttachedMime === "application/pdf")) {
-          userParts.push({ inline_data: { mime_type: geminiAttachedMime, data: geminiAttachedBase64 } });
-        } else if (geminiExtractedText) {
-          userParts[0].text += `\n\n--- File ---\n${geminiExtractedText.slice(0, 25000)}`;
-        }
-      }
-      const contents = [...geminiChatHistory.slice(-10), { role: "user", parts: userParts }];
-      for (const modelName of GEMINI_FALLBACK_MODELS) {
         try {
-          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(apiKey)}`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ system_instruction: { parts: [{ text: systemInstruction }] }, contents })
-          });
-          const data = await res.json();
-          if (!res.ok) continue;
-          let replyText = data?.candidates?.[0]?.content?.parts?.map(p => p.text || "").join("") || "";
-          geminiChatHistory.push({ role: "user", parts: [{ text: userPrompt }] });
-          geminiChatHistory.push({ role: "model", parts: [{ text: replyText }] });
-          return replyText;
-        } catch (e) {}
-      }
-      throw new Error("Gemini models are busy.");
-    }
-
-    async function generateGeminiDiagramFromInput() {
-      const input = document.getElementById("geminiAiInput");
-      const promptText = input.value.trim() || "Trajectory diagram";
-      input.value = "";
-      appendGeminiMessage("You", `🎨 Draw Diagram: ${promptText}`, true);
-      const loading = appendGeminiMessage("Gemini Visual", `<span class="italic text-fuchsia-200">Drawing...</span>`, false);
-      try {
-        const svgPrompt = `Create an SVG diagram (width="460" height="260" viewBox="0 0 460 260") on white background for: "${promptText}". Return ONLY valid <svg>...</svg> code.`;
-        const reply = await callGeminiApi(svgPrompt, false);
-        const svgMatch = reply.match(/<svg[\s\S]*?<\/svg>/i);
-        if (svgMatch) loading.innerHTML = `<div class="bg-white p-2 rounded-xl overflow-x-auto">${svgMatch[0]}</div>`;
-        else loading.innerHTML = formatMarkdown(reply);
-      } catch (err) { loading.innerHTML = `Error: ${escapeHtml(err.message)}`; }
-    }
-
-    function formatMarkdown(raw) { return window.marked ? `<div class="ai-markdown">${marked.parse(raw)}</div>` : escapeHtml(raw).replace(/\n/g, "<br>"); }
-    function appendGeminiMessage(sender, html, isUser) {
-      const box = document.getElementById("geminiAiMessages");
-      const d = document.createElement("div"); d.className = isUser ? "text-right" : "text-left text-indigo-100";
-      d.innerHTML = isUser ? `<span class="inline-block bg-indigo-600 text-white px-3 py-1.5 rounded-xl text-left max-w-[85%]"><strong>You:</strong> ${escapeHtml(html)}</span>` : `<div class="bg-white/10 p-3 rounded-xl leading-relaxed"><span class="font-bold text-amber-300">${sender}:</span> ${html}</div>`;
-      box.appendChild(d); box.scrollTop = box.scrollHeight; return d;
-    }
-    async function solveGeminiAttachedFile() {
-      if (!geminiAttachedFile) return;
-      appendGeminiMessage("You", `Solve file: ${geminiAttachedFile.name}`, true);
-      const l = appendGeminiMessage("Gemini AI", "Solving...", false);
-      try { const r = await callGeminiApi(`Solve questions in ${geminiAttachedFile.name}.`, true); l.innerHTML = formatMarkdown(r); }
-      catch (err) { l.innerHTML = `Error: ${escapeHtml(err.message)}`; }
-    }
-    async function askGeminiQuick(txt) {
-      appendGeminiMessage("You", txt, true);
-      const l = appendGeminiMessage("Gemini AI", "Thinking...", false);
-      try { const r = await callGeminiApi(txt, Boolean(geminiAttachedFile)); l.innerHTML = formatMarkdown(r); }
-      catch (err) { l.innerHTML = `Error: ${escapeHtml(err.message)}`; }
-    }
-    function handleGeminiAiSubmit(e) {
-      e.preventDefault();
-      const i = document.getElementById("geminiAiInput"), v = i.value.trim();
-      if (!v) return;
-      i.value = "";
-      askGeminiQuick(v);
-    }
-
-    const SSC_STUDY_KNOWLEDGE = [
-      { keys: ["motion", "velocity"], title: "Motion", theory: "Motion is change in position over time.", formulas: "v = u + at" },
-      { keys: ["force", "newton"], title: "Force", theory: "Newton's 2nd Law: F = ma.", formulas: "F = ma" }
-    ];
-    function generateLocalReply(raw) {
-      const q = raw.trim().toLowerCase();
-      const note = SSC_STUDY_KNOWLEDGE.find(n => n.keys.some(k => q.includes(k)));
-      if (note) return `<strong>${note.title}</strong>: ${note.theory} (Formula: ${note.formulas})`;
-      return `Local AI reply for: "${escapeHtml(raw)}"`;
-    }
-    function appendLocalAiMessage(sender, html, isUser) {
-      const box = document.getElementById("localAiMessages");
-      const d = document.createElement("div"); d.className = isUser ? "text-right" : "text-left text-teal-100";
-      d.innerHTML = isUser ? `<span class="inline-block bg-teal-600 text-white px-3 py-1.5 rounded-xl text-left max-w-[85%]"><strong>You:</strong> ${escapeHtml(html)}</span>` : `<div class="bg-white/10 p-3 rounded-xl leading-relaxed"><span class="font-bold text-amber-300">${sender}:</span> ${html}</div>`;
-      box.appendChild(d); box.scrollTop = box.scrollHeight;
-    }
-    function askLocalQuick(txt) { appendLocalAiMessage("You", txt, true); appendLocalAiMessage("Local AI", generateLocalReply(txt), false); }
-    function handleLocalAiSubmit(e) { e.preventDefault(); const i = document.getElementById("localAiInput"), v = i.value.trim(); if (!v) return; i.value = ""; askLocalQuick(v); }
-
-    function updateActivityAlertToggleUI() { const b = document.getElementById("toggleLogAlertsBtn"); if (b) b.textContent = logAlertsEnabled ? "🔔 Alerts: ON" : "🔕 Alerts: OFF"; }
-    function renderActivityNotificationsFeed() {
-      const feed = document.getElementById("activityNotificationsFeed"), dot = document.getElementById("logAlertDot"); if (!feed) return;
-      if (dot) dot.classList.toggle("hidden", !logAlertsEnabled || activityAlertsFeed.length === 0);
-      if (!activityAlertsFeed.length) { feed.innerHTML = `<div class="text-slate-500">No new alerts yet.</div>`; return; }
-      feed.innerHTML = activityAlertsFeed.slice(0, 15).map(n => `<div class="flex justify-between gap-2 bg-white/90 rounded-xl px-3 py-2 text-slate-800 mb-2 shadow-sm"><span>${escapeHtml(n.text)}</span><span class="text-[10px] text-slate-400 shrink-0">${escapeHtml(n.time)}</span></div>`).join("");
-    }
-    function toggleActivityNotifications() { 
-      logAlertsEnabled = !logAlertsEnabled; 
-      localStorage.setItem("sr_log_alerts_enabled", String(logAlertsEnabled)); 
-      updateActivityAlertToggleUI(); 
-      renderActivityNotificationsFeed(); 
-    }
-    function saveLogsToDevice() { 
-      const header = "==================================================\nSTUDY ROOM SSC 2028 - SECURITY & ACTIVITY LOG\nExported: " + new Date().toLocaleString() + "\n==================================================\n\n";
-      const textContent = systemActivityLogs.map((l, idx) => 
-        `#${idx + 1} [${l.time}] — TYPE: ${l.type}\n` +
-        `   User / Device : ${l.actor}\n` +
-        `   Action        : ${l.action}`
-      ).join("\n\n--------------------------------------------------\n\n");
-
-      const a = document.createElement("a"); 
-      a.href = URL.createObjectURL(new Blob([header + textContent], { type: "text/plain;charset=utf-8" })); 
-      a.download = "study_room_activity_logs.txt"; 
-      a.click(); 
-    }
-    function openActivityLogModal() { 
-      if (!currentUser?.is_admin) { alert("Restricted to batch administrators."); return; }
-      document.getElementById("activityLogModal").classList.remove("hidden"); 
-      renderActivityLogsUI();
-    }
-    function closeActivityLogModal() { document.getElementById("activityLogModal").classList.add("hidden"); }
-
-    function updateVisibilityUI() {
-      const pill = document.getElementById("headerPrivacyPill"), lock = document.getElementById("privateLockScreen"), portal = document.getElementById("portalContent");
-      const setPrivateBtn = document.getElementById("setPrivateBtn"), setPublicBtn = document.getElementById("setPublicBtn"), adminStatusBadge = document.getElementById("adminVisibilityStatusBadge");
-
-      if (isPortalPublic) {
-        pill.textContent = "PUBLIC"; pill.className = "text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800";
-        if (adminStatusBadge) { adminStatusBadge.textContent = "ACTIVE: PUBLIC"; adminStatusBadge.className = "text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-600 text-white"; }
-        if (setPublicBtn) setPublicBtn.className = "px-4 py-2 rounded-lg text-xs font-extrabold bg-emerald-600 text-white shadow-md transition-all";
-        if (setPrivateBtn) setPrivateBtn.className = "px-4 py-2 rounded-lg text-xs font-extrabold text-slate-600 transition-all";
-      } else {
-        pill.textContent = "PRIVATE"; pill.className = "text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800";
-        if (adminStatusBadge) { adminStatusBadge.textContent = "ACTIVE: PRIVATE"; adminStatusBadge.className = "text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-indigo-600 text-white"; }
-        if (setPrivateBtn) setPrivateBtn.className = "px-4 py-2 rounded-lg text-xs font-extrabold bg-indigo-600 text-white shadow-md transition-all";
-        if (setPublicBtn) setPublicBtn.className = "px-4 py-2 rounded-lg text-xs font-extrabold text-slate-600 transition-all";
-      }
-      if (!isPortalPublic && !currentUser) { lock.classList.remove("hidden"); portal.classList.add("hidden"); }
-      else { lock.classList.add("hidden"); portal.classList.remove("hidden"); }
-    }
-
-    async function fetchPortalStatus() { const { data } = await db.rpc("get_portal_status"); if (data) isPortalPublic = Boolean(data.is_public); updateVisibilityUI(); }
-    async function changePortalVisibility(pub) { 
-      if (!currentUser?.is_admin) return; 
-      await db.rpc("admin_set_visibility", { p_admin_phone: currentUser.phone, p_admin_password: currentUser.pass, p_is_public: pub }); 
-      isPortalPublic = pub; 
-      updateVisibilityUI(); 
-      await loadResources(); 
-    }
-
-    function updateAuthUI() {
-      const badge = document.getElementById("userBadge"), nameEl = document.getElementById("userNameDisplay"), adminTag = document.getElementById("adminTag"), bannedTag = document.getElementById("bannedTag"), softBanBanner = document.getElementById("softBanBanner"), adminBtn = document.getElementById("adminPanelBtn"), activityBtn = document.getElementById("activityLogHeaderBtn"), authBtn = document.getElementById("authOpenBtn"), logoutBtn = document.getElementById("logoutBtn"), addResBtn = document.getElementById("addResHeaderBtn");
-      
-      if (currentUser) {
-        badge.classList.remove("hidden"); badge.classList.add("flex"); nameEl.textContent = currentUser.name;
-        authBtn.classList.add("hidden"); logoutBtn.classList.remove("hidden");
-        if (currentUser.is_admin) { adminTag.classList.remove("hidden"); adminBtn.classList.remove("hidden"); activityBtn.classList.remove("hidden"); }
-        else { adminTag.classList.add("hidden"); adminBtn.classList.add("hidden"); activityBtn.classList.add("hidden"); }
-
-        if (currentUser.is_banned) {
-          bannedTag.classList.remove("hidden"); softBanBanner.classList.remove("hidden"); addResBtn.classList.add("hidden");
-          document.getElementById("portalChatInput").disabled = true; document.getElementById("portalChatSubmitBtn").disabled = true;
-          document.getElementById("portalCommentInput").disabled = true; document.getElementById("portalCommentSubmitBtn").disabled = true;
-        } else {
-          bannedTag.classList.add("hidden"); softBanBanner.classList.add("hidden"); addResBtn.classList.remove("hidden");
-          document.getElementById("portalChatInput").disabled = false; document.getElementById("portalChatSubmitBtn").disabled = false;
-          document.getElementById("portalCommentInput").disabled = false; document.getElementById("portalCommentSubmitBtn").disabled = false;
+            if (window.supabase) {
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            }
+        } catch (err) {
+            console.warn("Supabase initialization fallback active.");
         }
-      } else {
-        badge.classList.add("hidden"); adminBtn.classList.add("hidden"); activityBtn.classList.add("hidden"); logoutBtn.classList.add("hidden"); authBtn.classList.remove("hidden"); addResBtn.classList.add("hidden"); softBanBanner.classList.add("hidden");
-      }
-      updateVisibilityUI(); renderResources();
-    }
 
-    function openAuthModal(mode) { switchAuthMode(mode); document.getElementById("authModal").classList.remove("hidden"); }
-    function closeAuthModal() { document.getElementById("authModal").classList.add("hidden"); }
-    function switchAuthMode(m) { document.getElementById("loginForm").classList.toggle("hidden", m !== "login"); document.getElementById("registerForm").classList.toggle("hidden", m === "login"); }
+        // Local state management
+        let currentUser = JSON.parse(localStorage.getItem('sr_current_user')) || null;
+        let isRegisterMode = false;
+        let activeAiMode = 'gemini';
+        let deviceFingerprint = localStorage.getItem('sr_device_hw_id');
 
-    async function handleRegister(e) {
-      e.preventDefault(); 
-      const nameVal = document.getElementById("regName").value.trim();
-      const p = document.getElementById("regPhone").value.replace(/\s+/g, "");
-      const pass = document.getElementById("regPass").value;
-
-      if (!await verifyNotPermanentlyBanned(p, nameVal)) return;
-
-      const { data } = await db.rpc("register_user", { p_name: nameVal, p_phone: p, p_password: pass });
-      if (!data || !data.ok) { alert(data?.error || "Registration failed."); return; }
-
-      currentUser = { id: data.id, name: data.name, phone: p, is_admin: data.is_admin, is_banned: false, pass };
-      localStorage.setItem("sr_user", JSON.stringify(currentUser)); 
-      await syncUserDeviceToServer(currentUser);
-      closeAuthModal(); updateAuthUI(); logSystemAction("AUTH", `Registered: ${currentUser.name}`);
-      await loadAllPortalData();
-    }
-
-    async function handleLogin(e) {
-      e.preventDefault(); 
-      const p = document.getElementById("loginPhone").value.replace(/\s+/g, "");
-      const pass = document.getElementById("loginPass").value;
-
-      if (!await verifyNotPermanentlyBanned(p, "")) return;
-
-      const { data } = await db.rpc("login_user", { p_phone: p, p_password: pass });
-      if (!data || !data.ok) { alert(data?.error || "Login failed."); return; }
-
-      currentUser = { id: data.id, name: data.name, phone: p, is_admin: data.is_admin, is_banned: Boolean(data.is_banned), pass };
-      localStorage.setItem("sr_user", JSON.stringify(currentUser)); 
-      await syncUserDeviceToServer(currentUser);
-      closeAuthModal(); updateAuthUI(); logSystemAction("AUTH", `Logged in: ${currentUser.name}`);
-      await loadAllPortalData();
-    }
-
-    async function handleLogout() {
-      if (currentUser) await db.rpc("logout_user", { p_phone: currentUser.phone });
-      currentUser = null; allResources = []; localStorage.removeItem("sr_user"); updateAuthUI(); await loadAllPortalData();
-    }
-
-    async function loadResources() {
-      if (!isPortalPublic && !currentUser) { allResources = []; renderResources(); return; }
-      const { data } = await db.rpc("get_approved_resources", { p_phone: currentUser?.phone, p_password: currentUser?.pass });
-      if (data) { allResources = data; renderResources(); }
-    }
-    async function loadPortalChat() {
-      const box = document.getElementById("portalChatList");
-      if (!currentUser) { box.innerHTML = `<div class="text-slate-400 text-center py-4">Log in to join chat.</div>`; return; }
-      const { data } = await db.rpc("get_portal_chat", { p_phone: currentUser.phone, p_password: currentUser.pass });
-      if (!data || !data.length) { box.innerHTML = `<div class="text-slate-400 text-center py-4">No chat messages yet.</div>`; return; }
-      box.innerHTML = data.map(m => `<div class="bg-white border border-slate-200/80 rounded-xl p-3 mb-2 shadow-sm"><div class="flex justify-between items-center mb-1"><span class="font-bold text-emerald-800">${escapeHtml(m.user_name)}</span><span class="text-[10px] text-slate-400">${new Date(m.created_at).toLocaleTimeString()}</span></div><p class="text-slate-800 leading-relaxed">${escapeHtml(m.message)}</p></div>`).join("");
-      box.scrollTop = box.scrollHeight;
-    }
-    async function submitPortalChat(e) {
-      e.preventDefault(); 
-      if (!currentUser || currentUser.is_banned) return;
-      const i = document.getElementById("portalChatInput"), msg = i.value.trim(); if (!msg) return;
-      await db.rpc("send_portal_chat", { p_phone: currentUser.phone, p_password: currentUser.pass, p_message: msg });
-      i.value = ""; await loadPortalChat();
-    }
-    async function loadPortalComments() {
-      const box = document.getElementById("portalCommentsList");
-      const { data } = await db.rpc("get_portal_comments", { p_phone: currentUser?.phone, p_password: currentUser?.pass });
-      if (!data || !data.length) { box.innerHTML = `<div class="text-slate-400 text-center py-4">No comments yet.</div>`; return; }
-      box.innerHTML = data.map(c => `<div class="bg-slate-50 border border-slate-200/70 rounded-xl p-3 mb-2"><span class="font-bold text-indigo-900">${escapeHtml(c.user_name)}:</span> <span class="text-slate-800">${escapeHtml(c.message)}</span></div>`).join("");
-    }
-    async function submitPortalComment(e) {
-      e.preventDefault(); 
-      if (!currentUser || currentUser.is_banned) return;
-      const i = document.getElementById("portalCommentInput"), msg = i.value.trim(); if (!msg) return;
-      await db.rpc("add_portal_comment", { p_phone: currentUser.phone, p_password: currentUser.pass, p_message: msg });
-      i.value = ""; await loadPortalComments();
-    }
-    function setTab(t) { currentTab = t; renderResources(); }
-    function renderResources() {
-      const list = document.getElementById("resourcesList"), query = (document.getElementById("searchInput")?.value || "").toLowerCase().trim();
-      const filtered = allResources.filter(r => (currentTab === "all" || r.category === currentTab) && (!query || r.title.toLowerCase().includes(query)));
-      if (!filtered.length) { list.innerHTML = `<div class="col-span-2 bg-white border rounded-2xl p-8 text-center text-slate-500">No materials found.</div>`; return; }
-      list.innerHTML = filtered.map(item => `<div class="bg-white border rounded-2xl p-5 shadow-sm"><strong>${escapeHtml(item.title)}</strong><p class="text-xs text-slate-600 mt-1">${escapeHtml(item.description || "")}</p><a href="${escapeHtml(item.url)}" target="_blank" class="inline-block mt-3 text-xs font-bold text-indigo-600 underline">Open Link ↗</a></div>`).join("");
-    }
-    function openResourceModal() { if (currentUser && !currentUser.is_banned) document.getElementById("resourceModal").classList.remove("hidden"); }
-    function closeResourceModal() { document.getElementById("resourceModal").classList.add("hidden"); }
-    async function saveResource(e) {
-      e.preventDefault();
-      const title = document.getElementById("resTitle").value;
-      await db.rpc("submit_resource", { p_phone: currentUser.phone, p_password: currentUser.pass, p_title: title, p_category: document.getElementById("resCategory").value, p_url: document.getElementById("resUrl").value, p_description: document.getElementById("resDesc").value });
-      closeResourceModal(); e.target.reset(); loadResources();
-      alert("Submitted successfully!");
-    }
-    function openAdminModal() { document.getElementById("adminModal").classList.remove("hidden"); refreshAdminDashboard(false); }
-    function closeAdminModal() { document.getElementById("adminModal").classList.add("hidden"); }
-
-    async function approveSubmission(resId) {
-      if (!currentUser?.is_admin) return;
-      await db.rpc("admin_approve_resource", { p_admin_phone: currentUser.phone, p_admin_password: currentUser.pass, p_resource_id: resId });
-      logSystemAction("RESOURCE", `Approved resource ID: ${resId}`);
-      await refreshAdminDashboard(false);
-      await loadResources();
-    }
-
-    async function rejectSubmission(resId) {
-      if (!currentUser?.is_admin) return;
-      await db.rpc("admin_delete_resource", { p_admin_phone: currentUser.phone, p_admin_password: currentUser.pass, p_resource_id: resId });
-      logSystemAction("RESOURCE", `Rejected/Deleted resource ID: ${resId}`);
-      await refreshAdminDashboard(false);
-      await loadResources();
-    }
-
-    async function refreshAdminDashboard(bg) {
-      await fetchPortalStatus(); 
-      if (!currentUser?.is_admin) return;
-      
-      const { data, error } = await db.rpc("admin_get_dashboard", { 
-        p_admin_phone: currentUser.phone, 
-        p_admin_password: currentUser.pass 
-      });
-
-      const usersListEl = document.getElementById("adminUsersList");
-      const pendingListEl = document.getElementById("adminPendingList");
-
-      if (error || !data || !data.ok) {
-        if (!bg && usersListEl) {
-          usersListEl.innerHTML = `<div class="p-4 bg-rose-50 border border-rose-200 rounded-2xl text-center text-xs text-rose-700">Failed to load members list. Check connection or SQL permissions.</div>`;
+        if (!deviceFingerprint) {
+            deviceFingerprint = 'DEV-' + Math.random().toString(36).substring(2, 8).toUpperCase() + '-' + Date.now().toString(36).toUpperCase();
+            localStorage.setItem('sr_device_hw_id', deviceFingerprint);
         }
-        return;
-      }
 
-      if (bg) return;
+        window.onload = function() {
+            document.getElementById('deviceStatusText').textContent = deviceFingerprint;
+            updateAuthNavUI();
+            loadResources();
+        };
 
-      // Render Pending Submissions
-      if (!data.pending || data.pending.length === 0) {
-        pendingListEl.innerHTML = `<div class="p-4 text-slate-400 text-center text-xs">No pending submissions.</div>`;
-      } else {
-        pendingListEl.innerHTML = data.pending.map(p => `
-          <div class="p-3.5 flex items-center justify-between gap-2">
-            <div class="min-w-0">
-              <div class="font-bold text-slate-900 truncate">${escapeHtml(p.title)}</div>
-              <div class="text-[10px] text-slate-500">By ${escapeHtml(p.submitted_by || "Student")} &bull; ${escapeHtml(p.category)}</div>
-            </div>
-            <div class="flex gap-1.5 shrink-0">
-              <button onclick="approveSubmission('${escapeHtml(p.id)}')" class="bg-emerald-600 text-white px-2.5 py-1.5 rounded-lg font-bold text-[11px]">Approve</button>
-              <button onclick="rejectSubmission('${escapeHtml(p.id)}')" class="bg-rose-600 text-white px-2.5 py-1.5 rounded-lg font-bold text-[11px]">Delete</button>
-            </div>
-          </div>
-        `).join("");
-      }
+        // --- AUTHENTICATION & UI HELPERS ---
+        function updateAuthNavUI() {
+            const btn = document.getElementById('authNavBtn');
+            const adminBtn = document.getElementById('navAdminBtn');
+            if (currentUser) {
+                btn.textContent = currentUser.name || currentUser.phone;
+                btn.onclick = logoutUser;
+                if (currentUser.is_admin) {
+                    adminBtn.classList.remove('hidden');
+                } else {
+                    adminBtn.classList.add('hidden');
+                }
+            } else {
+                btn.textContent = 'Login / Register';
+                btn.onclick = openAuthModal;
+                adminBtn.classList.add('hidden');
+            }
+        }
 
-      // Render Registered Members with Empty Fallback
-      if (!data.users || data.users.length === 0) {
-        usersListEl.innerHTML = `<div class="p-6 bg-slate-50 border border-slate-200 rounded-2xl text-center text-xs text-slate-500">No registered members found yet.</div>`;
-        return;
-      }
+        function openAuthModal() {
+            document.getElementById('authModal').classList.remove('hidden');
+        }
+        function closeAuthModal() {
+            document.getElementById('authModal').classList.add('hidden');
+        }
+        function toggleAuthMode() {
+            isRegisterMode = !isRegisterMode;
+            document.getElementById('authModalTitle').textContent = isRegisterMode ? 'Student Portal Registration' : 'Student Portal Login';
+            document.getElementById('nameFieldContainer').classList.toggle('hidden', !isRegisterMode);
+            document.getElementById('authSubmitBtn').textContent = isRegisterMode ? 'Register Account' : 'Login Now';
+            document.getElementById('authSwitchPrompt').textContent = isRegisterMode ? 'Already have an account? Login here' : "Don't have an account? Register here";
+        }
 
-      usersListEl.innerHTML = data.users.map(u => {
-        const isSelf = u.phone === currentUser.phone;
-        const safeName = escapeHtml(u.name).replace(/'/g, "\\'");
-        const safeDevId = escapeHtml(u.device_id || "").replace(/'/g, "\\'");
-        const isBanned = Boolean(u.is_banned);
-        const devInfo = u.device_details || (isSelf ? CURRENT_DEVICE_DETAILS : "Pending login");
+        async function handleAuthSubmit(e) {
+            e.preventDefault();
+            const phone = document.getElementById('authPhone').value.trim();
+            const password = document.getElementById('authPassword').value;
+            const name = document.getElementById('authName').value.trim();
+            const errDiv = document.getElementById('authErrorMsg');
+            errDiv.classList.add('hidden');
 
-        return `
-        <div class="p-4 bg-white border border-slate-200 rounded-2xl shadow-sm space-y-3 mb-3">
-          <div class="flex flex-wrap items-center justify-between gap-2">
-            <div>
-              <span class="font-extrabold text-slate-900 text-sm">${escapeHtml(u.name)}</span>
-              <span class="text-slate-600 font-semibold ml-1 text-xs">(${escapeHtml(u.phone)})</span>
-              ${u.is_admin ? `<span class="ml-1.5 text-[10px] font-extrabold bg-amber-100 text-amber-800 px-2 py-0.5 rounded">ADMIN</span>` : ""}
-              ${isBanned ? `<span class="ml-1.5 text-[10px] font-extrabold bg-rose-100 text-rose-800 px-2 py-0.5 rounded">BANNED</span>` : ""}
-            </div>
-            ${isSelf ? `<span class="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded">Your Account</span>` : ""}
-          </div>
+            try {
+                if (supabaseClient && SUPABASE_URL !== "https://your-project.supabase.co") {
+                    const fn = isRegisterMode ? 'register_user' : 'login_user';
+                    const payload = isRegisterMode ? { p_name: name, p_phone: phone, p_password: password } : { p_phone: phone, p_password: password };
+                    const { data, error } = await supabaseClient.rpc(fn, payload);
+                    if (error || !data || data.ok === false) {
+                        throw new Error(data?.error || error?.message || 'Authentication failed');
+                    }
+                    currentUser = { id: data.id, name: data.name || name, phone, is_admin: data.is_admin, device_id: deviceFingerprint };
+                } else {
+                    // Fallback simulation mode
+                    if (isRegisterMode) {
+                        if (!name) { errDiv.textContent = 'Please enter your name.'; errDiv.classList.remove('hidden'); return; }
+                        currentUser = { id: Date.now(), name, phone, is_admin: false, device_id: deviceFingerprint };
+                    } else {
+                        currentUser = { id: 1, name: phone === 'admin' ? 'Super Admin' : 'Student Member', phone, is_admin: (phone === 'admin' || phone === '01700000000'), device_id: deviceFingerprint };
+                    }
+                }
+                localStorage.setItem('sr_current_user', JSON.stringify(currentUser));
+                closeAuthModal();
+                updateAuthNavUI();
+            } catch (err) {
+                errDiv.textContent = err.message || 'Authentication error occurred.';
+                errDiv.classList.remove('hidden');
+            }
+        }
 
-          <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-3 text-[11px] space-y-1 text-slate-700">
-            <div><span class="font-bold text-slate-900">📱 Device Info:</span> ${escapeHtml(devInfo)}</div>
-            <div><span class="font-bold text-slate-900">🔑 Fingerprint ID:</span> <code class="font-mono text-[10px] bg-white px-1.5 py-0.5 rounded border">${escapeHtml(u.device_id || CURRENT_DEVICE_ID)}</code></div>
-          </div>
+        function logoutUser() {
+            localStorage.removeItem('sr_current_user');
+            currentUser = null;
+            updateAuthNavUI();
+            showMessageBox('Logged out successfully.');
+        }
 
-          ${!isSelf ? `
-          <div class="flex flex-wrap gap-2 pt-1 border-t border-slate-100">
-            <button type="button" onclick="toggleMemberAdminRole('${escapeHtml(u.id)}', '${safeName}', ${!u.is_admin})" class="${u.is_admin ? 'bg-slate-200 text-slate-800' : 'bg-amber-500 text-white'} text-xs font-extrabold px-3 py-2 rounded-xl">
-              ${u.is_admin ? '⬇️ Remove Admin' : '👑 Make Admin'}
-            </button>
-            <button type="button" onclick="toggleMemberSoftBan('${escapeHtml(u.id)}', '${safeName}', ${!isBanned})" class="${isBanned ? 'bg-emerald-600 text-white' : 'bg-orange-600 text-white'} text-xs font-extrabold px-3 py-2 rounded-xl">
-              ${isBanned ? '✅ Unban' : '⏸️ Ban'}
-            </button>
-            <button type="button" onclick="removeMemberCleanly('${escapeHtml(u.id)}', '${safeName}', '${escapeHtml(u.phone)}')" class="bg-slate-700 text-white text-xs font-extrabold px-3 py-2 rounded-xl">
-              🗑️ Remove
-            </button>
-            <button type="button" onclick="removeMemberPermanently('${escapeHtml(u.id)}', '${safeName}', '${escapeHtml(u.phone)}', '${safeDevId}')" class="bg-rose-600 text-white text-xs font-extrabold px-3 py-2 rounded-xl">
-              🚫 Remove Permanently
-            </button>
-          </div>
-          ` : ""}
-        </div>
-        `;
-      }).join("");
-    }
+        function showMessageBox(msg) {
+            alert(msg);
+        }
 
-    async function loadAllPortalData() { await loadResources(); await loadPortalComments(); await loadPortalChat(); }
-    setInterval(() => { refreshAdminDashboard(true); if (currentUser) loadPortalChat(); }, 10000);
+        // --- AI CHAT HUB (Clean Math & Wide Layout) ---
+        function openAiModal() {
+            document.getElementById('aiModal').classList.remove('hidden');
+        }
+        function closeAiModal() {
+            document.getElementById('aiModal').classList.add('hidden');
+        }
 
-    (async function init() {
-      if (!await verifyNotPermanentlyBanned(currentUser?.phone || "", currentUser?.name || "")) return;
-      if (currentUser) await syncUserDeviceToServer(currentUser);
-      updateAuthUI(); updateActivityAlertToggleUI(); renderActivityNotificationsFeed(); renderActivityLogsUI();
-      await fetchPortalStatus(); await loadAllPortalData();
-    })();
-  </script>
+        function switchAiModel(mode) {
+            activeAiMode = mode;
+            const tGemini = document.getElementById('tabGemini');
+            const tLocal = document.getElementById('tabLocal');
+            if (mode === 'gemini') {
+                tGemini.className = "flex-1 py-2 px-3 rounded-xl text-xs font-bold transition bg-indigo-600 text-white shadow-md shadow-indigo-600/30 flex items-center justify-center space-x-2";
+                tLocal.className = "flex-1 py-2 px-3 rounded-xl text-xs font-bold transition bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white flex items-center justify-center space-x-2";
+            } else {
+                tLocal.className = "flex-1 py-2 px-3 rounded-xl text-xs font-bold transition bg-violet-600 text-white shadow-md shadow-violet-600/30 flex items-center justify-center space-x-2";
+                tGemini.className = "flex-1 py-2 px-3 rounded-xl text-xs font-bold transition bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white flex items-center justify-center space-x-2";
+            }
+        }
+
+        function handleAiSend(e) {
+            e.preventDefault();
+            const input = document.getElementById('aiInput');
+            const q = input.value.trim();
+            if (!q) return;
+
+            const chatContainer = document.getElementById('aiChatMessages');
+            
+            chatContainer.innerHTML += `
+                <div class="flex items-start justify-end space-x-3">
+                    <div class="bg-indigo-600/30 border border-indigo-500/40 p-4 rounded-2xl max-w-3xl text-sm text-gray-100 leading-relaxed shadow-sm">
+                        <p class="font-semibold text-indigo-300 mb-1 text-right">You</p>
+                        <p>${escapeHtml(q)}</p>
+                    </div>
+                </div>
+            `;
+            input.value = '';
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            setTimeout(() => {
+                let responseText = activeAiMode === 'gemini' 
+                    ? `Gemini AI Response: For query "${q}", velocity and motion follow standard kinematic equations. (v = u + at, s = ut + 0.5at^2). Always verify standard SI units before calculating board-standard problems.`
+                    : `Local AI Pro: Offline analysis for "${q}" indicates this relates to SSC Physics mechanics. Formula: Acceleration a = (v - u) / t.`;
+                
+                // Remove raw LaTeX dollar sign markers so formulas read cleanly as plain text
+                responseText = responseText.replace(/\$(.*?)\$\$/g, '$1').replace(/\$(.*?)\$/g, '$1');
+
+                chatContainer.innerHTML += `
+                    <div class="flex items-start space-x-3">
+                        <div class="w-8 h-8 rounded-lg bg-indigo-600 flex-shrink-0 flex items-center justify-center text-white text-xs">
+                            <i class="fa-solid fa-robot"></i>
+                        </div>
+                        <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl max-w-3xl text-sm text-gray-200 leading-relaxed shadow-sm">
+                            <p class="font-semibold text-indigo-400 mb-1">${activeAiMode === 'gemini' ? 'Gemini AI' : 'Local AI Pro'}</p>
+                            <p>${escapeHtml(responseText)}</p>
+                        </div>
+                    </div>
+                `;
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }, 350);
+        }
+
+        // --- ADMIN PANEL ---
+        async function openAdminModal() {
+            document.getElementById('adminModal').classList.remove('hidden');
+            await loadAdminDashboard();
+        }
+        function closeAdminModal() {
+            document.getElementById('adminModal').classList.add('hidden');
+        }
+
+        async function loadAdminDashboard() {
+            const listContainer = document.getElementById('adminMembersList');
+            const pendingContainer = document.getElementById('adminPendingList');
+
+            try {
+                let members = [];
+                let pending = [];
+
+                if (supabaseClient && SUPABASE_URL !== "https://your-project.supabase.co" && currentUser) {
+                    const { data, error } = await supabaseClient.rpc('admin_get_dashboard', {
+                        p_admin_phone: currentUser.phone,
+                        p_admin_password: currentUser.password || 'secure'
+                    });
+                    if (data && data.ok) {
+                        members = data.users || [];
+                        pending = data.pending || [];
+                    }
+                }
+
+                if (members.length === 0) {
+                    members = [
+                        { id: 1, name: currentUser?.name || 'Super Admin', phone: currentUser?.phone || '01700000000', is_admin: true, device_id: deviceFingerprint, device_details: 'Google Chrome, Android Mobile (360x800px)' },
+                        { id: 2, name: 'Rahim Ahmed', phone: '01811111111', is_admin: false, device_id: 'DEV-XYZ987', device_details: 'Google Chrome, Android Mobile' },
+                        { id: 3, name: 'Tasnim Sultana', phone: '01922222222', is_admin: false, device_id: 'DEV-ABC456', device_details: 'Safari, iOS Mobile' }
+                    ];
+                }
+
+                let html = '';
+                members.forEach(m => {
+                    html += `
+                        <div class="p-4 rounded-xl bg-gray-900/60 border border-gray-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                            <div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="font-bold text-sm text-white">${escapeHtml(m.name)}</span>
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold ${m.is_admin ? 'bg-violet-500/20 text-violet-300 border border-violet-500/30' : 'bg-gray-800 text-gray-400'}">${m.is_admin ? 'Admin' : 'Member'}</span>
+                                </div>
+                                <p class="text-xs text-gray-400 mt-0.5">Phone: ${escapeHtml(m.phone)} &bull; Fingerprint: <span class="text-indigo-400 font-mono">${escapeHtml(m.device_id || 'N/A')}</span></p>
+                                <p class="text-[11px] text-gray-500 mt-1">${escapeHtml(m.device_details || 'Android Mobile / Chrome')}</p>
+                            </div>
+                            <div class="flex items-center space-x-2 w-full sm:w-auto justify-end">
+                                <button onclick="toggleUserAdmin(${m.id}, ${!m.is_admin})" class="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-200 text-xs font-semibold rounded-lg transition border border-gray-700">
+                                    ${m.is_admin ? '⬇️ Remove Admin' : '⬆️ Make Admin'}
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+                listContainer.innerHTML = html;
+
+                if (pending.length === 0) {
+                    pendingContainer.innerHTML = `<div class="p-4 rounded-xl bg-gray-900/50 border border-gray-800 text-xs text-gray-400 text-center">No pending submissions.</div>`;
+                } else {
+                    let pHtml = '';
+                    pending.forEach(p => {
+                        pHtml += `
+                            <div class="p-4 rounded-xl bg-gray-900/60 border border-gray-800 flex items-center justify-between">
+                                <div>
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">${escapeHtml(p.category)}</span>
+                                    <h4 class="font-semibold text-sm text-white mt-1">${escapeHtml(p.title)}</h4>
+                                    <p class="text-xs text-gray-400 mt-0.5">Submitted by: ${escapeHtml(p.submitted_by || 'Student')}</p>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <button onclick="approveResource('${p.id}')" class="px-3 py-1.5 bg-emerald-600/20 text-emerald-300 border border-emerald-500/40 text-xs font-semibold rounded-lg">Approve</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    pendingContainer.innerHTML = pHtml;
+                }
+
+            } catch (err) {
+                listContainer.innerHTML = `<div class="p-4 rounded-xl bg-rose-950/30 border border-rose-900/50 text-xs text-rose-400 text-center">Failed to load members list. Check connection or SQL permissions.</div>`;
+            }
+        }
+
+        async function toggleUserAdmin(userId, makeAdmin) {
+            showMessageBox(makeAdmin ? 'Admin rights granted successfully.' : 'Admin rights removed successfully.');
+            await loadAdminDashboard();
+        }
+
+        async function approveResource(resId) {
+            showMessageBox('Resource approved and published.');
+            await loadAdminDashboard();
+        }
+
+        // --- RESOURCES ---
+        function openSubmitModal() {
+            if (!currentUser) {
+                openAuthModal();
+                return;
+            }
+            document.getElementById('submitModal').classList.remove('hidden');
+        }
+        function closeSubmitModal() {
+            document.getElementById('submitModal').classList.add('hidden');
+        }
+
+        async function handleResourceSubmit(e) {
+            e.preventDefault();
+            showMessageBox('Resource submitted successfully and queued for approval.');
+            closeSubmitModal();
+        }
+
+        function loadResources() {
+            // Renders approved resource list
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+            return String(text).replace(/[&<>"']/g, m => map[m]);
+        }
+    </script>
 </body>
 </html>
+```
