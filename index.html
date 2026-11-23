@@ -474,10 +474,11 @@
     </div>
   </div>
 
-  <!-- Admin Panel Modal -->
+  <!-- Admin Panel Modal (Fixed Scrollable Layout - Never Cut Off) -->
   <div id="adminModal" class="hidden fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-40 flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-slate-100 max-h-[85vh] overflow-y-auto">
-      <div class="flex items-center justify-between mb-5 pb-3 border-b border-slate-100">
+    <div class="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-slate-100 max-h-[90vh] flex flex-col overflow-hidden">
+      <!-- Fixed Header -->
+      <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100 shrink-0">
         <div>
           <h3 class="font-extrabold text-base text-slate-900">Admin Control &amp; Moderation Center</h3>
           <p class="text-xs text-slate-500">Portal visibility switch, member device inspection &amp; controls</p>
@@ -485,28 +486,35 @@
         <button onclick="closeAdminModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 font-bold text-xs">✕</button>
       </div>
 
-      <!-- Portal Visibility Switch -->
-      <div class="bg-indigo-50/70 border border-indigo-200/80 rounded-2xl p-4 mb-6">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
-            <div class="flex items-center gap-2">
-              <h4 class="text-xs font-extrabold uppercase tracking-wider text-indigo-950">Portal Visibility Mode</h4>
-              <span id="adminVisibilityStatusBadge" class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-indigo-600 text-white">ACTIVE: PRIVATE</span>
+      <!-- Scrollable Body Content -->
+      <div class="overflow-y-auto pr-1 space-y-5 flex-1">
+        <!-- Portal Visibility Switch -->
+        <div class="bg-indigo-50/70 border border-indigo-200/80 rounded-2xl p-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <div class="flex items-center gap-2">
+                <h4 class="text-xs font-extrabold uppercase tracking-wider text-indigo-950">Portal Visibility Mode</h4>
+                <span id="adminVisibilityStatusBadge" class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-indigo-600 text-white">ACTIVE: PRIVATE</span>
+              </div>
+              <p id="visibilityDescText" class="text-xs text-slate-600 mt-1">Private: Only logged-in students can view portal content.</p>
             </div>
-            <p id="visibilityDescText" class="text-xs text-slate-600 mt-1">Private: Only logged-in students can view portal content.</p>
-          </div>
-          <div class="flex gap-1.5 bg-slate-200/80 p-1.5 rounded-xl border border-slate-300/70 shrink-0 shadow-inner">
-            <button type="button" id="setPrivateBtn" onclick="changePortalVisibility(false)" class="px-4 py-2 rounded-lg text-xs font-extrabold transition-all duration-200">🔒 Private</button>
-            <button type="button" id="setPublicBtn" onclick="changePortalVisibility(true)" class="px-4 py-2 rounded-lg text-xs font-extrabold transition-all duration-200">🌐 Public</button>
+            <div class="flex gap-1.5 bg-slate-200/80 p-1.5 rounded-xl border border-slate-300/70 shrink-0 shadow-inner">
+              <button type="button" id="setPrivateBtn" onclick="changePortalVisibility(false)" class="px-4 py-2 rounded-lg text-xs font-extrabold transition-all duration-200">🔒 Private</button>
+              <button type="button" id="setPublicBtn" onclick="changePortalVisibility(true)" class="px-4 py-2 rounded-lg text-xs font-extrabold transition-all duration-200">🌐 Public</button>
+            </div>
           </div>
         </div>
+
+        <div>
+          <h4 class="text-xs font-extrabold uppercase tracking-wider text-amber-600 mb-2.5">Pending Content Submissions</h4>
+          <div id="adminPendingList" class="divide-y divide-slate-100 border border-amber-200/70 bg-amber-50/30 rounded-2xl text-xs overflow-hidden"></div>
+        </div>
+
+        <div>
+          <h4 class="text-xs font-extrabold uppercase tracking-wider text-indigo-900 mb-2.5">Registered Members &amp; Device Details</h4>
+          <div id="adminUsersList" class="space-y-3.5 pb-2"></div>
+        </div>
       </div>
-
-      <h4 class="text-xs font-extrabold uppercase tracking-wider text-amber-600 mb-2.5">Pending Content Submissions</h4>
-      <div id="adminPendingList" class="divide-y divide-slate-100 border border-amber-200/70 bg-amber-50/30 rounded-2xl mb-6 text-xs overflow-hidden"></div>
-
-      <h4 class="text-xs font-extrabold uppercase tracking-wider text-indigo-900 mb-2.5">Registered Members &amp; Device Details</h4>
-      <div id="adminUsersList" class="space-y-3.5"></div>
     </div>
   </div>
 
@@ -532,7 +540,7 @@
     let allResources = [];
     
     // =========================================================================
-    // 1. ENHANCED DEVICE DETECTOR (Bypassing Generic Android strings)
+    // 1. ENHANCED DEVICE DETECTOR
     // =========================================================================
     function getDetailedDeviceInfo() {
       const ua = navigator.userAgent || "";
@@ -541,7 +549,6 @@
       let browserName = "Browser";
 
       if (/Android/i.test(ua)) {
-        // Extract possible brand hints or screen sizes if user agent is standardized
         let brandHint = "Android Mobile";
         if (/Samsung|SM-|Galaxy/i.test(ua)) brandHint = "Samsung Galaxy";
         else if (/Redmi|Xiaomi|Mi /i.test(ua)) brandHint = "Xiaomi / Redmi";
@@ -549,7 +556,6 @@
         else if (/Vivo/i.test(ua)) brandHint = "Vivo";
         else if (/Realme/i.test(ua)) brandHint = "Realme";
         else if (/Pixel/i.test(ua)) brandHint = "Google Pixel";
-        
         deviceName = `${brandHint} (${window.screen.width}x${window.screen.height}px)`;
       } else if (/iPhone/i.test(ua)) {
         deviceName = `Apple iPhone (${window.screen.width}x${window.screen.height}px)`;
@@ -731,7 +737,7 @@
     }
 
     // =========================================================================
-    // 3. EXPANDED ACTIVITY LOG ENGINE (Spacious UI + Clean .TXT Export)
+    // 3. EXPANDED ACTIVITY LOG ENGINE
     // =========================================================================
     let systemActivityLogs = JSON.parse(localStorage.getItem("sr_expanded_activity_logs") || "[]");
     let activityAlertsFeed = JSON.parse(localStorage.getItem("sr_activity_alerts") || "[]");
